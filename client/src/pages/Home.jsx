@@ -46,6 +46,8 @@ const Home = () => {
 
       let newArr = [];
 
+      console.log(responseTMDB)
+      console.log(responseDB)
       /* Improve this, transform to setMap maybe */
       responseTMDB.data.results.map((movieTMDB) => {
         const checkMovie = responseDB.data.some(
@@ -72,7 +74,9 @@ const Home = () => {
       setMovies(newArr);
     };
     fetchLatestMovies();
-  }, []); //FIXME - I had a dependency 'movies' here, the useEffect fetches movies and updates 'movies' variable, that causes an infinite loop.
+  }, []); //FIXME - I had a dependency 'movies' here, 
+  // the useEffect fetches movies and updates 'movies' variable, 
+  // that causes an infinite loop.
 
   const saveToDB = async (movieParam) => {
     const { title, thumbnail, genreId, overview } = movieParam;

@@ -68,17 +68,17 @@ const Header = () => {
             <ul className="menu menu-horizontal px-1">
               <li>
                 <a href="/" className="text-xl">
-                  Home
+                  Feed
                 </a>
               </li>
               <li>
-                <a href="/mylist" className="text-xl">
-                  My Movies
+                <a href="/saved" className="text-xl">
+                  Saved
                 </a>
               </li>
               <li>
-                <a href="/login" className="text-xl">
-                  Login
+                <a href="/friends" className="text-xl">
+                  Friends
                 </a>
               </li>
             </ul>

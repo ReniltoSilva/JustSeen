@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Movie from "../components/Movie";
 
-const MyList = () => {
+const Saved = () => {
   const [title, setTitle] = useState("");
   const [thumbnail, setThumbnail] = useState("");
 
@@ -90,7 +90,7 @@ const MyList = () => {
                 details={movie}
                 saveTitle={saveTitle}
                 deleteMovie={deleteMovie}
-                from={"myList.jsx"}
+                from={"friends.jsx"}
               />
             </div>
           </div>
@@ -99,4 +99,4 @@ const MyList = () => {
   );
 };
 
-export default MyList;
+export default Saved;

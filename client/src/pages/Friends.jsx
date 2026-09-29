@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const Login = () => {
+const Friends = () => {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -133,4 +133,4 @@ button login or sign up */ //FIXME
   );
 };
 
-export default Login;
+export default Friends;
