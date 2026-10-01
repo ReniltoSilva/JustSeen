@@ -24,9 +24,9 @@ function App() {
 
   return (
     <>
-      <div>
+      <div className="bg-[#222329]">
         <Header />
-        <main>
+        <main >
           <Outlet />
         </main>
       </div>

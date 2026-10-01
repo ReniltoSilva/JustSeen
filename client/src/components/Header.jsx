@@ -13,33 +13,15 @@ const Header = () => {
 
   return (
     <>
-      {/* <header>
-        <nav>
-          <a href="/">Home</a> | <a href="/mylist">My List</a> |{" "}
-          <a href="/login">Login</a>
-        </nav>
-        <form onSubmit={searchMovie}>
-          <label>
-            <input
-              type="text"
-              class="border-1 border-solid rounded-sm border-black"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </label>
-          <button>Search</button>
-        </form>
-      </header> */}
-
-      <div className="max-lg:collapse bg-base-200 lg:mb-18 shadow-sm w-full rounded-md">
+      <div className="max-lg:collapse bg-[#222329] lg:mb-18 border-base-content shadow-[0.3px_0.3px_0px_0px_grey] w-full ">
         <input id="navbar-1-toggle" className="peer hidden" type="checkbox" />
         <label
           htmlFor="navbar-1-toggle"
           className="fixed inset-0 hidden max-lg:peer-checked:block"
         ></label>
 
-        <div className="collapse-title navbar">
-          <div className="navbar-start">
+        <div className="collapse-title navbar ">
+          <div className="navbar-start flex gap-4">
             <label
               htmlFor="navbar-1-toggle"
               className="btn btn-ghost lg:hidden"
@@ -59,63 +41,53 @@ const Header = () => {
                 />
               </svg>
             </label>
-            <a href="/" className=" text-xl font-bold">
+            <a href="/" className=" text-xl font-bold text-[#fafafa]">
               Two Seats
             </a>
+
+            {/* Search bar */}
+            <div className="navbar-center">
+              <input
+                type="text"
+                placeholder="Search"
+                className="input input-bordered w-100 "
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            <button className="btn " onClick={searchMovie}>
+              Search
+            </button>
           </div>
 
-          <div className="navbar-center hidden lg:flex">
+          {/* menu */}
+          <div className="navbar-end hidden lg:flex">
             <ul className="menu menu-horizontal px-1">
               <li>
-                <a href="/" className="text-xl">
+                <a href="/" className="text-xl text-[#fafafa]">
                   Feed
                 </a>
               </li>
               <li>
-                <a href="/saved" className="text-xl">
+                <a href="/saved" className="text-xl text-[#fafafa]">
                   Saved
                 </a>
               </li>
               <li>
-                <a href="/friends" className="text-xl">
+                <a href="/friends" className="text-xl text-[#fafafa]">
                   Friends
                 </a>
               </li>
             </ul>
           </div>
 
-          <div className="navbar-end">
-            <input
-              type="text"
-              placeholder="Search"
-              className="input input-bordered w-64 lg:w-auto"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          <div className="avatar">
+            <div className="w-10 rounded-full">
+              <img alt="Tailwind-CSS-Avatar-component" src="https://img.daisyui.com/images/profile/demo/yellingcat@192.webp" />
+            </div>
           </div>
-          <button className="btn" onClick={searchMovie}>
-            Search
-          </button>
-        </div>
-
-        <div className="collapse-content lg:hidden z-1">
-          <ul className="menu">
-            <li>
-              <a href="/" className="text-xl">
-                Home
-              </a>
-            </li>
-            <li>
-              <a href="/mylist" className="text-xl">
-                My Movies
-              </a>
-            </li>
-            <li>
-              <a href="/login" className="text-xl">
-                Login
-              </a>
-            </li>
-          </ul>
+        
         </div>
       </div>
     </>

@@ -3,9 +3,9 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import MyList from "./pages/Friends.jsx";
+import Saved from "./pages/Saved.jsx";
 import Home from "./pages/Home.jsx";
-import Login from "./pages/Login.jsx";
+import Friends from "./pages/Friends.jsx";
 
 createRoot(document.getElementById("root")).render(
   <Router>

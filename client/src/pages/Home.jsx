@@ -114,7 +114,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="main_movies_container">
+      <div className="main_movies_container ">
         {movies.map((item) => (
           <div
             // key={item.id}// CONTINUE is it supposed to have an ID key here?
