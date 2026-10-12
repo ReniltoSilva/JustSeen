@@ -1,1 +1,13 @@
 /node_modules
+
+# Secrets and local settings
+.env
+.env.local
+*.local
+
+# Build output and logs
+dist
+*.log
+
+# Netlify CLI local state
+.netlify

@@ -1,71 +1,81 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400..700&display=swap");
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes: dark --default, light;
+}
 
-/* :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* dark: follows the app's theme switch (data-theme), not only the device setting */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+/* One palette for the whole app, used as bg-ink, text-muted, border-line, bg-brand...
+These are the dark colours; [data-theme="light"] below swaps them */
+@theme {
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif; /* everything */
+  --font-display: "Bricolage Grotesque", "Geist", ui-sans-serif, sans-serif; /* headings */
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  --color-ink: #09090d; /* page background */
+  --color-panel: #131318; /* cards, menus */
+  --color-panel-2: #1c1c24; /* inputs, chips, hover */
+  --color-line: #25252f; /* borders */
+  --color-line-strong: #383845; /* hover borders, outline buttons */
+  --color-fg: #f5f5f7; /* main text */
+  --color-soft: #bdbdc9; /* secondary text */
+  --color-muted: #8c8c9a; /* small print */
+  --color-brand: #7c5cff; /* purple accent */
+  --color-brand-hover: #6a48f5;
+  --color-brand-soft: #b4a3ff; /* purple text on the background */
+
+  /* Reactions */
+  --color-agree: #34d399;
+  --color-unsure: #a1a1b5;
+  --color-disagree: #fb7185;
+}
+
+/* Light mode: same names, light values, so every component follows automatically */
+[data-theme="light"] {
+  --color-ink: #f6f6f9;
+  --color-panel: #ffffff;
+  --color-panel-2: #efeff4;
+  --color-line: #e3e3ea;
+  --color-line-strong: #cacad6;
+  --color-fg: #15151c;
+  --color-soft: #4a4a58;
+  --color-muted: #75758a;
+  --color-brand: #6d4cf5;
+  --color-brand-hover: #5b3ae6;
+  --color-brand-soft: #5b3ae6;
+  --color-agree: #059669;
+  --color-unsure: #6b6b80;
+  --color-disagree: #e11d48;
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-fg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* Headings get the display font, slightly tighter */
+@layer base {
+  /* Tailwind 4 gives buttons the normal arrow cursor; anything clickable should show the hand */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"],
+  [role="radio"],
+  select,
+  summary,
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
   }
-  a:hover {
-    color: #747bff;
+  button:disabled {
+    cursor: not-allowed;
   }
-  button {
-    background-color: #f9f9f9;
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
   }
-} */
+}

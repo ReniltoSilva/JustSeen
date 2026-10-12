@@ -1,15 +1,15 @@
 {
-  "name": "twoseats",
+  "name": "justseen",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Movies are better with friends: share quick reviews and see what your friends are watching.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "lint": "npm --prefix client run lint",
+    "setup": "npm --prefix client install"
   },
   "keywords": [],
   "author": "Renilto Junior",
   "license": "ISC",
-  "devDependencies": {
-    "concurrently": "^9.2.1"
-  }
+  "private": true
 }

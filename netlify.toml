@@ -1,0 +1,25 @@
+# Netlify build settings. In the Netlify UI, also add these environment variables:
+#   VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, TMDB_TOKEN
+
+[build]
+  base = "client"
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# Movie data goes through the function, which adds the secret TMDB token
+[[redirects]]
+  from = "/api/tmdb/*"
+  to = "/.netlify/functions/tmdb/:splat"
+  status = 200
+
+# Single-page app: every other address loads index.html and React Router takes over
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

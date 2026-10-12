@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="118 6 382 382">
+  <!-- JustSeen mark: an opening quote next to a screen, traced from the logo -->
+  <g fill="#4f3fe0">
+    <!-- the quote mark: a round body with a tail curling up to the right -->
+    <circle cx="187" cy="212" r="64" />
+    <path d="M140 175 C 150 125, 190 92, 230 76 L 240 86 C 214 104, 200 126, 198 150 Z" />
+  </g>
+  <!-- the screen, drawn in perspective with its left side open -->
+  <path
+    d="M246 120 L 466 103 Q 482 102 482 118 L 482 284 Q 482 300 466 299 L 236 282"
+    fill="none"
+    stroke="#4f3fe0"
+    stroke-width="30"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+  />
+</svg>
