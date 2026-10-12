@@ -2,12 +2,10 @@ import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import AvatarPicker from "../components/AvatarPicker";
 import { LogoMark } from "../components/Logo";
-
-const inputClass =
-  "w-full h-12 rounded-xl bg-ink border border-line px-4 text-[15px] text-fg placeholder:text-muted transition focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/15";
+import { authInputClass as inputClass } from "../components/formStyles";
 
 /* Shown once, after someone's first Google sign-in. The database already gave them a
-username from their email, so everything is filled in; they just confirm or change it */
+username from their name, so everything is filled in; they just confirm or change it */
 const WelcomeSetup = () => {
   const { user, updateProfile, logout } = useAuth();
   const [name, setName] = useState(user.name);

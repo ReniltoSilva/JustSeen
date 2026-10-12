@@ -1,7 +1,10 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import PageLoading from "../components/PageLoading";
-import WelcomeSetup from "../pages/WelcomeSetup";
+
+/* Only new Google users ever see this, so it downloads on demand like the other pages */
+const WelcomeSetup = lazy(() => import("../pages/WelcomeSetup"));
 
 /* Pages inside this need an account: logged-out visitors go to the login page,
 and come back here afterwards */
@@ -32,7 +35,13 @@ const RequireAuth = () => {
   }
 
   /* First Google sign-in: choose a username and avatar before anything else */
-  if (user.needs_setup) return <WelcomeSetup />;
+  if (user.needs_setup) {
+    return (
+      <Suspense fallback={<PageLoading />}>
+        <WelcomeSetup />
+      </Suspense>
+    );
+  }
 
   return <Outlet />;
 };

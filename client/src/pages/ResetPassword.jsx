@@ -3,9 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { passwordProblem } from "../auth/passwords";
 import PasswordInput from "../components/PasswordInput";
-
-const inputClass =
-  "w-full h-12 rounded-xl bg-ink border border-line px-4 text-[15px] text-fg transition focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/15";
+import { authInputClass as inputClass } from "../components/formStyles";
 
 /* Opened from the "reset your password" email. The link logs the person in
 temporarily, so all that's left is choosing a new password */

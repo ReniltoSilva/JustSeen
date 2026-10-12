@@ -36,7 +36,8 @@ begin
     return new;
   end if;
 
-  -- Google (or any sign-in without a username): "Maya.Lopez+films@gmail.com" -> "maya.lopez"
+  -- Google (or any sign-in without a username): "Maya.Lopez+films@gmail.com" -> "maya.lopezfilms"
+  -- (0004 replaces this with a username built from the name instead)
   base := left(regexp_replace(lower(split_part(coalesce(new.email, ''), '@', 1)), '[^a-z0-9._]', '', 'g'), 15);
   if char_length(base) < 3 then
     base := 'movielover';

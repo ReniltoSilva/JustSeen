@@ -10,9 +10,7 @@ import ThemeToggle from "../components/ThemeToggle";
 import { LogoMark } from "../components/Logo";
 import { GoogleIcon } from "../components/icons";
 import { animalAvatars, animalValue } from "../avatars";
-
-const inputClass =
-  "w-full h-12 rounded-xl bg-ink border border-line px-4 text-[15px] text-fg placeholder:text-muted transition focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/15";
+import { authInputClass as inputClass } from "../components/formStyles";
 
 const Field = ({ label, hint, children }) => (
   <label className="flex flex-col gap-1.5">
