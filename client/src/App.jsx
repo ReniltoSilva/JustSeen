@@ -1,13 +1,15 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { useAuth } from "./auth/AuthContext";
 
 /* Every page shares the header; the page itself renders in <Outlet />.
 If a page crashes, the header still works and the error clears on the next page */
 function App() {
   const location = useLocation();
-  /* The welcome page has its own logo and layout */
-  const isWelcome = location.pathname === "/login";
+  const { user } = useAuth();
+  /* The login page and the first-visit welcome step have their own logo and layout */
+  const isWelcome = location.pathname === "/login" || user?.needs_setup;
 
   return (
     <div className="min-h-screen bg-ink text-fg">

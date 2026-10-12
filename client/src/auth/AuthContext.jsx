@@ -81,6 +81,17 @@ export const AuthProvider = ({ children }) => {
     return !data.session;
   };
 
+  /* Leaves the site for Google's sign-in page; Google sends people back to `returnTo`
+  and Supabase picks the login up from the address bar. New Google accounts get a
+  temporary username and see the welcome step first (see RequireAuth) */
+  const signInWithGoogle = async (returnTo = "/") => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}${returnTo}` },
+    });
+    if (error) throw new Error(friendlyError(error));
+  };
+
   const logout = () => supabase.auth.signOut();
 
   const sendPasswordReset = async (email) => {
@@ -138,6 +149,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         signup,
+        signInWithGoogle,
         logout,
         sendPasswordReset,
         changePassword,

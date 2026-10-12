@@ -8,6 +8,7 @@ import PasswordInput from "../components/PasswordInput";
 import LoginShowcase from "../components/LoginShowcase";
 import ThemeToggle from "../components/ThemeToggle";
 import { LogoMark } from "../components/Logo";
+import { GoogleIcon } from "../components/icons";
 import { animalAvatars, animalValue } from "../avatars";
 
 const inputClass =
@@ -36,7 +37,7 @@ const copy = {
 
 /* Log in, sign up and "forgot password" on one page (?mode=signup / ?mode=forgot) */
 const Login = () => {
-  const { user, login, signup, sendPasswordReset } = useAuth();
+  const { user, login, signup, signInWithGoogle, sendPasswordReset } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -64,6 +65,19 @@ const Login = () => {
   const jumpToForm = (next) => {
     switchMode(next);
     document.getElementById("login-form")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  /* Off to Google; on success the browser comes back already logged in */
+  const handleGoogle = async () => {
+    setError("");
+    setNotice("");
+    setSubmitting(true);
+    try {
+      await signInWithGoogle(location.state?.from || "/");
+    } catch (err) {
+      setError(err.message || "Couldn't reach Google. Please try again.");
+      setSubmitting(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -219,7 +233,26 @@ const Login = () => {
               </p>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-7 flex flex-col gap-5">
+            {mode !== "forgot" && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleGoogle}
+                  disabled={submitting}
+                  className="mt-6 flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-panel text-[15px] font-semibold text-fg ring-1 ring-line-strong transition hover:bg-fg/[0.04] disabled:opacity-60"
+                >
+                  <GoogleIcon />
+                  Continue with Google
+                </button>
+                <div className="mt-6 flex items-center gap-3 text-xs font-medium text-muted">
+                  <span className="h-px flex-1 bg-line" />
+                  or with email
+                  <span className="h-px flex-1 bg-line" />
+                </div>
+              </>
+            )}
+
+            <form onSubmit={handleSubmit} className={`${mode === "forgot" ? "mt-7" : "mt-5"} flex flex-col gap-5`}>
               {mode === "signup" && (
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Field label="Name">
