@@ -8,8 +8,9 @@ If a page crashes, the header still works and the error clears on the next page 
 function App() {
   const location = useLocation();
   const { user } = useAuth();
-  /* The login page and the first-visit welcome step have their own logo and layout */
-  const isWelcome = location.pathname === "/login" || user?.needs_setup;
+  /* The welcome page (at /login, and at / when logged out) and the first-visit
+  setup step have their own logo and layout */
+  const isWelcome = location.pathname === "/login" || (!user && location.pathname === "/") || user?.needs_setup;
 
   return (
     <div className="min-h-screen bg-ink text-fg">

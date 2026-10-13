@@ -5,9 +5,11 @@ import PageLoading from "../components/PageLoading";
 
 /* Only new Google users ever see this, so it downloads on demand like the other pages */
 const WelcomeSetup = lazy(() => import("../pages/WelcomeSetup"));
+const Login = lazy(() => import("../pages/Login"));
 
 /* Pages inside this need an account: logged-out visitors go to the login page,
-and come back here afterwards */
+and come back here afterwards. The home page itself shows the welcome page right there,
+so the site's main address is what visitors (and Google) see first */
 const RequireAuth = () => {
   const { user, session, loading, logout } = useAuth();
   const location = useLocation();
@@ -27,6 +29,14 @@ const RequireAuth = () => {
           Log out
         </button>
       </div>
+    );
+  }
+
+  if (!user && location.pathname === "/") {
+    return (
+      <Suspense fallback={<PageLoading />}>
+        <Login />
+      </Suspense>
     );
   }
 

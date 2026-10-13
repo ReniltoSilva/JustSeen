@@ -10,6 +10,7 @@ import UserAvatar from "../components/UserAvatar";
 import BarChart from "../components/BarChart";
 import EmptyState from "../components/EmptyState";
 import { StarIcon } from "../components/icons";
+import { usePageMeta } from "../lib/usePageMeta";
 
 /* A block on the page; `accent` gives it the purple gradient */
 const Panel = ({ children, className = "", accent = false }) => (
@@ -53,6 +54,7 @@ const YearInFilm = () => {
   const year = Number(yearParam);
   const { user } = useAuth();
   const [person, setPerson] = useState(null);
+  usePageMeta({ title: person ? `${person.name}'s ${year} in film` : `${year} in film` });
   const [reviews, setReviews] = useState(null);
   const [status, setStatus] = useState("loading");
 

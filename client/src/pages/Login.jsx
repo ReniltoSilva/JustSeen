@@ -11,6 +11,7 @@ import { LogoMark } from "../components/Logo";
 import { GoogleIcon } from "../components/icons";
 import { animalAvatars, animalValue } from "../avatars";
 import { authInputClass as inputClass } from "../components/formStyles";
+import { usePageMeta } from "../lib/usePageMeta";
 
 const Field = ({ label, hint, children }) => (
   <label className="flex flex-col gap-1.5">
@@ -35,6 +36,8 @@ const copy = {
 
 /* Log in, sign up and "forgot password" on one page (?mode=signup / ?mode=forgot) */
 const Login = () => {
+  /* Shown at "/" and "/login"; Google should treat "/" as the one real address */
+  usePageMeta({ canonicalPath: "/" });
   const { user, login, signup, signInWithGoogle, sendPasswordReset } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -135,13 +138,13 @@ const Login = () => {
         Everywhere else: cards under the headline, scaled to fit */}
         <div className="relative 2xl:flex 2xl:items-center 2xl:justify-between 2xl:gap-6">
           <div className="2xl:max-w-sm">
-            <h2 className="font-display text-4xl sm:text-5xl [@media(min-height:961px)]:xl:text-6xl font-bold leading-[1.05] tracking-tight">
+            <h1 className="font-display text-4xl sm:text-5xl [@media(min-height:961px)]:xl:text-6xl font-bold leading-[1.05] tracking-tight">
               Movies are better
               <br />
               <span className="bg-gradient-to-r from-[#b4a3ff] to-fuchsia-400 bg-clip-text text-transparent">
                 with friends.
               </span>
-            </h2>
+            </h1>
             <p className="mt-4 max-w-md text-base sm:text-lg leading-relaxed text-white/70 lg:mt-5">
               Share quick reviews of what you watch, and decide what to see next from the people whose taste you
               trust. No critic scores. Just your friends.
@@ -198,7 +201,7 @@ const Login = () => {
       <section id="login-form" className="flex scroll-mt-4 flex-col px-5 py-8 sm:px-10 lg:py-10">
         <div className="flex flex-1 items-center justify-center py-4 lg:py-8">
           <div className="w-full max-w-[26rem]">
-            <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+            <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
             <p className="mt-2 text-soft">{subtitle}</p>
 
             {mode !== "forgot" && (

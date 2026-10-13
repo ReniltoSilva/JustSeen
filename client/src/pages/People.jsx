@@ -11,6 +11,7 @@ import Masonry from "../components/Masonry";
 import PersonCard from "../components/PersonCard";
 import EmptyState from "../components/EmptyState";
 import { SearchIcon } from "../components/icons";
+import { usePageMeta } from "../lib/usePageMeta";
 
 const tabs = [
   { key: "following", label: "Following" },
@@ -42,6 +43,7 @@ const PeopleGrid = ({ people, counts, mutual = {} }) => (
 
 /* Who I follow, who follows me, and finding new people */
 const People = () => {
+  usePageMeta({ title: "People" });
   const { user } = useAuth();
   const { followingIds, version } = useLibrary();
   const [searchParams, setSearchParams] = useSearchParams();

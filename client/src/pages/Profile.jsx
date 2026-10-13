@@ -12,6 +12,7 @@ import ProfileHeader from "../components/ProfileHeader";
 import GenreChips from "../components/GenreChips";
 import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton, ProfileHeaderSkeleton } from "../components/Skeletons";
+import { usePageMeta } from "../lib/usePageMeta";
 
 /* Someone's profile: their stats, what they watched and what they want to watch */
 const Profile = () => {
@@ -20,6 +21,7 @@ const Profile = () => {
   const { version, watchlist: myWatchlist } = useLibrary();
 
   const [person, setPerson] = useState(null);
+  usePageMeta({ title: person ? `${person.name} (@${person.username})` : undefined });
   const [reviews, setReviews] = useState(null);
   const [theirWatchlist, setTheirWatchlist] = useState(null);
   const [status, setStatus] = useState("loading"); // "loading" | "ready" | "missing" | "error"

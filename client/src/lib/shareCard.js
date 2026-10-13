@@ -1,9 +1,8 @@
 import { avatarFor } from "../avatars";
 import { posterUrl } from "./tmdb";
 import { releaseYear } from "./dates";
+import { siteUrl } from "./site";
 
-/* The address people see on shared posts, whichever address the app was opened from */
-export const siteUrl = "https://justseenapp.com";
 
 /* The text that goes with the picture (some apps keep it, Instagram drops it) */
 export const shareText = ({ movie, rating }) =>

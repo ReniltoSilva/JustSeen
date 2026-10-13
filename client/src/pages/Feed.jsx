@@ -10,9 +10,11 @@ import PageHeading from "../components/PageHeading";
 import Masonry from "../components/Masonry";
 import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton } from "../components/Skeletons";
+import { usePageMeta } from "../lib/usePageMeta";
 
 /* Reviews by me and the people I follow, newest first */
 const Feed = () => {
+  usePageMeta({ title: "Feed" });
   const { user } = useAuth();
   const { ready, followingIds, version } = useLibrary();
   const [reviews, setReviews] = useState(null);

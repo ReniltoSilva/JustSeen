@@ -1,0 +1,14 @@
+# Everything behind the login is private, so search engines only need the public pages
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /reset-password
+Disallow: /watched
+Disallow: /watchlist
+Disallow: /people
+Disallow: /search
+Disallow: /movie/
+Disallow: /u/
+Disallow: /api/
+
+Sitemap: https://justseenapp.com/sitemap.xml

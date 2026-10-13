@@ -10,6 +10,7 @@ import Masonry from "../components/Masonry";
 import ReviewModal from "../components/ReviewModal";
 import EmptyState from "../components/EmptyState";
 import { BookmarkIcon, PencilIcon, StarIcon, StarPlusIcon } from "../components/icons";
+import { usePageMeta } from "../lib/usePageMeta";
 
 const formatRuntime = (minutes) =>
   minutes ? `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}m` : null;
@@ -25,6 +26,7 @@ const MovieDetails = () => {
   const { myReviewFor, isSaved, toggleWatchlist, followingIds, version } = useLibrary();
 
   const [details, setDetails] = useState(null);
+  usePageMeta({ title: details?.title });
   const [reviews, setReviews] = useState(null);
   const [status, setStatus] = useState("loading");
   const [reviewing, setReviewing] = useState(false);

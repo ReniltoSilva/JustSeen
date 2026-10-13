@@ -2,13 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#09090d" />
-    <meta name="description" content="JustSeen: share quick movie reviews with your friends and see what they are watching. No critic scores, just friends." />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JustSeen</title>
-    <meta property="og:title" content="JustSeen" />
-    <meta property="og:description" content="Movies are better with friends. Share quick reviews and see what your friends are watching." />
+    <title>JustSeen: share movie reviews with your friends</title>
+    <meta name="description" content="Share quick movie reviews with your friends and see what they're watching. Rate films, keep a watchlist and pick your next movie from people whose taste you trust. Free." />
+    <meta name="theme-color" content="#09090d" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- How the site looks when a link is shared on WhatsApp, X, Facebook... -->
+    <meta property="og:title" content="JustSeen: movies are better with friends" />
+    <meta property="og:description" content="Share quick movie reviews with your friends and see what they're watching. No critic scores, just friends." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://justseenapp.com/" />
     <meta property="og:site_name" content="JustSeen" />
@@ -17,10 +23,40 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="JustSeen: movies are better with friends" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@devnomadJS" />
     <meta name="twitter:image" content="https://justseenapp.com/og-image.png" />
+
+    <!-- Tells Google what this site is: its name (shown in search results) and that it's a free web app -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "JustSeen",
+            "url": "https://justseenapp.com/"
+          },
+          {
+            "@type": "WebApplication",
+            "name": "JustSeen",
+            "url": "https://justseenapp.com/",
+            "description": "Share quick movie reviews with your friends and see what they're watching. Rate films, keep a watchlist and pick your next movie from people whose taste you trust.",
+            "applicationCategory": "SocialNetworkingApplication",
+            "operatingSystem": "Any",
+            "image": "https://justseenapp.com/og-image.png",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+            "creator": { "@type": "Person", "name": "Junior Silva", "sameAs": "https://x.com/devnomadJS" }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>JustSeen: movies are better with friends</h1>
+      <p>Share quick movie reviews with your friends and see what they're watching. JustSeen needs JavaScript to run.</p>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

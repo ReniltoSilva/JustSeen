@@ -10,9 +10,11 @@ import PageHeading from "../components/PageHeading";
 import Masonry from "../components/Masonry";
 import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton } from "../components/Skeletons";
+import { usePageMeta } from "../lib/usePageMeta";
 
 /* Every movie I've reviewed, newest first */
 const Watched = () => {
+  usePageMeta({ title: "Watched" });
   const { user } = useAuth();
   const { version } = useLibrary();
   const [reviews, setReviews] = useState(null);

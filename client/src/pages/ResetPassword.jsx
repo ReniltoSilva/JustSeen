@@ -4,10 +4,12 @@ import { useAuth } from "../auth/AuthContext";
 import { passwordProblem } from "../auth/passwords";
 import PasswordInput from "../components/PasswordInput";
 import { authInputClass as inputClass } from "../components/formStyles";
+import { usePageMeta } from "../lib/usePageMeta";
 
 /* Opened from the "reset your password" email. The link logs the person in
 temporarily, so all that's left is choosing a new password */
 const ResetPassword = () => {
+  usePageMeta({ title: "Choose a new password" });
   const { session, loading, changePassword } = useAuth();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");

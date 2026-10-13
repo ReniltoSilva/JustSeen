@@ -6,11 +6,13 @@ import Masonry from "../components/Masonry";
 import PageHeading from "../components/PageHeading";
 import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton } from "../components/Skeletons";
+import { usePageMeta } from "../lib/usePageMeta";
 
 /* Movie search through TMDB */
 const Search = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q")?.trim() ?? "";
+  usePageMeta({ title: query ? `"${query}"` : "Search" });
 
   /* Results are stored with the query they belong to, so a new search never shows old results */
   const [search, setSearch] = useState({ query: "", movies: [], totalResults: 0, page: 0, totalPages: 0 });

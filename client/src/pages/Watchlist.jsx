@@ -8,10 +8,12 @@ import PageHeading from "../components/PageHeading";
 import Masonry from "../components/Masonry";
 import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton } from "../components/Skeletons";
+import { usePageMeta } from "../lib/usePageMeta";
 
 /* Movies I want to watch. The list lives in the shared library, so saving a
 movie anywhere in the app shows up here straight away */
 const Watchlist = () => {
+  usePageMeta({ title: "Watchlist" });
   const { ready, watchlist } = useLibrary();
   const [selectedGenre, setSelectedGenre] = useState("All");
 

@@ -7,6 +7,14 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# One official address: the netlify.app copy forwards to the real domain, so search
+# engines don't see the same site twice
+[[redirects]]
+  from = "https://justseen.netlify.app/*"
+  to = "https://justseenapp.com/:splat"
+  status = 301
+  force = true
+
 # Movie data goes through the function, which adds the secret TMDB token
 [[redirects]]
   from = "/api/tmdb/*"

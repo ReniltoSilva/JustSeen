@@ -3,10 +3,12 @@ import { useAuth } from "../auth/AuthContext";
 import AvatarPicker from "../components/AvatarPicker";
 import { LogoMark } from "../components/Logo";
 import { authInputClass as inputClass } from "../components/formStyles";
+import { usePageMeta } from "../lib/usePageMeta";
 
 /* Shown once, after someone's first Google sign-in. The database already gave them a
 username from their name, so everything is filled in; they just confirm or change it */
 const WelcomeSetup = () => {
+  usePageMeta({ title: "Welcome" });
   const { user, updateProfile, logout } = useAuth();
   const [name, setName] = useState(user.name);
   const [username, setUsername] = useState(user.username);
