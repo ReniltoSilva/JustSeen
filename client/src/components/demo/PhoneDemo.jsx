@@ -16,7 +16,6 @@ import {
   myReviewCounts,
   progress,
   reviewed,
-  sceneDetails,
   searchResults,
   useDemoClock,
   useSharePicture,
@@ -165,10 +164,7 @@ const PhoneDemo = () => {
         </div>
       </div>
 
-      <div className="w-full">
-        <DemoSteps clock={clock} />
-        <p className="mt-3 min-h-[2.5rem] text-center text-sm leading-snug text-white/60">{sceneDetails[clock.step]}</p>
-      </div>
+      <DemoSteps clock={clock} className="w-full" />
     </div>
   );
 };

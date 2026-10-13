@@ -62,13 +62,13 @@ const Login = () => {
     setSearchParams(next === "login" ? {} : { mode: next }, { replace: true, state: location.state });
   };
 
-  /* Buttons in the welcome section: pick the tab and bring the form into view.
-  On wide screens the form is already visible, so put the cursor in its first box */
+  /* Buttons in the welcome section: pick the tab and glide down to the form.
+  On computers also put the cursor in its first box (phones would pop the keyboard up) */
   const jumpToForm = (next) => {
     switchMode(next);
     document.getElementById("login-form")?.scrollIntoView({ behavior: "smooth" });
     if (window.matchMedia("(min-width: 1024px)").matches) {
-      setTimeout(() => document.querySelector("#login-form input")?.focus(), 50);
+      setTimeout(() => document.querySelector("#login-form input")?.focus({ preventScroll: true }), 50);
     }
   };
 
@@ -123,101 +123,94 @@ const Login = () => {
   const { title, subtitle } = copy[mode];
 
   return (
-    <div className="relative grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
-      {/* Light / dark switch, top right on every screen size */}
-      <ThemeToggle className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6" />
-
-      {/* The story: always dark, whatever the theme, like a cinema.
-      Phones see it first, with buttons that jump to the form */}
-      <section className="relative order-1 flex flex-col justify-between gap-8 overflow-hidden bg-[#0b0a14] px-5 pt-6 pb-6 text-white sm:px-10 lg:min-h-[42rem] lg:px-12 lg:py-10 xl:px-16">
+    <div className="min-h-screen">
+      {/* The story: always dark, whatever the theme, like a cinema. It opens with the
+      headline and the demo; the form comes right after it */}
+      <section className="relative overflow-hidden bg-[#0b0a14] px-5 pt-6 pb-10 text-white sm:px-10 lg:px-12 lg:pb-12 xl:px-16">
         <div className="absolute -top-40 -left-40 h-[32rem] w-[32rem] rounded-full bg-[#7c5cff]/30 blur-3xl" />
         <div className="absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-fuchsia-600/20 blur-3xl" />
 
-        <div className="relative flex items-center gap-2.5">
-          <LogoMark className="h-8 w-auto" />
-          <span className="font-display text-2xl font-bold tracking-tight">JustSeen</span>
-        </div>
-
-        {/* Headline and call to action */}
-        <div className="relative">
-          <div>
-            <p className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/25 lg:mb-5">
-              <CheckIcon className="h-3 w-3" />
-              100% free, for everyone
-            </p>
-            <h1 className="font-display text-4xl sm:text-5xl [@media(min-height:961px)]:xl:text-6xl font-bold leading-[1.05] tracking-tight">
-              Movies are better
-              <br />
-              <span className="bg-gradient-to-r from-[#b4a3ff] to-fuchsia-400 bg-clip-text text-transparent">
-                with friends.
-              </span>
-            </h1>
-            <p className="mt-4 max-w-md text-base sm:text-lg leading-relaxed text-white/70 lg:mt-5">
-              Share quick reviews of what you watch, and decide what to see next from the people whose taste you
-              trust. No critic scores. Just your friends.
-            </p>
-
-            {/* The main call to action. Phones also get "I have an account", since their form is further down */}
-            <div className="mt-6 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => jumpToForm("signup")}
-                className="flex-1 whitespace-nowrap rounded-xl bg-[#7c5cff] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#7c5cff]/30 transition hover:bg-[#6a48f5] sm:flex-none"
-              >
-                Create your free account
-              </button>
-              <button
-                type="button"
-                onClick={() => jumpToForm("login")}
-                className="flex-1 whitespace-nowrap rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white ring-1 ring-white/15 hover:bg-white/15 sm:flex-none lg:hidden"
-              >
-                I have an account
-              </button>
-            </div>
-            <p className="mt-3 text-xs text-white/50">No ads. No credit card. Ready in a minute.</p>
-          </div>
-        </div>
-
-        <ul className="relative hidden lg:grid grid-cols-3 gap-6">
-          {promises.map((item) => (
-            <li key={item.title}>
-              <span className="text-xl">{item.emoji}</span>
-              <p className="mt-2 text-sm font-semibold">{item.title}</p>
-              <p className="mt-1 text-xs leading-relaxed text-white/55">{item.text}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* How it works: the animated demo, across the whole page on desktop */}
-      <section className="relative order-2 overflow-hidden bg-[#0b0a14] px-5 pb-14 pt-6 text-white sm:px-10 lg:order-3 lg:col-span-2 lg:px-12 lg:py-20 xl:px-16">
-        <div className="absolute left-1/2 top-0 h-96 w-[48rem] -translate-x-1/2 rounded-full bg-[#7c5cff]/15 blur-3xl" />
-        <div className="relative mx-auto max-w-6xl">
-          <div className="mb-8 text-center lg:mb-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#b4a3ff]">How it works</p>
-            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              From movie night to your friends&apos; feeds
-            </h2>
-            <p className="mt-3 text-white/60">Four quick steps, and all of it free.</p>
-          </div>
-
-          <LoginDemo />
-
-          <div className="mt-10 flex flex-col items-center gap-3 lg:mt-14">
+        <div className="relative mx-auto max-w-7xl">
+          {/* Top bar: logo, and on wide screens shortcuts down to the form */}
+          <div className="flex items-center gap-3">
+            <LogoMark className="h-8 w-auto" />
+            <span className="mr-auto font-display text-2xl font-bold tracking-tight">JustSeen</span>
+            <button
+              type="button"
+              onClick={() => jumpToForm("login")}
+              className="hidden rounded-xl px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/10 hover:text-white lg:block"
+            >
+              Log in
+            </button>
             <button
               type="button"
               onClick={() => jumpToForm("signup")}
-              className="rounded-xl bg-[#7c5cff] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#7c5cff]/30 transition hover:bg-[#6a48f5]"
+              className="hidden rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/15 hover:bg-white/15 lg:block"
             >
-              Create your free account
+              Create free account
             </button>
-            <p className="text-xs text-white/50">Join your friends in under a minute.</p>
+            <ThemeToggle />
           </div>
+
+          {/* Headline and call to action, with the demo beside them on computers
+          and under them on phones and tablets */}
+          <div className="mt-8 lg:mt-12 lg:grid lg:grid-cols-[23rem_minmax(0,1fr)] lg:items-center lg:gap-10 xl:grid-cols-[27rem_minmax(0,1fr)] xl:gap-14">
+            <div>
+              <p className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/25 lg:mb-5">
+                <CheckIcon className="h-3 w-3" />
+                100% free, for everyone
+              </p>
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-[2.5rem] xl:text-5xl font-bold leading-[1.05] tracking-tight">
+                Movies are better
+                <br />
+                <span className="bg-gradient-to-r from-[#b4a3ff] to-fuchsia-400 bg-clip-text text-transparent">
+                  with friends.
+                </span>
+              </h1>
+              <p className="mt-4 max-w-md text-base sm:text-lg leading-relaxed text-white/70 lg:mt-5">
+                Share quick reviews of what you watch, and decide what to see next from the people whose taste you
+                trust. No critic scores. Just your friends.
+              </p>
+
+              {/* The main call to action; the form is further down the page */}
+              <div className="mt-6 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => jumpToForm("signup")}
+                  className="flex-1 whitespace-nowrap rounded-xl bg-[#7c5cff] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#7c5cff]/30 transition hover:bg-[#6a48f5] sm:flex-none"
+                >
+                  Create your free account
+                </button>
+                <button
+                  type="button"
+                  onClick={() => jumpToForm("login")}
+                  className="flex-1 whitespace-nowrap rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white ring-1 ring-white/15 hover:bg-white/15 sm:flex-none"
+                >
+                  I have an account
+                </button>
+              </div>
+              <p className="mt-3 text-xs text-white/50">No ads. No credit card. Ready in a minute.</p>
+            </div>
+
+            <div className="mt-8 lg:mt-0">
+              <LoginDemo />
+            </div>
+          </div>
+
+          <ul className="mt-14 hidden grid-cols-3 gap-6 border-t border-white/10 pt-8 lg:grid">
+            {promises.map((item) => (
+              <li key={item.title}>
+                <span className="text-xl">{item.emoji}</span>
+                <p className="mt-2 text-sm font-semibold">{item.title}</p>
+                <p className="mt-1 text-xs leading-relaxed text-white/55">{item.text}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
       {/* The form */}
-      <section id="login-form" className="order-3 flex scroll-mt-4 flex-col px-5 py-8 sm:px-10 lg:order-2 lg:py-10">
+      <section id="login-form" className="flex scroll-mt-4 flex-col px-5 py-8 sm:px-10 lg:py-16">
         <div className="flex flex-1 items-center justify-center py-4 lg:py-8">
           <div className="w-full max-w-[26rem]">
             <h2 className="text-3xl font-bold tracking-tight">{title}</h2>

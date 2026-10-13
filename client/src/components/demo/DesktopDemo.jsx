@@ -7,7 +7,6 @@ import {
   DemoNotifications,
   DemoReviewForm,
   DemoShareModal,
-  DemoStepList,
   DemoSteps,
   ShareSheet,
 } from "./demoKit";
@@ -219,43 +218,38 @@ const DesktopDemo = () => {
   const scale = width / pageWidth;
 
   return (
-    <div className="grid items-center gap-8 xl:grid-cols-[17rem_minmax(0,1fr)] xl:gap-12">
-      {/* Very wide screens: the steps, with what each one means, beside the window */}
-      <DemoStepList clock={clock} className="hidden xl:flex" />
-
-      <div className="flex min-w-0 flex-col gap-5">
-        <div ref={box} className="w-full">
-          <div
-            className="relative overflow-hidden rounded-xl border border-white/10 bg-[#09090d] text-left shadow-2xl shadow-black/60 ring-1 ring-black/40"
-            style={{ height: (pageHeight + barHeight) * scale }}
-            aria-hidden="true"
-          >
-            {width > 0 && (
-              <div
-                ref={page}
-                className="relative flex origin-top-left flex-col"
-                style={{ width: pageWidth, height: pageHeight + barHeight, transform: `scale(${scale})` }}
-              >
-                {/* Browser bar */}
-                <div className="flex shrink-0 items-center gap-4 border-b border-white/10 bg-[#1c1b24] px-4" style={{ height: barHeight }}>
-                  <span className="flex gap-2">
-                    <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
-                    <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
-                    <span className="h-3 w-3 rounded-full bg-[#28c840]" />
-                  </span>
-                  <span className="mx-auto w-96 rounded-md bg-black/30 py-1 text-center text-xs text-white/60">
-                    {addressFor[clock.step]}
-                  </span>
-                  <span className="w-12" />
-                </div>
-                <Screen step={clock.step} local={clock.local} picture={picture} />
-                {!clock.reduced && <Cursor pageRef={page} step={clock.step} local={clock.local} scale={scale} />}
+    <div className="flex min-w-0 flex-col gap-5">
+      <div ref={box} className="w-full">
+        <div
+          className="relative overflow-hidden rounded-xl border border-white/10 bg-[#09090d] text-left shadow-2xl shadow-black/60 ring-1 ring-black/40"
+          style={{ height: (pageHeight + barHeight) * scale }}
+          aria-hidden="true"
+        >
+          {width > 0 && (
+            <div
+              ref={page}
+              className="relative flex origin-top-left flex-col"
+              style={{ width: pageWidth, height: pageHeight + barHeight, transform: `scale(${scale})` }}
+            >
+              {/* Browser bar */}
+              <div className="flex shrink-0 items-center gap-4 border-b border-white/10 bg-[#1c1b24] px-4" style={{ height: barHeight }}>
+                <span className="flex gap-2">
+                  <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+                  <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
+                  <span className="h-3 w-3 rounded-full bg-[#28c840]" />
+                </span>
+                <span className="mx-auto w-96 rounded-md bg-black/30 py-1 text-center text-xs text-white/60">
+                  {addressFor[clock.step]}
+                </span>
+                <span className="w-12" />
               </div>
-            )}
-          </div>
+              <Screen step={clock.step} local={clock.local} picture={picture} />
+              {!clock.reduced && <Cursor pageRef={page} step={clock.step} local={clock.local} scale={scale} />}
+            </div>
+          )}
         </div>
-        <DemoSteps clock={clock} className="mx-auto w-full max-w-md xl:hidden" />
       </div>
+      <DemoSteps clock={clock} className="mx-auto w-full max-w-md" />
     </div>
   );
 };

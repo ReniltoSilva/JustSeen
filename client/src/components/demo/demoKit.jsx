@@ -1,6 +1,6 @@
 import { LogoMark } from "../Logo";
 import UserAvatar from "../UserAvatar";
-import { clamp, leo, progress, reviewText, reviewed, sceneDetails, sceneLabels, sceneLength, you } from "./demoData";
+import { clamp, leo, progress, reviewText, reviewed, sceneLabels, sceneLength, you } from "./demoData";
 import {
   BellIcon,
   BookmarkIcon,
@@ -35,44 +35,6 @@ export const DemoSteps = ({ clock, className = "" }) => (
             <span className={`text-[11px] font-semibold leading-tight ${i === clock.step ? "text-white" : "text-white/45"}`}>
               {i + 1}. {label}
             </span>
-          </button>
-        </li>
-      );
-    })}
-  </ol>
-);
-
-/* The same steps as a list with descriptions, beside the demo on wide screens */
-export const DemoStepList = ({ clock, className = "" }) => (
-  <ol className={`flex flex-col gap-2 ${className}`}>
-    {sceneLabels.map((label, i) => {
-      const active = i === clock.step;
-      const fill = clock.reduced ? 1 : clock.local / sceneLength;
-      return (
-        <li key={label}>
-          <button
-            type="button"
-            onClick={() => clock.jumpTo(i)}
-            className={`w-full rounded-2xl p-4 text-left transition ${active ? "bg-white/[0.07] ring-1 ring-white/10" : "hover:bg-white/[0.03]"}`}
-          >
-            <span className="flex items-center gap-3">
-              <span
-                className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold transition-colors ${
-                  active ? "bg-[#7c5cff] text-white" : "bg-white/10 text-white/60"
-                }`}
-              >
-                {i + 1}
-              </span>
-              <span className={`font-semibold ${active ? "text-white" : "text-white/60"}`}>{label}</span>
-            </span>
-            <span className={`mt-1.5 block pl-10 text-sm leading-relaxed ${active ? "text-white/70" : "text-white/40"}`}>
-              {sceneDetails[i]}
-            </span>
-            {active && (
-              <span className="ml-10 mt-3 block h-1 overflow-hidden rounded-full bg-white/10">
-                <span className="block h-full rounded-full bg-[#b4a3ff]" style={{ width: `${fill * 100}%` }} />
-              </span>
-            )}
           </button>
         </li>
       );
