@@ -5,7 +5,7 @@ import { cleanUsername, usernameProblem } from "../auth/usernames";
 import { passwordProblem } from "../auth/passwords";
 import AvatarPicker from "../components/AvatarPicker";
 import PasswordInput from "../components/PasswordInput";
-import LoginShowcase from "../components/LoginShowcase";
+import LoginDemo from "../components/LoginDemo";
 import ThemeToggle from "../components/ThemeToggle";
 import { LogoMark } from "../components/Logo";
 import { CheckIcon, GoogleIcon } from "../components/icons";
@@ -178,19 +178,19 @@ const Login = () => {
             <p className="mt-3 text-xs text-white/50">No ads. No credit card. Ready in a minute.</p>
           </div>
 
-          {/* The fan is 27rem wide and 31rem tall at full size; each screen size
-          scales it down and reserves only the height it needs */}
+          {/* The demo phone is 20rem wide and 38rem tall at full size; smaller screens
+          scale it down and reserve only the height it needs */}
           <div
-            className="mt-8 flex justify-center h-[21rem] sm:max-lg:h-[28rem]
-              lg:max-2xl:h-[20rem] lg:max-2xl:[@media(min-height:961px)_and_(max-height:1080px)]:h-[24rem] lg:max-2xl:[@media(min-height:1081px)]:h-[31rem]
-              2xl:mt-0 2xl:h-[31rem] 2xl:shrink-0"
+            className="mt-8 flex justify-center h-[34.5rem] sm:max-lg:h-[38rem]
+              lg:max-2xl:h-[30.5rem] lg:max-2xl:[@media(min-height:961px)_and_(max-height:1080px)]:h-[34.5rem] lg:max-2xl:[@media(min-height:1081px)]:h-[38rem]
+              2xl:mt-0 2xl:h-[38rem] 2xl:shrink-0"
           >
             <div
-              className="origin-top scale-[0.68] sm:max-lg:scale-[0.9]
-                lg:max-2xl:scale-[0.64] lg:max-2xl:[@media(min-height:961px)_and_(max-height:1080px)]:scale-[0.76] lg:max-2xl:[@media(min-height:1081px)]:scale-100
+              className="origin-top scale-[0.9] sm:max-lg:scale-100
+                lg:max-2xl:scale-[0.8] lg:max-2xl:[@media(min-height:961px)_and_(max-height:1080px)]:scale-[0.9] lg:max-2xl:[@media(min-height:1081px)]:scale-100
                 2xl:scale-100"
             >
-              <LoginShowcase />
+              <LoginDemo />
             </div>
           </div>
         </div>
