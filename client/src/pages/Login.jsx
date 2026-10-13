@@ -123,13 +123,13 @@ const Login = () => {
   const { title, subtitle } = copy[mode];
 
   return (
-    <div className="relative min-h-screen lg:grid lg:grid-cols-[1.1fr_1fr]">
+    <div className="relative grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
       {/* Light / dark switch, top right on every screen size */}
       <ThemeToggle className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6" />
 
       {/* The story: always dark, whatever the theme, like a cinema.
       Phones see it first, with buttons that jump to the form */}
-      <section className="relative flex flex-col justify-between gap-8 overflow-hidden bg-[#0b0a14] px-5 pt-6 pb-10 text-white sm:px-10 lg:px-12 lg:py-10 xl:px-16">
+      <section className="relative order-1 flex flex-col justify-between gap-8 overflow-hidden bg-[#0b0a14] px-5 pt-6 pb-6 text-white sm:px-10 lg:min-h-[42rem] lg:px-12 lg:py-10 xl:px-16">
         <div className="absolute -top-40 -left-40 h-[32rem] w-[32rem] rounded-full bg-[#7c5cff]/30 blur-3xl" />
         <div className="absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-fuchsia-600/20 blur-3xl" />
 
@@ -138,7 +138,7 @@ const Login = () => {
           <span className="font-display text-2xl font-bold tracking-tight">JustSeen</span>
         </div>
 
-        {/* Headline and call to action, then the how-it-works demo under them */}
+        {/* Headline and call to action */}
         <div className="relative">
           <div>
             <p className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/25 lg:mb-5">
@@ -176,10 +176,6 @@ const Login = () => {
             </div>
             <p className="mt-3 text-xs text-white/50">No ads. No credit card. Ready in a minute.</p>
           </div>
-
-          <div className="mt-8">
-            <LoginDemo />
-          </div>
         </div>
 
         <ul className="relative hidden lg:grid grid-cols-3 gap-6">
@@ -193,11 +189,35 @@ const Login = () => {
         </ul>
       </section>
 
-      {/* The form. On desktop it stays in view while the welcome side scrolls on short screens */}
-      <section
-        id="login-form"
-        className="flex scroll-mt-4 flex-col px-5 py-8 sm:px-10 lg:sticky lg:top-0 lg:h-screen lg:self-start lg:overflow-y-auto lg:py-10"
-      >
+      {/* How it works: the animated demo, across the whole page on desktop */}
+      <section className="relative order-2 overflow-hidden bg-[#0b0a14] px-5 pb-14 pt-6 text-white sm:px-10 lg:order-3 lg:col-span-2 lg:px-12 lg:py-20 xl:px-16">
+        <div className="absolute left-1/2 top-0 h-96 w-[48rem] -translate-x-1/2 rounded-full bg-[#7c5cff]/15 blur-3xl" />
+        <div className="relative mx-auto max-w-6xl">
+          <div className="mb-8 text-center lg:mb-12">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#b4a3ff]">How it works</p>
+            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              From movie night to your friends&apos; feeds
+            </h2>
+            <p className="mt-3 text-white/60">Four quick steps, and all of it free.</p>
+          </div>
+
+          <LoginDemo />
+
+          <div className="mt-10 flex flex-col items-center gap-3 lg:mt-14">
+            <button
+              type="button"
+              onClick={() => jumpToForm("signup")}
+              className="rounded-xl bg-[#7c5cff] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#7c5cff]/30 transition hover:bg-[#6a48f5]"
+            >
+              Create your free account
+            </button>
+            <p className="text-xs text-white/50">Join your friends in under a minute.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* The form */}
+      <section id="login-form" className="order-3 flex scroll-mt-4 flex-col px-5 py-8 sm:px-10 lg:order-2 lg:py-10">
         <div className="flex flex-1 items-center justify-center py-4 lg:py-8">
           <div className="w-full max-w-[26rem]">
             <h2 className="text-3xl font-bold tracking-tight">{title}</h2>

@@ -16,6 +16,7 @@ import {
   myReviewCounts,
   progress,
   reviewed,
+  sceneDetails,
   searchResults,
   useDemoClock,
   useSharePicture,
@@ -124,7 +125,7 @@ const Screen = ({ step, local, picture }) => {
   const bell = progress(local, 1700, 300);
   return (
     <>
-      <DemoHeader active="Feed" unread={local > 1300 && local < 1700 ? 1 : 0} />
+      <DemoHeader active="Feed" unread={local > 1100 && local < 1700 ? 1 : 0} bellTap={progress(local, 1500, 450)} />
       <div className="relative flex-1 overflow-hidden">
         <Feed local={local} />
         <div className="absolute right-3 top-1 z-30">
@@ -164,7 +165,10 @@ const PhoneDemo = () => {
         </div>
       </div>
 
-      <DemoSteps clock={clock} className="w-full" />
+      <div className="w-full">
+        <DemoSteps clock={clock} />
+        <p className="mt-3 min-h-[2.5rem] text-center text-sm leading-snug text-white/60">{sceneDetails[clock.step]}</p>
+      </div>
     </div>
   );
 };

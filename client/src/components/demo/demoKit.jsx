@@ -1,6 +1,6 @@
 import { LogoMark } from "../Logo";
 import UserAvatar from "../UserAvatar";
-import { clamp, leo, progress, reviewText, reviewed, sceneLabels, sceneLength, you } from "./demoData";
+import { clamp, leo, progress, reviewText, reviewed, sceneDetails, sceneLabels, sceneLength, you } from "./demoData";
 import {
   BellIcon,
   BookmarkIcon,
@@ -35,6 +35,44 @@ export const DemoSteps = ({ clock, className = "" }) => (
             <span className={`text-[11px] font-semibold leading-tight ${i === clock.step ? "text-white" : "text-white/45"}`}>
               {i + 1}. {label}
             </span>
+          </button>
+        </li>
+      );
+    })}
+  </ol>
+);
+
+/* The same steps as a list with descriptions, beside the demo on wide screens */
+export const DemoStepList = ({ clock, className = "" }) => (
+  <ol className={`flex flex-col gap-2 ${className}`}>
+    {sceneLabels.map((label, i) => {
+      const active = i === clock.step;
+      const fill = clock.reduced ? 1 : clock.local / sceneLength;
+      return (
+        <li key={label}>
+          <button
+            type="button"
+            onClick={() => clock.jumpTo(i)}
+            className={`w-full rounded-2xl p-4 text-left transition ${active ? "bg-white/[0.07] ring-1 ring-white/10" : "hover:bg-white/[0.03]"}`}
+          >
+            <span className="flex items-center gap-3">
+              <span
+                className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold transition-colors ${
+                  active ? "bg-[#7c5cff] text-white" : "bg-white/10 text-white/60"
+                }`}
+              >
+                {i + 1}
+              </span>
+              <span className={`font-semibold ${active ? "text-white" : "text-white/60"}`}>{label}</span>
+            </span>
+            <span className={`mt-1.5 block pl-10 text-sm leading-relaxed ${active ? "text-white/70" : "text-white/40"}`}>
+              {sceneDetails[i]}
+            </span>
+            {active && (
+              <span className="ml-10 mt-3 block h-1 overflow-hidden rounded-full bg-white/10">
+                <span className="block h-full rounded-full bg-[#b4a3ff]" style={{ width: `${fill * 100}%` }} />
+              </span>
+            )}
           </button>
         </li>
       );
@@ -88,14 +126,14 @@ export const Typed = ({ text, placeholder, caret = true }) =>
 /* ---------- Copies of the app's components ---------- */
 
 /* Header (Header.jsx). `wide` is the desktop layout with the nav inline */
-export const DemoHeader = ({ wide = false, search = "", typing = false, active = "", unread = 0 }) => (
+export const DemoHeader = ({ wide = false, search = "", typing = false, active = "", unread = 0, bellTap = 0 }) => (
   <header className="border-b border-[#25252f] bg-[#09090d]">
     <div className={`flex h-16 items-center ${wide ? "gap-8 px-8" : "gap-3 px-4"}`}>
       <span className="flex shrink-0 items-center gap-2">
         <LogoMark className="h-7 w-auto" />
         <span className="font-display text-xl font-bold tracking-tight text-[#f5f5f7]">JustSeen</span>
       </span>
-      <div className={`relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-[#131318] pl-10 pr-4 text-sm ${wide ? "max-w-md" : ""} ${typing ? "border-[#7c5cff] ring-2 ring-[#7c5cff]/25" : "border-[#25252f]"}`}>
+      <div data-tap="search" className={`relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-[#131318] pl-10 pr-4 text-sm ${wide ? "max-w-md" : ""} ${typing ? "border-[#7c5cff] ring-2 ring-[#7c5cff]/25" : "border-[#25252f]"}`}>
         <SearchIcon className="absolute left-3.5 h-4 w-4 text-[#8c8c9a]" />
         <span className="truncate text-[#f5f5f7]">
           <Typed text={search} placeholder="Search movies..." caret={typing} />
@@ -103,8 +141,9 @@ export const DemoHeader = ({ wide = false, search = "", typing = false, active =
       </div>
       {wide && <DemoNav active={active} className="ml-auto h-16 gap-6" />}
       <span className="flex shrink-0 items-center gap-1.5">
-        <span className="relative grid h-9 w-9 place-items-center text-[#bdbdc9]">
+        <span data-tap="bell" className="relative grid h-9 w-9 place-items-center text-[#bdbdc9]">
           <BellIcon />
+          <Tap p={bellTap} />
           {unread > 0 && (
             <span className="absolute -right-0.5 -top-0.5 h-4 min-w-4 rounded-full bg-[#fb7185] px-1 text-center text-[10px] font-bold leading-4 text-white">
               {unread}
@@ -140,15 +179,15 @@ export const DemoHeading = ({ title, subtitle }) => (
   </div>
 );
 
-const PosterButton = ({ children, tap = 0, highlight = false }) => (
-  <span className={`relative grid h-8 w-8 place-items-center rounded-full text-white transition-colors ${highlight ? "bg-white/25" : ""}`}>
+const PosterButton = ({ children, tap = 0, highlight = false, target }) => (
+  <span data-tap={target} className={`relative grid h-8 w-8 place-items-center rounded-full text-white transition-colors ${highlight ? "bg-white/25" : ""}`}>
     {children}
     <Tap p={tap} />
   </span>
 );
 
 /* MovieCard.jsx: a search result (no `review`) or someone's review */
-export const DemoCard = ({ movie, review, tap = 0, counts = [0, 0, 0], reactors = [], overview = false }) => {
+export const DemoCard = ({ movie, review, tap = 0, target = false, counts = [0, 0, 0], reactors = [], overview = false }) => {
   const isMine = review?.author === you;
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-[#25252f] bg-[#131318]">
@@ -191,7 +230,7 @@ export const DemoCard = ({ movie, review, tap = 0, counts = [0, 0, 0], reactors 
             </>
           ) : (
             <>
-              <PosterButton tap={tap} highlight={tap > 0}>
+              <PosterButton tap={tap} highlight={tap > 0} target={target ? "star" : undefined}>
                 <StarPlusIcon />
               </PosterButton>
               <PosterButton>
@@ -284,7 +323,7 @@ export const DemoReviewForm = ({ local }) => {
       <div className="mt-6 flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-[#8c8c9a]">Rating</span>
-          <div className="flex items-center gap-4">
+          <div data-tap="rating" className="flex items-center gap-4">
             <Stars rating={rating} />
             <span className="text-sm text-[#bdbdc9]">{rating ? `${rating} / 5` : "Pick a rating"}</span>
           </div>
@@ -297,14 +336,14 @@ export const DemoReviewForm = ({ local }) => {
         </div>
         <div className="flex flex-col gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-[#8c8c9a]">Review</span>
-          <div className="h-24 rounded-2xl border border-[#25252f] bg-[#09090d] p-4 text-[15px] leading-relaxed">
+          <div data-tap="text" className="h-24 rounded-2xl border border-[#25252f] bg-[#09090d] p-4 text-[15px] leading-relaxed">
             <Typed text={typed} placeholder="What did you think?" caret={typed.length < reviewText.length} />
           </div>
           <span className="self-end text-xs tabular-nums text-[#8c8c9a]">{typed.length} / 250</span>
         </div>
         <div className="flex items-center justify-end gap-2">
           <span className="rounded-full border border-[#383845] px-5 py-2.5 text-sm font-semibold">Cancel</span>
-          <span className="relative rounded-full bg-[#7c5cff] px-6 py-2.5 text-sm font-semibold text-white">
+          <span data-tap="save" className="relative rounded-full bg-[#7c5cff] px-6 py-2.5 text-sm font-semibold text-white">
             Save
             <Tap p={saveTap} />
           </span>
@@ -332,7 +371,7 @@ export const DemoShareModal = ({ local, picture }) => {
           <div className="aspect-[4/5] w-full animate-pulse bg-white/[0.06]" />
         )}
       </div>
-      <span className="relative mt-4 flex items-center justify-center gap-2 rounded-full bg-[#7c5cff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#7c5cff]/25">
+      <span data-tap="share" className="relative mt-4 flex items-center justify-center gap-2 rounded-full bg-[#7c5cff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#7c5cff]/25">
         <ShareIcon />
         Share review
         <Tap p={shareTap} />
@@ -356,7 +395,7 @@ export const ShareSheet = ({ className = "" }) => (
     <div className="grid grid-cols-4 gap-3">
       {shareApps.map((app) => (
         <span key={app.name} className="flex flex-col items-center gap-2">
-          <span className={`h-14 w-14 rounded-2xl ${app.color}`} />
+          <span data-tap={app.name === "WhatsApp" ? "whatsapp" : undefined} className={`h-14 w-14 rounded-2xl ${app.color}`} />
           <span className="text-xs text-white/70">{app.name}</span>
         </span>
       ))}

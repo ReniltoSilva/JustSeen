@@ -17,8 +17,8 @@ const LoginDemo = () => {
   return wide ? (
     <DesktopDemo />
   ) : (
-    /* The phone is 20rem x 38rem; shrink it a little and keep only the height it needs */
-    <div className="flex h-[34.5rem] justify-center">
+    /* The phone and its captions are about 20rem x 41.5rem; shrink them a little and keep only the height needed */
+    <div className="flex h-[37.5rem] justify-center">
       <div className="origin-top scale-[0.9]">
         <PhoneDemo />
       </div>

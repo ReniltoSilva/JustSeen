@@ -7,6 +7,12 @@ import { drawShareCard } from "../../lib/shareCard";
 
 export const sceneLength = 4600;
 export const sceneLabels = ["Find a movie", "Rate & review", "Share it", "Friends react"];
+export const sceneDetails = [
+  "Search any film. Posters and details come straight from TMDB.",
+  "Give it stars and a few honest words. No essays needed.",
+  "JustSeen turns your review into a picture for WhatsApp, Instagram and more.",
+  "Friends agree, disagree or aren't sure, and you get a notification.",
+];
 const loopLength = sceneLength * sceneLabels.length;
 
 export const clamp = (value) => Math.min(1, Math.max(0, value));
