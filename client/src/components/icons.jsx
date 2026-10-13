@@ -193,3 +193,12 @@ export const FacebookLogo = ({ className = "w-4 h-4" }) => (
     <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.971H15.83c-1.491 0-1.956.93-1.956 1.886v2.264h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
   </svg>
 );
+
+/* Instagram's camera outline (drawn simply, in the current text colour) */
+export const InstagramLogo = ({ className = "w-5 h-5" }) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <rect x="3" y="3" width="18" height="18" rx="5" />
+    <circle cx="12" cy="12" r="4" />
+    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+  </svg>
+);

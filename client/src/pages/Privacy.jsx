@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 /* Who runs JustSeen and where people can reach them about their data */
 const operator = "Junior Silva";
 /* Leave empty to hide; just the handle, without the @ */
-const operatorX = "";
-const contactEmail = "privacy@justseenapp.com";
+const operatorX = "devnomadJS";
+const contactEmail = "info@justseenapp.com";
 const lastUpdated = "October 13, 2026";
 
 const Section = ({ title, children }) => (

@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { drawShareCard, shareText, siteUrl } from "../lib/shareCard";
-import { CheckIcon, CopyIcon, DownloadIcon, FacebookLogo, ShareIcon, WhatsAppLogo, XLogo } from "./icons";
+import {
+  CheckIcon,
+  CopyIcon,
+  DownloadIcon,
+  FacebookLogo,
+  InstagramLogo,
+  ShareIcon,
+  WhatsAppLogo,
+  XLogo,
+} from "./icons";
 
 /* "dune-part-two" from "Dune: Part Two", for the downloaded file's name */
 const slug = (title) =>
@@ -43,6 +52,7 @@ const ShareReview = ({ movie, rating, review, author }) => {
   const [failed, setFailed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareError, setShareError] = useState("");
+  const [hint, setHint] = useState("");
 
   /* Draw the picture once; the preview and every button use the same one */
   useEffect(() => {
@@ -101,6 +111,21 @@ const ShareReview = ({ movie, rating, review, author }) => {
     }
   };
 
+  /* Instagram can't be opened with a picture from a website. Phones: the share menu
+  (pick Instagram there). Computers: save the picture and open Instagram to post it */
+  const shareToInstagram = () => {
+    if (canShareImage) {
+      share();
+      return;
+    }
+    const link = document.createElement("a");
+    link.href = image.url;
+    link.download = image.file.name;
+    link.click();
+    window.open("https://www.instagram.com/", "_blank", "noreferrer");
+    setHint("Picture downloaded. On Instagram, click Create and choose it.");
+  };
+
   const copyText = async () => {
     setShareError("");
     if (await copyToClipboard(fullText)) {
@@ -145,6 +170,15 @@ const ShareReview = ({ movie, rating, review, author }) => {
           </div>
 
           <div className="mt-2 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={shareToInstagram}
+              title="Post on Instagram"
+              aria-label="Post on Instagram"
+              className={`${brandButton} bg-[linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)]`}
+            >
+              <InstagramLogo />
+            </button>
             {socialLinks.map((link) => (
               <a
                 key={link.label}
@@ -160,8 +194,8 @@ const ShareReview = ({ movie, rating, review, author }) => {
             ))}
           </div>
           <p className="text-center text-xs leading-relaxed text-muted">
-            X, WhatsApp and Facebook only accept text and a link from websites. To include the picture, download it
-            and add it to your post.
+            {hint ||
+              "X, WhatsApp and Facebook only accept text and a link from websites. To include the picture, download it and add it to your post."}
           </p>
         </div>
       )}
