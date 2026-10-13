@@ -138,10 +138,9 @@ const Login = () => {
           <span className="font-display text-2xl font-bold tracking-tight">JustSeen</span>
         </div>
 
-        {/* Wide screens: headline on the left, cards beside it at full size.
-        Everywhere else: cards under the headline, scaled to fit */}
-        <div className="relative 2xl:flex 2xl:items-center 2xl:justify-between 2xl:gap-6">
-          <div className="2xl:max-w-sm">
+        {/* Headline and call to action, then the how-it-works demo under them */}
+        <div className="relative">
+          <div>
             <p className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/25 lg:mb-5">
               <CheckIcon className="h-3 w-3" />
               100% free, for everyone
@@ -178,20 +177,8 @@ const Login = () => {
             <p className="mt-3 text-xs text-white/50">No ads. No credit card. Ready in a minute.</p>
           </div>
 
-          {/* The demo phone is 20rem wide and 38rem tall at full size; smaller screens
-          scale it down and reserve only the height it needs */}
-          <div
-            className="mt-8 flex justify-center h-[34.5rem] sm:max-lg:h-[38rem]
-              lg:max-2xl:h-[30.5rem] lg:max-2xl:[@media(min-height:961px)_and_(max-height:1080px)]:h-[34.5rem] lg:max-2xl:[@media(min-height:1081px)]:h-[38rem]
-              2xl:mt-0 2xl:h-[38rem] 2xl:shrink-0"
-          >
-            <div
-              className="origin-top scale-[0.9] sm:max-lg:scale-100
-                lg:max-2xl:scale-[0.8] lg:max-2xl:[@media(min-height:961px)_and_(max-height:1080px)]:scale-[0.9] lg:max-2xl:[@media(min-height:1081px)]:scale-100
-                2xl:scale-100"
-            >
-              <LoginDemo />
-            </div>
+          <div className="mt-8">
+            <LoginDemo />
           </div>
         </div>
 
