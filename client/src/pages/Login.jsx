@@ -8,7 +8,7 @@ import PasswordInput from "../components/PasswordInput";
 import LoginShowcase from "../components/LoginShowcase";
 import ThemeToggle from "../components/ThemeToggle";
 import { LogoMark } from "../components/Logo";
-import { GoogleIcon } from "../components/icons";
+import { CheckIcon, GoogleIcon } from "../components/icons";
 import { animalAvatars, animalValue } from "../avatars";
 import { authInputClass as inputClass } from "../components/formStyles";
 import { usePageMeta } from "../lib/usePageMeta";
@@ -62,10 +62,14 @@ const Login = () => {
     setSearchParams(next === "login" ? {} : { mode: next }, { replace: true, state: location.state });
   };
 
-  /* Phone buttons in the welcome section: pick the tab and scroll down to the form */
+  /* Buttons in the welcome section: pick the tab and bring the form into view.
+  On wide screens the form is already visible, so put the cursor in its first box */
   const jumpToForm = (next) => {
     switchMode(next);
     document.getElementById("login-form")?.scrollIntoView({ behavior: "smooth" });
+    if (window.matchMedia("(min-width: 1024px)").matches) {
+      setTimeout(() => document.querySelector("#login-form input")?.focus(), 50);
+    }
   };
 
   /* Off to Google; on success the browser comes back already logged in */
@@ -138,6 +142,10 @@ const Login = () => {
         Everywhere else: cards under the headline, scaled to fit */}
         <div className="relative 2xl:flex 2xl:items-center 2xl:justify-between 2xl:gap-6">
           <div className="2xl:max-w-sm">
+            <p className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/25 lg:mb-5">
+              <CheckIcon className="h-3 w-3" />
+              100% free, for everyone
+            </p>
             <h1 className="font-display text-4xl sm:text-5xl [@media(min-height:961px)]:xl:text-6xl font-bold leading-[1.05] tracking-tight">
               Movies are better
               <br />
@@ -150,23 +158,24 @@ const Login = () => {
               trust. No critic scores. Just your friends.
             </p>
 
-            {/* Phones: jump straight to the form */}
-            <div className="mt-6 flex flex-wrap gap-2 lg:hidden">
+            {/* The main call to action. Phones also get "I have an account", since their form is further down */}
+            <div className="mt-6 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => jumpToForm("signup")}
-                className="rounded-xl bg-[#7c5cff] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#7c5cff]/30 hover:bg-[#6a48f5]"
+                className="flex-1 whitespace-nowrap rounded-xl bg-[#7c5cff] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#7c5cff]/30 transition hover:bg-[#6a48f5] sm:flex-none"
               >
-                Create account
+                Create your free account
               </button>
               <button
                 type="button"
                 onClick={() => jumpToForm("login")}
-                className="rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white ring-1 ring-white/15 hover:bg-white/15"
+                className="flex-1 whitespace-nowrap rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white ring-1 ring-white/15 hover:bg-white/15 sm:flex-none lg:hidden"
               >
                 I have an account
               </button>
             </div>
+            <p className="mt-3 text-xs text-white/50">No ads. No credit card. Ready in a minute.</p>
           </div>
 
           {/* The fan is 27rem wide and 31rem tall at full size; each screen size
@@ -197,8 +206,11 @@ const Login = () => {
         </ul>
       </section>
 
-      {/* The form */}
-      <section id="login-form" className="flex scroll-mt-4 flex-col px-5 py-8 sm:px-10 lg:py-10">
+      {/* The form. On desktop it stays in view while the welcome side scrolls on short screens */}
+      <section
+        id="login-form"
+        className="flex scroll-mt-4 flex-col px-5 py-8 sm:px-10 lg:sticky lg:top-0 lg:h-screen lg:self-start lg:overflow-y-auto lg:py-10"
+      >
         <div className="flex flex-1 items-center justify-center py-4 lg:py-8">
           <div className="w-full max-w-[26rem]">
             <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
@@ -354,6 +366,19 @@ const Login = () => {
                     privacy policy
                   </Link>
                   .
+                </p>
+              )}
+
+              {mode === "login" && (
+                <p className="-mt-1 text-center text-sm text-soft">
+                  New to JustSeen?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("signup")}
+                    className="font-semibold text-brand-soft hover:underline"
+                  >
+                    Create a free account
+                  </button>
                 </p>
               )}
 
