@@ -197,7 +197,7 @@ const Login = () => {
             </div>
           </div>
 
-          <ul className="mt-14 hidden grid-cols-3 gap-6 border-t border-white/10 pt-8 lg:grid">
+          <ul className="mt-14 hidden grid-cols-3 gap-6 border-t border-white/10 pt-8 text-center lg:grid">
             {promises.map((item) => (
               <li key={item.title}>
                 <span className="text-xl">{item.emoji}</span>
