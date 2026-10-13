@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 import ShareReview from "./ShareReview";
+import { CheckIcon } from "./icons";
 
-/* Share one of my earlier reviews (opened from its card) */
-const ShareReviewModal = ({ movie, review, onClose }) => {
+/* Share a review: straight after writing it (justSaved), or later from its card */
+const ShareReviewModal = ({ movie, rating, review, author, justSaved = false, onClose }) => {
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -20,9 +21,20 @@ const ShareReviewModal = ({ movie, review, onClose }) => {
             ✕
           </button>
         </form>
-        <h3 className="pr-8 text-lg font-bold">Share your review</h3>
+        {justSaved && (
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-agree">
+            <CheckIcon className="h-3.5 w-3.5" />
+            Review saved
+          </p>
+        )}
+        <h3 className="pr-8 text-lg font-bold">{justSaved ? "Share it with your friends?" : "Share your review"}</h3>
         <p className="mt-1 mb-5 text-sm text-soft">Post it anywhere and invite friends to JustSeen.</p>
-        <ShareReview movie={movie} rating={review.rating} review={review.review} author={review.author} />
+        <ShareReview movie={movie} rating={rating} review={review} author={author} />
+        {justSaved && (
+          <form method="dialog" className="mt-3 text-center">
+            <button className="text-sm font-medium text-soft hover:text-fg">Not now</button>
+          </form>
+        )}
       </div>
 
       <form method="dialog" className="modal-backdrop">

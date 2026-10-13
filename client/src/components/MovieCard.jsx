@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useLibrary } from "../library/LibraryContext";
+import { useShare } from "../share/ShareContext";
 import { genreName } from "../genres";
 import { posterUrl } from "../lib/tmdb";
 import { formatDay, relativeDay, releaseYear } from "../lib/dates";
 import ReviewModal from "./ReviewModal";
-import ShareReviewModal from "./ShareReviewModal";
 import ReactionBar from "./ReactionBar";
 import UserAvatar from "./UserAvatar";
 import {
@@ -53,9 +53,9 @@ const PosterButton = ({ title, onClick, pressed, children }) => (
 const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false }) => {
   const { user } = useAuth();
   const { myReviewFor, isSaved, toggleWatchlist } = useLibrary();
+  const openShare = useShare();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showOverview, setShowOverview] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const isReview = variant === "review" && review;
@@ -121,17 +121,6 @@ const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false 
               Watched {relativeDay(review.watched_on)}
             </span>
           </div>
-          {isMine && (
-            <button
-              type="button"
-              onClick={() => setShowShareModal(true)}
-              title="Share your review"
-              aria-label="Share your review"
-              className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-fg/5 hover:text-fg"
-            >
-              <ShareIcon />
-            </button>
-          )}
         </div>
       )}
 
@@ -206,6 +195,16 @@ const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false 
                 ) : (
                   <StarPlusIcon />
                 )}
+              </PosterButton>
+            )}
+            {isMine && (
+              <PosterButton
+                title="Share your review"
+                onClick={posterAction(() =>
+                  openShare({ movie, rating: review.rating, review: review.review, author: review.author }),
+                )}
+              >
+                <ShareIcon />
               </PosterButton>
             )}
             {variant === "watchlist" ? (
@@ -297,9 +296,6 @@ const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false 
       </div>
 
       {showReviewModal && <ReviewModal movie={movie} onClose={() => setShowReviewModal(false)} />}
-      {showShareModal && (
-        <ShareReviewModal movie={movie} review={review} onClose={() => setShowShareModal(false)} />
-      )}
     </article>
   );
 };

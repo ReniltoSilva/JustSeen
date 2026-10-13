@@ -5,17 +5,24 @@ import { releaseYear } from "./dates";
 /* The address people see on shared posts, whichever address the app was opened from */
 export const siteUrl = "https://justseenapp.com";
 
-/* Instagram's portrait size, which also looks right on WhatsApp, X and Facebook */
-const width = 1080;
-const height = 1350;
-const pad = 80;
-
-const display = '"Bricolage Grotesque", "Geist", sans-serif';
-const body = '"Geist", system-ui, sans-serif';
-
-/* The text that goes with the image (some apps keep it, Instagram drops it) */
+/* The text that goes with the picture (some apps keep it, Instagram drops it) */
 export const shareText = ({ movie, rating }) =>
-  `I gave ${movie.title} ${Number(rating)}/5 on JustSeen. Movies are better with friends, join me: ${siteUrl}`;
+  `I gave ${movie.title} ${Number(rating)}/5 on JustSeen. Movies are better with friends, join me:`;
+
+/* Instagram's tallest allowed portrait is 1080 x 1350; shorter reviews make shorter pictures */
+const width = 1080;
+const maxHeight = 1350;
+const pad = 72;
+
+const display = '"Bricolage Grotesque Variable", "Geist Variable", sans-serif';
+const body = '"Geist Variable", system-ui, sans-serif';
+
+/* A friendly line under the name, based on the rating */
+const verdict = (rating) => {
+  if (rating >= 4) return "recommends this one";
+  if (rating <= 2) return "wasn't a fan";
+  return "watched this one";
+};
 
 /* Splits text into lines that fit `maxWidth`; long words are broken up too */
 const wrapLines = (ctx, text, maxWidth) => {
@@ -46,10 +53,10 @@ const wrapLines = (ctx, text, maxWidth) => {
 /* Keeps at most `max` lines, ending the last one with "…" if text was cut */
 const limitLines = (ctx, lines, max, maxWidth) => {
   if (lines.length <= max) return lines;
-  const kept = lines.slice(0, max);
-  let last = kept[max - 1];
+  const kept = lines.slice(0, Math.max(1, max));
+  let last = kept[kept.length - 1];
   while (last && ctx.measureText(`${last}…`).width > maxWidth) last = last.slice(0, -1);
-  kept[max - 1] = `${last.trimEnd()}…`;
+  kept[kept.length - 1] = `${last.trimEnd()}…`;
   return kept;
 };
 
@@ -71,7 +78,7 @@ const drawStar = (ctx, cx, cy, r, fill) => {
   }
   path.closePath();
 
-  ctx.fillStyle = "rgba(255, 255, 255, 0.16)";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
   ctx.fill(path);
   if (fill > 0) {
     ctx.save();
@@ -84,18 +91,18 @@ const drawStar = (ctx, cx, cy, r, fill) => {
   }
 };
 
-/* The JustSeen mark (same shapes as LogoMark), `size` tall, top-left at (x, y) */
-const drawLogo = (ctx, x, y, size) => {
+/* The JustSeen mark (same shapes as LogoMark), `size` tall, top-left at (x, y); returns its width */
+const drawLogo = (ctx, x, y, size, color) => {
   const scale = size / 250;
   ctx.save();
   ctx.translate(x - 118 * scale, y - 70 * scale);
   ctx.scale(scale, scale);
-  ctx.fillStyle = "#7c5cff";
+  ctx.fillStyle = color;
   ctx.beginPath();
   ctx.arc(187, 212, 64, 0, Math.PI * 2);
   ctx.fill();
   ctx.fill(new Path2D("M140 175 C 150 125, 190 92, 230 76 L 240 86 C 214 104, 200 126, 198 150 Z"));
-  ctx.strokeStyle = "#7c5cff";
+  ctx.strokeStyle = color;
   ctx.lineWidth = 30;
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
@@ -125,6 +132,29 @@ const drawCover = (ctx, image, x, y, w, h) => {
   ctx.drawImage(image, (image.width - sw) / 2, (image.height - sh) / 2, sw, sh, x, y, w, h);
 };
 
+/* A very blurry copy of the poster: shrinking it to a few pixels and stretching it back
+blurs it the same way in every browser (canvas blur filters aren't supported everywhere) */
+const drawBlurredBackdrop = (ctx, image, w, h) => {
+  const tiny = document.createElement("canvas");
+  tiny.width = 12;
+  tiny.height = Math.round((12 * h) / w);
+  const tctx = tiny.getContext("2d");
+  tctx.imageSmoothingQuality = "high";
+  drawCover(tctx, image, 0, 0, tiny.width, tiny.height);
+
+  const mid = document.createElement("canvas");
+  mid.width = 96;
+  mid.height = Math.round((96 * h) / w);
+  const mctx = mid.getContext("2d");
+  mctx.imageSmoothingQuality = "high";
+  mctx.drawImage(tiny, 0, 0, mid.width, mid.height);
+
+  ctx.save();
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(mid, 0, 0, w, h);
+  ctx.restore();
+};
+
 const drawAvatar = async (ctx, user, x, y, size) => {
   ctx.save();
   ctx.beginPath();
@@ -150,87 +180,38 @@ const drawAvatar = async (ctx, user, x, y, size) => {
   ctx.restore();
 };
 
-/* Builds the picture people post: poster, stars, review, who wrote it and an invite.
-Resolves to a JPEG Blob */
+/* Builds the picture people post: poster, stars, the review as a message from a friend,
+and an invitation. Resolves to a JPEG Blob */
 export const drawShareCard = async ({ movie, rating, review, author }) => {
   /* Canvas only uses web fonts that have finished loading */
   try {
     await Promise.all([
       document.fonts.load(`800 64px ${display}`),
-      document.fonts.load(`600 36px ${body}`),
-      document.fonts.load(`400 40px ${body}`),
+      document.fonts.load(`600 34px ${body}`),
+      document.fonts.load(`400 38px ${body}`),
     ]);
   } catch {
     /* Falls back to system fonts */
   }
 
+  const poster = movie.poster_path ? await loadImage(posterUrl(movie.poster_path, "w500")) : null;
+  const stars = Number(rating);
+  const text = (review ?? "").trim();
+
   const canvas = document.createElement("canvas");
   canvas.width = width;
-  canvas.height = height;
+  canvas.height = maxHeight;
   const ctx = canvas.getContext("2d");
 
-  /* Background: the login page's dark cinema look with two soft glows */
-  ctx.fillStyle = "#0b0a14";
-  ctx.fillRect(0, 0, width, height);
-  const glow = (x, y, r, color) => {
-    const gradient = ctx.createRadialGradient(x, y, 0, x, y, r);
-    gradient.addColorStop(0, color);
-    gradient.addColorStop(1, "rgba(11, 10, 20, 0)");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-  };
-  glow(140, 120, 760, "rgba(124, 92, 255, 0.38)");
-  glow(1000, 1300, 680, "rgba(192, 38, 211, 0.22)");
-
-  /* Who reviewed it */
-  const avatarSize = 84;
-  await drawAvatar(ctx, author, pad, pad, avatarSize);
-  ctx.textAlign = "left";
-  ctx.textBaseline = "alphabetic";
-  ctx.fillStyle = "#ffffff";
-  ctx.font = `600 38px ${body}`;
-  ctx.fillText(author?.name ?? "", pad + avatarSize + 26, pad + 38, width - pad * 2 - avatarSize - 26);
-  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-  ctx.font = `400 28px ${body}`;
-  ctx.fillText("reviewed a movie on JustSeen", pad + avatarSize + 26, pad + 78);
-
-  /* The poster, with a soft shadow */
+  /* ---- Measure first, so the picture is exactly as tall as what's in it ---- */
   const posterX = pad;
-  const posterY = 220;
-  const posterW = 340;
-  const posterH = 510;
-  const poster = movie.poster_path ? await loadImage(posterUrl(movie.poster_path, "w500")) : null;
-  ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
-  ctx.shadowBlur = 60;
-  ctx.shadowOffsetY = 24;
-  roundedRect(ctx, posterX, posterY, posterW, posterH, 28);
-  ctx.fillStyle = "#1a1825";
-  ctx.fill();
-  ctx.restore();
-  ctx.save();
-  roundedRect(ctx, posterX, posterY, posterW, posterH, 28);
-  ctx.clip();
-  if (poster) {
-    drawCover(ctx, poster, posterX, posterY, posterW, posterH);
-  } else {
-    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-    ctx.font = `700 40px ${display}`;
-    ctx.textAlign = "center";
-    const lines = limitLines(ctx, wrapLines(ctx, movie.title, posterW - 60), 5, posterW - 60);
-    lines.forEach((line, i) => ctx.fillText(line, posterX + posterW / 2, posterY + posterH / 2 + (i - (lines.length - 1) / 2) * 50));
-    ctx.textAlign = "left";
-  }
-  ctx.restore();
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-  ctx.lineWidth = 2;
-  roundedRect(ctx, posterX, posterY, posterW, posterH, 28);
-  ctx.stroke();
+  const posterY = pad;
+  const posterW = 320;
+  const posterH = 480;
 
-  /* Title, year and stars beside the poster */
   const sideX = posterX + posterW + 56;
   const sideW = width - pad - sideX;
-  let titleSize = 66;
+  let titleSize = 68;
   ctx.font = `800 ${titleSize}px ${display}`;
   let titleLines = wrapLines(ctx, movie.title, sideW);
   /* Long titles get a smaller size before being cut */
@@ -240,73 +221,165 @@ export const drawShareCard = async ({ movie, rating, review, author }) => {
     titleLines = wrapLines(ctx, movie.title, sideW);
   }
   titleLines = limitLines(ctx, titleLines, 4, sideW);
-  ctx.fillStyle = "#ffffff";
-  /* Centre the title, year and stars beside the poster */
+
+  const bubbleX = pad;
+  const bubbleY = posterY + posterH + 56;
+  const bubbleW = width - pad * 2;
+  const bubblePad = 40;
+  const avatarSize = 72;
+  const textW = bubbleW - bubblePad * 2;
+  const footerH = 72;
+  const footerGap = 52;
+
+  /* The review shrinks (down to 30px) rather than making the picture taller than 1350 */
+  let textSize = 38;
+  let lines = [];
+  if (text) {
+    const textTop = bubbleY + bubblePad + avatarSize + 28;
+    const room = maxHeight - pad - footerH - footerGap - bubblePad - textTop;
+    for (;;) {
+      ctx.font = `400 ${textSize}px ${body}`;
+      lines = wrapLines(ctx, text, textW);
+      if (lines.length * textSize * 1.42 <= room || textSize <= 30) break;
+      textSize -= 2;
+    }
+    lines = limitLines(ctx, lines, Math.floor(room / (textSize * 1.42)), textW);
+  }
+  const lineHeight = textSize * 1.42;
+  const textBlock = lines.length ? 28 + (lines.length - 1) * lineHeight + textSize : 0;
+  const bubbleH = bubblePad * 2 + avatarSize + textBlock;
+  const footerY = bubbleY + bubbleH + footerGap;
+  const height = Math.min(maxHeight, Math.ceil(footerY + footerH + pad));
+
+  /* Setting the size clears the canvas and its settings, so drawing starts here */
+  canvas.height = height;
+
+  /* ---- Background: the poster's colours, blurred and darkened ---- */
+  ctx.fillStyle = "#0b0a14";
+  ctx.fillRect(0, 0, width, height);
+  if (poster) drawBlurredBackdrop(ctx, poster, width, height);
+  const shade = ctx.createLinearGradient(0, 0, 0, height);
+  shade.addColorStop(0, "rgba(11, 10, 20, 0.55)");
+  shade.addColorStop(0.55, "rgba(11, 10, 20, 0.78)");
+  shade.addColorStop(1, "rgba(11, 10, 20, 0.94)");
+  ctx.fillStyle = shade;
+  ctx.fillRect(0, 0, width, height);
+  const glow = ctx.createRadialGradient(width, height, 0, width, height, 760);
+  glow.addColorStop(0, "rgba(124, 92, 255, 0.35)");
+  glow.addColorStop(1, "rgba(124, 92, 255, 0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, width, height);
+
+  /* ---- Poster with a soft shadow ---- */
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+  ctx.shadowBlur = 56;
+  ctx.shadowOffsetY = 22;
+  roundedRect(ctx, posterX, posterY, posterW, posterH, 24);
+  ctx.fillStyle = "#1a1825";
+  ctx.fill();
+  ctx.restore();
+  ctx.save();
+  roundedRect(ctx, posterX, posterY, posterW, posterH, 24);
+  ctx.clip();
+  if (poster) {
+    drawCover(ctx, poster, posterX, posterY, posterW, posterH);
+  } else {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.font = `700 38px ${display}`;
+    ctx.textAlign = "center";
+    const placeholder = limitLines(ctx, wrapLines(ctx, movie.title, posterW - 56), 5, posterW - 56);
+    placeholder.forEach((line, i) =>
+      ctx.fillText(line, posterX + posterW / 2, posterY + posterH / 2 + (i - (placeholder.length - 1) / 2) * 48),
+    );
+    ctx.textAlign = "left";
+  }
+  ctx.restore();
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
+  ctx.lineWidth = 2;
+  roundedRect(ctx, posterX, posterY, posterW, posterH, 24);
+  ctx.stroke();
+
+  /* ---- Title, year and stars, centred beside the poster ---- */
   const year = releaseYear(movie.release_date);
-  const starR = 30;
-  const blockH = titleLines.length * titleSize * 1.08 + (year ? 48 : 0) + 50 + starR + 56;
-  let cursor = posterY + Math.max(0, (posterH - blockH) / 2) + titleSize * 0.85;
+  const starR = 28;
+  const sideH = titleLines.length * titleSize * 1.06 + (year ? 46 : 0) + 34 + starR * 2 + 50;
+  let cursor = posterY + Math.max(0, (posterH - sideH) / 2) + titleSize * 0.85;
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `800 ${titleSize}px ${display}`;
   for (const line of titleLines) {
     ctx.fillText(line, sideX, cursor);
-    cursor += titleSize * 1.08;
+    cursor += titleSize * 1.06;
   }
-
   if (year) {
-    ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
-    ctx.font = `400 32px ${body}`;
-    ctx.fillText(year, sideX, cursor + 8);
-    cursor += 48;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+    ctx.font = `400 30px ${body}`;
+    ctx.fillText(year, sideX, cursor + 4);
+    cursor += 46;
   }
-
-  const stars = Number(rating);
-  const starY = cursor + 50;
+  const starY = cursor + 34;
   for (let i = 0; i < 5; i++) {
-    drawStar(ctx, sideX + starR + i * (starR * 2 + 12), starY, starR, Math.min(1, Math.max(0, stars - i)));
+    drawStar(ctx, sideX + starR + i * (starR * 2 + 10), starY, starR, Math.min(1, Math.max(0, stars - i)));
   }
   ctx.fillStyle = "#fbbf24";
-  ctx.font = `600 34px ${body}`;
-  ctx.fillText(`${stars} / 5`, sideX, starY + starR + 56);
+  ctx.font = `600 32px ${body}`;
+  ctx.fillText(`${stars} / 5`, sideX, starY + starR + 50);
 
-  /* The review itself, shrinking the text if it's long so it always fits */
-  const text = (review ?? "").trim();
-  if (text) {
-    const textTop = posterY + posterH + 70;
-    const textBottom = 1170;
-    const textW = width - pad * 2;
-    /* The quote mark sits in the first 40px */
-    const area = textBottom - textTop - 40;
-    let size = 42;
-    let lines;
-    for (;;) {
-      ctx.font = `400 ${size}px ${body}`;
-      lines = wrapLines(ctx, text, textW);
-      if (lines.length * size * 1.4 <= area || size <= 30) break;
-      size -= 2;
-    }
-    lines = limitLines(ctx, lines, Math.max(1, Math.floor(area / (size * 1.4))), textW);
+  /* ---- The review, as a message from the friend who wrote it ---- */
+  roundedRect(ctx, bubbleX, bubbleY, bubbleW, bubbleH, 36);
+  ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
 
-    ctx.fillStyle = "#b4a3ff";
-    ctx.font = `800 120px ${display}`;
-    ctx.fillText("“", pad - 8, textTop + 62);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.font = `400 ${size}px ${body}`;
-    lines.forEach((line, i) => ctx.fillText(line, pad, textTop + 40 + size + i * size * 1.4));
+  /* A big faint quote mark in the corner, when there are words to quote */
+  if (lines.length) {
+    ctx.fillStyle = "rgba(180, 163, 255, 0.35)";
+    ctx.font = `800 150px ${display}`;
+    ctx.textAlign = "right";
+    ctx.fillText("”", bubbleX + bubbleW - 34, bubbleY + 128);
+    ctx.textAlign = "left";
   }
 
-  /* Footer: logo, name and the invitation */
-  ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
-  ctx.fillRect(pad, 1210, width - pad * 2, 2);
-  const logoW = drawLogo(ctx, pad, 1240, 46);
+  await drawAvatar(ctx, author, bubbleX + bubblePad, bubbleY + bubblePad, avatarSize);
+  const nameX = bubbleX + bubblePad + avatarSize + 22;
   ctx.fillStyle = "#ffffff";
-  ctx.font = `800 40px ${display}`;
-  ctx.fillText("JustSeen", pad + logoW + 16, 1278);
-  ctx.textAlign = "right";
+  ctx.font = `600 34px ${body}`;
+  ctx.fillText(author?.name ?? "", nameX, bubbleY + bubblePad + 32, bubbleW - (nameX - bubbleX) - 120);
   ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-  ctx.font = `400 26px ${body}`;
-  ctx.fillText("Movies are better with friends", width - pad, 1256);
-  ctx.fillStyle = "#b4a3ff";
-  ctx.font = `600 30px ${body}`;
-  ctx.fillText(siteUrl.replace("https://", ""), width - pad, 1294);
+  ctx.font = `400 27px ${body}`;
+  ctx.fillText(verdict(stars), nameX, bubbleY + bubblePad + 68);
+
+  if (lines.length) {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+    ctx.font = `400 ${textSize}px ${body}`;
+    const firstLine = bubbleY + bubblePad + avatarSize + 28 + textSize * 0.85;
+    lines.forEach((line, i) => ctx.fillText(line, bubbleX + bubblePad, firstLine + i * lineHeight));
+  }
+
+  /* ---- Footer: who we are, and the invitation ---- */
+  const logoW = drawLogo(ctx, pad, footerY + 6, 40, "#8b72ff");
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `800 36px ${display}`;
+  ctx.fillText("JustSeen", pad + logoW + 14, footerY + 36);
+  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+  ctx.font = `400 24px ${body}`;
+  ctx.fillText("Movies are better with friends", pad, footerY + 70);
+
+  const invite = `Join me on ${siteUrl.replace("https://", "")}`;
+  ctx.font = `600 28px ${body}`;
+  const pillW = ctx.measureText(invite).width + 64;
+  const pillH = 64;
+  const pillX = width - pad - pillW;
+  const pillY = footerY + (footerH - pillH) / 2 + 4;
+  roundedRect(ctx, pillX, pillY, pillW, pillH, pillH / 2);
+  ctx.fillStyle = "#7c5cff";
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.textBaseline = "middle";
+  ctx.fillText(invite, pillX + 32, pillY + pillH / 2 + 1);
+  ctx.textBaseline = "alphabetic";
 
   return new Promise((resolve, reject) =>
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Couldn't create the image"))), "image/jpeg", 0.92),

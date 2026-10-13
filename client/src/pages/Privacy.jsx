@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 
 /* Who runs JustSeen and where people can reach them about their data */
 const operator = "Junior Silva";
+/* Leave empty to hide; just the handle, without the @ */
+const operatorX = "";
 const contactEmail = "privacy@justseenapp.com";
 const lastUpdated = "October 13, 2026";
 
@@ -40,7 +42,14 @@ const Privacy = () => (
 
     <Section title="Who we are">
       <p>
-        JustSeen (justseenapp.com) is run by {operator}. For anything about your data, email{" "}
+        JustSeen (justseenapp.com) is run by {operator}
+        {operatorX && (
+          <>
+            {" "}
+            (<ExternalLink href={`https://x.com/${operatorX}`}>@{operatorX}</ExternalLink> on X)
+          </>
+        )}
+        . For anything about your data, email{" "}
         <ExternalLink href={`mailto:${contactEmail}`}>{contactEmail}</ExternalLink>.
       </p>
     </Section>
@@ -95,6 +104,13 @@ const Privacy = () => (
       </p>
     </Section>
 
+    <Section title="Sharing your reviews">
+      <p>
+        When you share a review, the picture is made on your own device. Nothing is sent to us, and nothing reaches X,
+        WhatsApp, Facebook or any other app until you choose to post it there. Once posted, their privacy policies apply.
+      </p>
+    </Section>
+
     <Section title="Services we rely on">
       <p>These companies process data for us, only to provide JustSeen:</p>
       <List
@@ -127,8 +143,10 @@ const Privacy = () => (
 
     <Section title="Cookies and storage">
       <p>
-        We don't use advertising or analytics cookies. Your browser stores two things for JustSeen: your login, so
-        you stay signed in, and your light or dark mode choice. Logging out removes the login.
+        We don't use advertising or analytics cookies, and we don't track you. Your browser stores two things for
+        JustSeen: your login, so you stay signed in, and your light or dark mode choice. Both are needed for features
+        you asked for, so we don't ask for cookie consent. Logging out removes the login. Our fonts come from our own
+        site, not from Google.
       </p>
     </Section>
 

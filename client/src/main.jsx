@@ -1,6 +1,9 @@
 import { StrictMode, Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+/* Fonts are served from our own site, so visitors' browsers never contact Google */
+import "@fontsource-variable/geist";
+import "@fontsource-variable/bricolage-grotesque/opsz.css";
 import "./index.css";
 import App from "./App.jsx";
 import RequireAuth from "./auth/RequireAuth.jsx";
@@ -8,6 +11,7 @@ import PageLoading from "./components/PageLoading.jsx";
 import { AuthProvider } from "./auth/AuthContext.jsx";
 import { LibraryProvider } from "./library/LibraryContext.jsx";
 import { ThemeProvider } from "./theme/ThemeContext.jsx";
+import { ShareProvider } from "./share/ShareContext.jsx";
 
 /* Each page is its own file that downloads the first time it's opened,
 so the first visit only loads what it needs */
@@ -32,29 +36,31 @@ createRoot(document.getElementById("root")).render(
     <ThemeProvider>
       <AuthProvider>
         <LibraryProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route element={<App />}>
-                <Route path="login" element={page(<Login />)} />
-                <Route path="reset-password" element={page(<ResetPassword />)} />
-                <Route path="privacy" element={page(<Privacy />)} />
+          <ShareProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route element={<App />}>
+                  <Route path="login" element={page(<Login />)} />
+                  <Route path="reset-password" element={page(<ResetPassword />)} />
+                  <Route path="privacy" element={page(<Privacy />)} />
 
-                {/* Everything else needs an account */}
-                <Route element={<RequireAuth />}>
-                  <Route index element={page(<Feed />)} />
-                  <Route path="watched" element={page(<Watched />)} />
-                  <Route path="watchlist" element={page(<Watchlist />)} />
-                  <Route path="people" element={page(<People />)} />
-                  <Route path="search" element={page(<Search />)} />
-                  <Route path="movie/:movieId" element={page(<MovieDetails />)} />
-                  <Route path="u/:username" element={page(<Profile />)} />
-                  <Route path="u/:username/year/:year" element={page(<YearInFilm />)} />
+                  {/* Everything else needs an account */}
+                  <Route element={<RequireAuth />}>
+                    <Route index element={page(<Feed />)} />
+                    <Route path="watched" element={page(<Watched />)} />
+                    <Route path="watchlist" element={page(<Watchlist />)} />
+                    <Route path="people" element={page(<People />)} />
+                    <Route path="search" element={page(<Search />)} />
+                    <Route path="movie/:movieId" element={page(<MovieDetails />)} />
+                    <Route path="u/:username" element={page(<Profile />)} />
+                    <Route path="u/:username/year/:year" element={page(<YearInFilm />)} />
+                  </Route>
+
+                  <Route path="*" element={page(<NotFound />)} />
                 </Route>
-
-                <Route path="*" element={page(<NotFound />)} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
+              </Routes>
+            </BrowserRouter>
+          </ShareProvider>
         </LibraryProvider>
       </AuthProvider>
     </ThemeProvider>
