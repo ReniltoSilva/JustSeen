@@ -150,3 +150,27 @@ export const GoogleIcon = ({ className = "w-5 h-5" }) => (
     <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
   </svg>
 );
+
+/* An arrow leaving a tray: the usual "share" symbol */
+export const ShareIcon = ({ className = "w-4 h-4" }) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <path d="M12 3v12" />
+    <path d="m7 8 5-5 5 5" />
+    <path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" />
+  </svg>
+);
+
+export const DownloadIcon = ({ className = "w-4 h-4" }) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <path d="M12 3v12" />
+    <path d="m7 10 5 5 5-5" />
+    <path d="M5 21h14" />
+  </svg>
+);
+
+export const CopyIcon = ({ className = "w-4 h-4" }) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <rect x="9" y="9" width="12" height="12" rx="2" />
+    <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+  </svg>
+);

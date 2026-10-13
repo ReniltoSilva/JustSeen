@@ -92,7 +92,7 @@ const Header = () => {
         )}
 
         {/* Bell and account menu sit together */}
-        <div className="flex items-center gap-1.5 shrink-0 ml-auto md:ml-0">
+        <div className={`flex items-center gap-1.5 shrink-0 ml-auto ${user ? "md:ml-0" : ""}`}>
           {user && <NotificationBell />}
 
           {user ? (
@@ -148,10 +148,18 @@ const Header = () => {
                   </div>
                 </div>
 
+                <Link
+                  to="/privacy"
+                  onClick={closeMenu}
+                  className="mt-1 flex rounded-lg px-2.5 py-2 text-sm text-soft hover:bg-fg/5 hover:text-fg"
+                >
+                  Privacy policy
+                </Link>
+
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="mt-1 flex w-full rounded-lg px-2.5 py-2 text-left text-sm text-disagree hover:bg-disagree/10"
+                  className="flex w-full rounded-lg px-2.5 py-2 text-left text-sm text-disagree hover:bg-disagree/10"
                 >
                   Log out
                 </button>

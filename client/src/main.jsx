@@ -21,6 +21,7 @@ const MovieDetails = lazy(() => import("./pages/MovieDetails.jsx"));
 const Search = lazy(() => import("./pages/Search.jsx"));
 const Login = lazy(() => import("./pages/Login.jsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.jsx"));
+const Privacy = lazy(() => import("./pages/Privacy.jsx"));
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
 
 /* Shows the spinner while a page's file is downloading */
@@ -36,6 +37,7 @@ createRoot(document.getElementById("root")).render(
               <Route element={<App />}>
                 <Route path="login" element={page(<Login />)} />
                 <Route path="reset-password" element={page(<ResetPassword />)} />
+                <Route path="privacy" element={page(<Privacy />)} />
 
                 {/* Everything else needs an account */}
                 <Route element={<RequireAuth />}>

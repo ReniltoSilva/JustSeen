@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { cleanUsername, usernameProblem } from "../auth/usernames";
 import { passwordProblem } from "../auth/passwords";
@@ -344,6 +344,16 @@ const Login = () => {
                       : "Log in"}
               </button>
 
+              {mode === "signup" && (
+                <p className="-mt-2 text-center text-xs text-muted">
+                  By creating an account you agree to our{" "}
+                  <Link to="/privacy" className="font-medium text-soft underline hover:text-fg">
+                    privacy policy
+                  </Link>
+                  .
+                </p>
+              )}
+
               {mode === "forgot" && (
                 <button type="button" onClick={() => switchMode("login")} className="text-sm font-medium text-soft hover:text-fg">
                   ← Back to log in
@@ -372,6 +382,10 @@ const Login = () => {
             TMDB
           </a>
           . JustSeen uses the TMDB API but is not endorsed or certified by TMDB.
+          <br />
+          <Link to="/privacy" className="underline hover:text-fg">
+            Privacy policy
+          </Link>
         </p>
       </section>
     </div>
