@@ -24,7 +24,8 @@
       "expo-status-bar",
       "expo-router",
       "expo-sqlite",
-      "expo-image"
+      "expo-image",
+      "expo-font"
     ],
     "scheme": "justseen",
     "backgroundColor": "#09090d"

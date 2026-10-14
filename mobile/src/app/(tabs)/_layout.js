@@ -11,7 +11,7 @@ const tabIcon =
 
 /* The main app, behind the login: Feed, Search and Profile along the bottom */
 export default function TabsLayout() {
-  const { session, loading } = useAuth();
+  const { session, user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -20,7 +20,8 @@ export default function TabsLayout() {
       </View>
     );
   }
-  if (!session) return <Redirect href="/login" />;
+  /* No profile means it couldn't load (e.g. no connection); the screens need it */
+  if (!session || !user) return <Redirect href="/login" />;
 
   return (
     <Tabs

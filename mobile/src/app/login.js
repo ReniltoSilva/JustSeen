@@ -21,13 +21,13 @@ const siteUrl = "https://justseenapp.com";
 /* Email and password log in. Creating an account and Google come in the next steps;
 until then "Create a free account" opens the website */
 export default function Login() {
-  const { session, login } = useAuth();
+  const { session, user, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  if (session) return <Redirect href="/" />;
+  if (session && user) return <Redirect href="/" />;
 
   const submit = async () => {
     setError("");

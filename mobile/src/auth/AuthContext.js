@@ -22,14 +22,17 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    /* The login and the profile are saved together, after the profile arrives, so the
+    screens never see a login without a profile (the feed needs user.id) */
     const loadProfile = async (newSession) => {
-      setSession(newSession);
       if (!newSession) {
+        setSession(null);
         setUser(null);
         setLoading(false);
         return;
       }
       const { data } = await supabase.from("profiles").select("*").eq("id", newSession.user.id).maybeSingle();
+      setSession(newSession);
       setUser(data ? { ...data, email: newSession.user.email } : null);
       setLoading(false);
     };
