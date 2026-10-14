@@ -58,3 +58,10 @@ export const setReaction = async (userId, reviewId, kind) => {
     await supabase.from("reactions").upsert({ review_id: reviewId, user_id: userId, kind }, { onConflict: "review_id,user_id" }),
   );
 };
+
+/* Every preview picture of mine, for when the whole account is deleted */
+export const removeAllSharePictures = async (userId) => {
+  const files = unwrap(await supabase.storage.from("share-cards").list(userId, { limit: 1000 }));
+  if (files.length === 0) return;
+  unwrap(await supabase.storage.from("share-cards").remove(files.map((file) => `${userId}/${file.name}`)));
+};

@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useLibrary } from "../library/LibraryContext";
 import { getUserReviews } from "../data/reviews";
 import { getFollowCounts } from "../data/people";
-import { openMovie } from "../lib/navigation";
+import { getWatchlist } from "../data/watchlist";
+import { openFollows, openMovie } from "../lib/navigation";
 import { posterUrl } from "../lib/tmdb";
 import { colors } from "../lib/theme";
 import Avatar from "./Avatar";
@@ -28,19 +30,26 @@ const averageRating = (reviews) => {
   return (total / reviews.length).toFixed(1);
 };
 
-/* Someone's profile: who they are, their stats, and everything they've watched as a
-grid of posters. `footer` goes under the grid (my Profile tab puts Log out there) */
+/* Someone's profile: who they are, their stats, and what they've watched or want to
+watch as a grid of posters. `footer` goes under the grid (my Profile tab puts Log out there) */
 const ProfileView = ({ person, isMe, footer }) => {
-  const { version } = useLibrary();
+  const { version, watchlist: myWatchlist } = useLibrary();
   const [reviews, setReviews] = useState(null);
+  const [theirWatchlist, setTheirWatchlist] = useState(null);
+  const [tab, setTab] = useState("watched");
   const [counts, setCounts] = useState(null);
   const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
     try {
-      const [list, followCounts] = await Promise.all([getUserReviews(person.id), getFollowCounts(person.id)]);
+      const [list, followCounts, saved] = await Promise.all([
+        getUserReviews(person.id),
+        getFollowCounts(person.id),
+        isMe ? null : getWatchlist(person.id),
+      ]);
       setReviews(list);
+      setTheirWatchlist(saved);
       setCounts(followCounts);
       setError(false);
     } catch (err) {
@@ -48,7 +57,7 @@ const ProfileView = ({ person, isMe, footer }) => {
       setError(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [person.id, version]);
+  }, [person.id, isMe, version]);
 
   useEffect(() => {
     load();
@@ -64,12 +73,18 @@ const ProfileView = ({ person, isMe, footer }) => {
   const avg = averageRating(list);
   const favorite = favoriteGenre(list);
   const firstName = person.name.split(" ")[0];
+  /* My own watchlist comes from the library, so changes show straight away */
+  const watchlist = isMe ? myWatchlist : (theirWatchlist ?? []);
+  const tabs = [
+    { key: "watched", label: "Watched", count: reviews?.length },
+    { key: "watchlist", label: "Watchlist", count: isMe || theirWatchlist ? watchlist.length : undefined },
+  ];
 
   const stats = [
     { label: "WATCHED", value: reviews ? list.length : "·" },
     { label: "AVG RATING", value: avg ? `★ ${avg}` : "—" },
-    { label: "FOLLOWERS", value: counts?.followers ?? "·" },
-    { label: "FOLLOWING", value: counts?.following ?? "·" },
+    { label: "FOLLOWERS", value: counts?.followers ?? "·", onPress: () => openFollows(person.username, "followers") },
+    { label: "FOLLOWING", value: counts?.following ?? "·", onPress: () => openFollows(person.username, "following") },
   ];
 
   const header = (
@@ -93,40 +108,68 @@ const ProfileView = ({ person, isMe, footer }) => {
       {person.bio ? <Text style={styles.bio}>{person.bio}</Text> : null}
 
       <View style={styles.badges}>
-        {!isMe && <FollowButton person={person} />}
+        {isMe ? (
+          <Pressable onPress={() => router.push("/edit-profile")} style={({ pressed }) => [styles.editButton, pressed && { opacity: 0.7 }]}>
+            <Ionicons name="create-outline" size={16} color={colors.fg} />
+            <Text style={styles.editText}>Edit profile</Text>
+          </Pressable>
+        ) : (
+          <FollowButton person={person} />
+        )}
         {favorite && <Text style={styles.loves}>Loves {favorite}</Text>}
       </View>
 
       <View style={styles.stats}>
         {stats.map((stat) => (
-          <View key={stat.label} style={styles.stat}>
+          <Pressable
+            key={stat.label}
+            onPress={stat.onPress}
+            disabled={!stat.onPress}
+            style={({ pressed }) => [styles.stat, pressed && { backgroundColor: colors.panel2 }]}
+          >
             <Text style={styles.statValue}>{stat.value}</Text>
             <Text style={styles.statLabel}>{stat.label}</Text>
-          </View>
+          </Pressable>
         ))}
       </View>
 
-      <Text style={styles.section}>{isMe ? "What you watched" : `What ${firstName} watched`}</Text>
+      {/* Watched / Watchlist tabs */}
+      <View style={styles.tabs}>
+        {tabs.map(({ key, label, count }) => (
+          <Pressable key={key} onPress={() => setTab(key)} style={[styles.tab, tab === key && styles.tabActive]}>
+            <Text style={[styles.tabText, tab === key && { color: colors.fg }]}>
+              {label}
+              {count !== undefined && <Text style={styles.tabCount}>  {count}</Text>}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
       {error && <Text style={styles.error}>Couldn't load the reviews. Pull down to try again.</Text>}
     </View>
   );
 
   return (
     <FlatList
-      data={list}
-      keyExtractor={(review) => review.id}
+      data={tab === "watched" ? list : watchlist}
+      keyExtractor={(item) => `${tab}-${item.id ?? item.movie_id}`}
       numColumns={2}
       columnWrapperStyle={styles.columns}
       contentContainerStyle={styles.content}
       ListHeaderComponent={header}
-      renderItem={({ item }) => <PosterTile review={item} />}
+      renderItem={({ item }) => <PosterTile movie={item} rating={tab === "watched" ? item.rating : null} />}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}
       ListEmptyComponent={
         reviews === null && !error ? (
           <ActivityIndicator color={colors.brand} style={{ marginTop: 32 }} />
         ) : reviews ? (
           <Text style={styles.empty}>
-            {isMe ? "You haven't reviewed anything yet. Find a movie in Search." : `${firstName} hasn't reviewed anything yet.`}
+            {tab === "watched"
+              ? isMe
+                ? "You haven't reviewed anything yet. Find a movie in Search."
+                : `${firstName} hasn't reviewed anything yet.`
+              : isMe
+                ? "Your watchlist is empty."
+                : `${firstName}'s watchlist is empty.`}
           </Text>
         ) : null
       }
@@ -135,22 +178,24 @@ const ProfileView = ({ person, isMe, footer }) => {
   );
 };
 
-/* One watched movie: poster with the rating on it, the title and the review */
-const PosterTile = ({ review }) => (
-  <Pressable onPress={() => openMovie(review.movie_id)} style={({ pressed }) => [styles.tile, pressed && { opacity: 0.8 }]}>
+/* One movie: poster (with the rating on it for watched ones), the title and the review */
+const PosterTile = ({ movie, rating }) => (
+  <Pressable onPress={() => openMovie(movie.movie_id)} style={({ pressed }) => [styles.tile, pressed && { opacity: 0.8 }]}>
     <View style={styles.tilePoster}>
-      <Image source={posterUrl(review.poster_path, "w342")} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
-      <View style={styles.tileRating}>
-        <Ionicons name="star" size={11} color={colors.star} />
-        <Text style={styles.tileRatingText}>{Number(review.rating)}</Text>
-      </View>
+      <Image source={posterUrl(movie.poster_path, "w342")} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
+      {rating != null && (
+        <View style={styles.tileRating}>
+          <Ionicons name="star" size={11} color={colors.star} />
+          <Text style={styles.tileRatingText}>{Number(rating)}</Text>
+        </View>
+      )}
     </View>
     <Text style={styles.tileTitle} numberOfLines={1}>
-      {review.title}
+      {movie.title}
     </Text>
-    {review.review ? (
+    {movie.review ? (
       <Text style={styles.tileReview} numberOfLines={2}>
-        {review.review}
+        {movie.review}
       </Text>
     ) : null}
   </Pressable>
@@ -167,6 +212,17 @@ const styles = StyleSheet.create({
   location: { flexDirection: "row", alignItems: "center", gap: 3 },
   bio: { color: colors.soft, fontSize: 15, lineHeight: 21 },
   badges: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 10 },
+  editButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    height: 38,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.lineStrong,
+  },
+  editText: { color: colors.fg, fontSize: 14, fontWeight: "600" },
   loves: {
     color: colors.brandSoft,
     backgroundColor: "rgba(124,92,255,0.15)",
@@ -190,7 +246,11 @@ const styles = StyleSheet.create({
   },
   statValue: { color: colors.fg, fontSize: 17, fontWeight: "800" },
   statLabel: { color: colors.muted, fontSize: 9, fontWeight: "600", letterSpacing: 0.6 },
-  section: { color: colors.fg, fontSize: 18, fontWeight: "700", marginTop: 8 },
+  tabs: { flexDirection: "row", gap: 24, borderBottomWidth: 1, borderBottomColor: colors.line, marginTop: 8 },
+  tab: { paddingBottom: 10, borderBottomWidth: 2, borderBottomColor: "transparent", marginBottom: -1 },
+  tabActive: { borderBottomColor: colors.brand },
+  tabText: { color: colors.muted, fontSize: 17, fontWeight: "700" },
+  tabCount: { color: colors.muted, fontSize: 13, fontWeight: "500" },
   error: { color: colors.disagree, fontSize: 14 },
   empty: { color: colors.muted, fontSize: 15, textAlign: "center", paddingVertical: 32, lineHeight: 22 },
   columns: { gap: 12 },

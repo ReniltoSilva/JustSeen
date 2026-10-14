@@ -19,7 +19,7 @@ import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/d
 import StarPicker from "../../components/StarPicker";
 import { useLibrary } from "../../library/LibraryContext";
 import { getMovieDetails, posterUrl, toMovie } from "../../lib/tmdb";
-import { closeReview, pendingMovie } from "../../lib/navigation";
+import { closeSheet, pendingMovie } from "../../lib/navigation";
 import { colors } from "../../lib/theme";
 import { formatDay, localToday, releaseYear } from "../../../../shared/dates";
 
@@ -81,7 +81,7 @@ export default function ReviewScreen() {
       {failed ? (
         <>
           <Text style={styles.muted}>Couldn't load this movie. Check your connection.</Text>
-          <Pressable onPress={() => closeReview()} hitSlop={12}>
+          <Pressable onPress={() => closeSheet()} hitSlop={12}>
             <Text style={styles.closeText}>Close</Text>
           </Pressable>
         </>
@@ -128,7 +128,7 @@ const ReviewForm = ({ movie }) => {
     setError("");
     try {
       await saveMyReview(movie, { rating, review, watchedOn });
-      closeReview();
+      closeSheet();
     } catch (err) {
       console.error("Failed to save review:", err);
       setError("Couldn't save your review. Check your connection and try again.");
@@ -147,7 +147,7 @@ const ReviewForm = ({ movie }) => {
           setError("");
           try {
             await deleteMyReview(movie.movie_id);
-            closeReview();
+            closeSheet();
           } catch (err) {
             console.error("Failed to delete review:", err);
             setError("Couldn't delete your review. Try again.");
@@ -162,7 +162,7 @@ const ReviewForm = ({ movie }) => {
     <SafeAreaView style={styles.screen} edges={Platform.OS === "android" ? ["top", "bottom"] : ["bottom"]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <View style={styles.topBar}>
-          <Pressable onPress={() => closeReview()} hitSlop={12} accessibilityLabel="Close">
+          <Pressable onPress={() => closeSheet()} hitSlop={12} accessibilityLabel="Close">
             <Ionicons name="close" size={26} color={colors.soft} />
           </Pressable>
           <Text style={styles.topTitle}>{existing ? "Edit your review" : "Your review"}</Text>

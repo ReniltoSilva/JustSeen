@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { AuthProvider } from "../auth/AuthContext";
 import { LibraryProvider } from "../library/LibraryContext";
+import { NotificationsProvider } from "../notifications/NotificationsContext";
 import { colors } from "../lib/theme";
 
 /* If the app reopens straight on another screen (a reload, a link), the tabs still
@@ -20,26 +21,31 @@ const withBackBar = {
   headerBackButtonDisplayMode: "minimal",
 };
 
-/* Every screen sits inside this: the login state, my library, a dark background,
-light status bar text */
+/* Every screen sits inside this: the login state, my library, my notifications, a dark
+background, light status bar text */
 export default function RootLayout() {
   return (
     <AuthProvider>
       <LibraryProvider>
-        <StatusBar style="light" />
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.ink } }}>
-          {/* The first screen listed is where the app starts, so the tabs go first */}
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="login" />
-          {/* The movie page's backdrop runs up under a see-through top bar */}
-          <Stack.Screen
-            name="movie/[movieId]"
-            options={{ ...withBackBar, title: "", headerTransparent: true, headerStyle: { backgroundColor: "transparent" } }}
-          />
-          <Stack.Screen name="u/[username]" options={withBackBar} />
-          {/* The review form slides up over the others */}
-          <Stack.Screen name="review/[movieId]" options={{ presentation: "modal" }} />
-        </Stack>
+        <NotificationsProvider>
+          <StatusBar style="light" />
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.ink } }}>
+            {/* The first screen listed is where the app starts, so the tabs go first */}
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="login" />
+            <Stack.Screen name="welcome" />
+            {/* The movie page's backdrop runs up under a see-through top bar */}
+            <Stack.Screen
+              name="movie/[movieId]"
+              options={{ ...withBackBar, title: "", headerTransparent: true, headerStyle: { backgroundColor: "transparent" } }}
+            />
+            <Stack.Screen name="u/[username]" options={withBackBar} />
+            <Stack.Screen name="follows/[username]" options={withBackBar} />
+            {/* These slide up over the others */}
+            <Stack.Screen name="review/[movieId]" options={{ presentation: "modal" }} />
+            <Stack.Screen name="edit-profile" options={{ presentation: "modal" }} />
+          </Stack>
+        </NotificationsProvider>
       </LibraryProvider>
     </AuthProvider>
   );

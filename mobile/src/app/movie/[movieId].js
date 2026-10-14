@@ -24,12 +24,13 @@ export default function MovieScreen() {
   const { movieId } = useLocalSearchParams();
   const id = Number(movieId);
   const { user } = useAuth();
-  const { myReviewFor, followingIds, version } = useLibrary();
+  const { myReviewFor, isSaved, toggleWatchlist, followingIds, version } = useLibrary();
 
   const [details, setDetails] = useState(null);
   const [failed, setFailed] = useState(false);
   const [reviews, setReviews] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [savingWatchlist, setSavingWatchlist] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -77,6 +78,18 @@ export default function MovieScreen() {
 
   const movie = { ...toMovie(details), runtime: details.runtime || null };
   const myReview = myReviewFor(id);
+  const saved = isSaved(id);
+
+  const toggleSave = async () => {
+    setSavingWatchlist(true);
+    try {
+      await toggleWatchlist(movie);
+    } catch (error) {
+      console.error("Failed to update watchlist:", error);
+    } finally {
+      setSavingWatchlist(false);
+    }
+  };
   const director = details.credits?.crew?.find((person) => person.job === "Director");
   const cast = details.credits?.cast?.slice(0, 10) ?? [];
   const backdrop = details.backdrop_path ? `https://image.tmdb.org/t/p/w780${details.backdrop_path}` : null;
@@ -136,6 +149,16 @@ export default function MovieScreen() {
             {myReview ? `Your rating: ★ ${Number(myReview.rating)} · Edit` : "Rate & review"}
           </Text>
         </Pressable>
+        {(!myReview || saved) && (
+          <Pressable
+            onPress={toggleSave}
+            disabled={savingWatchlist}
+            style={({ pressed }) => [styles.action, styles.actionSecondary, (pressed || savingWatchlist) && { opacity: 0.7 }]}
+          >
+            <Ionicons name={saved ? "bookmark" : "bookmark-outline"} size={18} color={colors.fg} />
+            <Text style={[styles.actionText, { color: colors.fg }]}>{saved ? "On your watchlist" : "Add to watchlist"}</Text>
+          </Pressable>
+        )}
 
         {/* Only ratings from people on JustSeen: friends first, no critic scores */}
         <View style={styles.averages}>
@@ -255,6 +278,7 @@ const styles = StyleSheet.create({
   },
   actionNew: { backgroundColor: colors.brand },
   actionEdit: { backgroundColor: "rgba(245,158,11,0.15)", borderWidth: 1, borderColor: "rgba(245,158,11,0.4)" },
+  actionSecondary: { borderWidth: 1, borderColor: colors.lineStrong, marginTop: 0 },
   actionText: { color: "#fff", fontSize: 15, fontWeight: "700" },
   averages: { flexDirection: "row", gap: 10 },
   average: { flex: 1, padding: 12, borderRadius: 16, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel, gap: 4 },

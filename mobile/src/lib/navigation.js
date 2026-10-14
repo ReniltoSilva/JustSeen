@@ -33,9 +33,12 @@ export const movieOf = ({ movie_id, title, poster_path, overview, genre_ids, rel
   runtime,
 });
 
-/* Leaves the review screen: back to where it was opened from, or to the feed when
-there's nothing behind it */
-export const closeReview = () => {
+/* Leaves a screen that slid up (the review form, edit profile): back to where it was
+opened from, or to the feed when there's nothing behind it */
+export const closeSheet = () => {
   if (router.canGoBack()) router.back();
   else router.replace("/");
 };
+
+/* Someone's followers or the people they follow; `list` is "followers" or "following" */
+export const openFollows = (username, list) => router.push(`/follows/${username}?list=${list}`);
