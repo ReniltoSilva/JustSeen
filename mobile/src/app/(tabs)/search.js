@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
-import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useLibrary } from "../../library/LibraryContext";
 import { searchMovies, posterUrl } from "../../lib/tmdb";
+import { openReview } from "../../lib/openReview";
 import { colors } from "../../lib/theme";
 import { releaseYear } from "../../../../shared/dates";
 
@@ -48,10 +48,9 @@ export default function Search() {
     };
   }, [query]);
 
-  /* The review screen gets the whole movie, so it can open without loading anything */
-  const openReview = (movie) => {
+  const reviewMovie = (movie) => {
     Keyboard.dismiss();
-    router.push({ pathname: "/review/[movieId]", params: { movieId: movie.movie_id, movie: JSON.stringify(movie) } });
+    openReview(movie);
   };
 
   const searched = query.trim().length >= 2;
@@ -79,7 +78,7 @@ export default function Search() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => <MovieRow movie={item} myReview={myReviewFor(item.movie_id)} onPress={() => openReview(item)} />}
+        renderItem={({ item }) => <MovieRow movie={item} myReview={myReviewFor(item.movie_id)} onPress={() => reviewMovie(item)} />}
         ListEmptyComponent={
           error ? (
             <Text style={styles.message}>{error}</Text>

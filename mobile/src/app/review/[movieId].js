@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -18,7 +18,8 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import StarPicker from "../../components/StarPicker";
 import { useLibrary } from "../../library/LibraryContext";
-import { posterUrl } from "../../lib/tmdb";
+import { getMovieDetails, posterUrl, toMovie } from "../../lib/tmdb";
+import { pendingMovie } from "../../lib/openReview";
 import { colors } from "../../lib/theme";
 import { formatDay, localToday, releaseYear } from "../../../../shared/dates";
 
@@ -45,11 +46,49 @@ const DayChip = ({ label, active, onPress, icon }) => (
   </Pressable>
 );
 
-/* Write, edit or delete my review of a movie. Opened from Search (or my own card in
-the feed) with the movie in the `movie` parameter */
+/* Write, edit or delete my review of a movie. Opened with openReview() from Search
+or my own card in the feed. Finds the movie first, then shows the form */
 export default function ReviewScreen() {
-  const params = useLocalSearchParams();
-  const movie = JSON.parse(params.movie);
+  const { movieId } = useLocalSearchParams();
+  const [movie, setMovie] = useState(() => pendingMovie(movieId));
+  const [failed, setFailed] = useState(false);
+
+  /* Not handed over (e.g. the app reloaded on this screen): load it from TMDB */
+  useEffect(() => {
+    if (movie) return;
+    let cancelled = false;
+    getMovieDetails(movieId)
+      .then((details) => {
+        if (!cancelled) setMovie({ ...toMovie(details), runtime: details.runtime || null });
+      })
+      .catch((error) => {
+        console.error("Failed to load the movie:", error);
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [movie, movieId]);
+
+  if (movie) return <ReviewForm movie={movie} />;
+
+  return (
+    <SafeAreaView style={[styles.screen, styles.center]}>
+      {failed ? (
+        <>
+          <Text style={styles.muted}>Couldn't load this movie. Check your connection.</Text>
+          <Pressable onPress={() => router.back()} hitSlop={12}>
+            <Text style={styles.closeText}>Close</Text>
+          </Pressable>
+        </>
+      ) : (
+        <ActivityIndicator color={colors.brand} />
+      )}
+    </SafeAreaView>
+  );
+}
+
+const ReviewForm = ({ movie }) => {
   const { myReviewFor, saveMyReview, deleteMyReview } = useLibrary();
   const existing = myReviewFor(movie.movie_id);
 
@@ -221,10 +260,12 @@ export default function ReviewScreen() {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.panel },
+  center: { alignItems: "center", justifyContent: "center", gap: 16, padding: 32 },
+  closeText: { color: colors.brandSoft, fontSize: 15, fontWeight: "600" },
   topBar: {
     flexDirection: "row",
     alignItems: "center",

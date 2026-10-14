@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
-import { router } from "expo-router";
+import { openReview } from "../../lib/openReview";
 import { useAuth } from "../../auth/AuthContext";
 import { useLibrary } from "../../library/LibraryContext";
 import { getFeed, getFollowingIds } from "../../data/feed";
@@ -35,8 +35,7 @@ export default function Feed() {
   /* Tapping one of my own reviews opens it for editing */
   const editReview = (review) => {
     const { movie_id, title, poster_path, overview, genre_ids, release_date, runtime } = review;
-    const movie = { movie_id, title, poster_path, overview, genre_ids, release_date, runtime };
-    router.push({ pathname: "/review/[movieId]", params: { movieId: movie_id, movie: JSON.stringify(movie) } });
+    openReview({ movie_id, title, poster_path, overview, genre_ids, release_date, runtime });
   };
 
   const refresh = async () => {
