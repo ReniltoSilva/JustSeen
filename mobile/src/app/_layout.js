@@ -18,6 +18,9 @@ export default function RootLayout() {
       <LibraryProvider>
         <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.ink } }}>
+          {/* The first screen listed is where the app starts, so the tabs go first */}
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="login" />
           <Stack.Screen name="review/[movieId]" options={{ presentation: "modal" }} />
         </Stack>
       </LibraryProvider>
