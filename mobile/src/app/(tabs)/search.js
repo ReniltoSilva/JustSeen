@@ -17,18 +17,20 @@ export default function Search() {
   const { myReviewFor, followingIds } = useLibrary();
   const [mode, setMode] = useState("movies"); // "movies" | "people"
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
+  /* Results remember which mode they came from: movies and people look different */
+  const [results, setResults] = useState({ mode: "movies", items: [] });
   const [suggestions, setSuggestions] = useState(null);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
 
   const minLength = mode === "movies" ? 2 : 1;
 
-  /* Search once typing pauses, instead of on every letter */
+  /* Search once typing pauses, instead of on every letter. The old results stay on
+  screen until the new ones arrive */
   useEffect(() => {
     const text = query.trim();
-    setResults([]);
     if (text.length < minLength) {
+      setResults({ mode, items: [] });
       setError("");
       setSearching(false);
       return;
@@ -40,7 +42,7 @@ export default function Search() {
       search
         .then((found) => {
           if (cancelled) return;
-          setResults(found);
+          setResults({ mode, items: found });
           setError("");
         })
         .catch((err) => {
@@ -76,6 +78,7 @@ export default function Search() {
 
   const searched = query.trim().length >= minLength;
   const showSuggestions = mode === "people" && !searched;
+  const items = results.mode === mode ? results.items : [];
 
   return (
     <View style={styles.screen}>
@@ -108,7 +111,7 @@ export default function Search() {
       </View>
 
       <FlatList
-        data={showSuggestions ? (suggestions ?? []) : results}
+        data={showSuggestions ? (suggestions ?? []) : items}
         keyExtractor={(item) => String(item.movie_id ?? item.id ?? item.profile?.id)}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"

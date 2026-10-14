@@ -92,8 +92,10 @@ const ReactionBar = ({ review }) => {
       )}
 
       <Modal visible={showWho} transparent animationType="fade" onRequestClose={() => setShowWho(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setShowWho(false)}>
-          <Pressable style={styles.sheet}>
+        <View style={styles.backdrop}>
+          {/* Tapping the dimmed area closes it; it sits behind the list so the list still scrolls */}
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setShowWho(false)} accessibilityLabel="Close" />
+          <View style={styles.sheet}>
             <Text style={styles.sheetTitle}>Reactions</Text>
             <FlatList
               data={reactors}
@@ -111,8 +113,8 @@ const ReactionBar = ({ review }) => {
                 );
               }}
             />
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </View>
   );

@@ -10,12 +10,15 @@ import { posterUrl } from "../lib/tmdb";
 import { movieOf, openMovie, openProfile, openReview, openShare } from "../lib/navigation";
 import { genreName } from "../../../shared/genres";
 import { relativeDay, releaseYear } from "../../../shared/dates";
+import { useToday } from "../lib/useToday";
 
 /* One review, laid out like the website's MovieCard. Tap the person for their
 profile, the poster or title for the movie; my own reviews have an Edit button */
 const ReviewCard = ({ review }) => {
   const { user } = useAuth();
   const isMine = review.user_id === user?.id;
+  /* Redraws the card when the day changes, so "today" becomes "yesterday" */
+  const today = useToday();
   const genres = (review.genre_ids ?? []).filter((id) => genreName(id)).slice(0, 3);
 
   return (
@@ -38,7 +41,7 @@ const ReviewCard = ({ review }) => {
             </View>
             <View style={styles.whenRow}>
               <Ionicons name="eye-outline" size={13} color={colors.muted} />
-              <Text style={styles.when}>Watched {relativeDay(review.watched_on)}</Text>
+              <Text style={styles.when}>Watched {relativeDay(review.watched_on, today)}</Text>
             </View>
           </View>
         </Pressable>

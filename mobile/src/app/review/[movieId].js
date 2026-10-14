@@ -22,22 +22,14 @@ import { getMovieDetails, posterUrl, toMovie } from "../../lib/tmdb";
 import { closeSheet, openShare, pendingMovie } from "../../lib/navigation";
 import { useAuth } from "../../auth/AuthContext";
 import { colors } from "../../lib/theme";
-import { formatDay, localToday, releaseYear } from "../../../../shared/dates";
+import { addDays, formatDay, releaseYear, toDay } from "../../../../shared/dates";
+import { useToday } from "../../lib/useToday";
 
 /* Short enough that cards can always show the whole review (the database checks it too) */
 const maxReviewLength = 250;
 
-const pad = (n) => String(n).padStart(2, "0");
-/* A Date as "2026-10-14", in my own timezone */
-const toDay = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-/* "2026-10-14" as a Date at midday, so it can't slip to another day */
+/* "2026-10-14" as a Date at midday, for the calendar, so it can't slip to another day */
 const fromDay = (day) => new Date(`${day}T12:00:00`);
-
-const yesterday = () => {
-  const date = new Date();
-  date.setDate(date.getDate() - 1);
-  return toDay(date);
-};
 
 /* Today / Yesterday / Earlier */
 const DayChip = ({ label, active, onPress, icon }) => (
@@ -75,7 +67,25 @@ export default function ReviewScreen() {
     };
   }, [movie, movieId]);
 
-  if (movie) return <ReviewForm movie={movie} />;
+  const { ready, loadFailed, reload } = useLibrary();
+
+  /* The form waits for my reviews, so it knows whether I already reviewed this movie.
+  Otherwise an old review would open as a new one and be saved with today's date */
+  if (movie && ready) return <ReviewForm movie={movie} />;
+
+  if (movie && loadFailed) {
+    return (
+      <SafeAreaView style={[styles.screen, styles.center]}>
+        <Text style={styles.muted}>Couldn't load your reviews. Check your connection.</Text>
+        <Pressable onPress={reload} hitSlop={12}>
+          <Text style={styles.closeText}>Try again</Text>
+        </Pressable>
+        <Pressable onPress={() => closeSheet()} hitSlop={12}>
+          <Text style={styles.closeText}>Close</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.screen, styles.center]}>
@@ -100,13 +110,14 @@ const ReviewForm = ({ movie }) => {
 
   const [rating, setRating] = useState(Number(existing?.rating) || 0);
   const [review, setReview] = useState(existing?.review ?? "");
-  const [watchedOn, setWatchedOn] = useState(existing?.watched_on ?? localToday());
+  const today = useToday();
+  const yesterday = addDays(today, -1);
+  const [watchedOn, setWatchedOn] = useState(existing?.watched_on ?? today);
   const [showCalendar, setShowCalendar] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const today = localToday();
-  const isOtherDay = watchedOn !== today && watchedOn !== yesterday();
+  const isOtherDay = watchedOn !== today && watchedOn !== yesterday;
 
   /* Android shows its own calendar window; iPhones show one inside the screen */
   const pickDate = () => {
@@ -196,7 +207,7 @@ const ReviewForm = ({ movie }) => {
             <Text style={styles.label}>DATE WATCHED</Text>
             <View style={styles.chips}>
               <DayChip label="Today" active={watchedOn === today} onPress={() => setWatchedOn(today)} />
-              <DayChip label="Yesterday" active={watchedOn === yesterday()} onPress={() => setWatchedOn(yesterday())} />
+              <DayChip label="Yesterday" active={watchedOn === yesterday} onPress={() => setWatchedOn(yesterday)} />
               <DayChip
                 label={isOtherDay ? formatDay(watchedOn) : "Earlier"}
                 icon="calendar-outline"

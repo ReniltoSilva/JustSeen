@@ -27,6 +27,12 @@
   to = "/.netlify/functions/share/:splat"
   status = 200
 
+# Google sign-in from the mobile app comes back here and is sent on to the app
+[[redirects]]
+  from = "/app-auth"
+  to = "/.netlify/functions/app-auth"
+  status = 200
+
 # Single-page app: every other address loads index.html and React Router takes over
 [[redirects]]
   from = "/*"

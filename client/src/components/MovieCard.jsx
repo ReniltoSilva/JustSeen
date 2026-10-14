@@ -6,6 +6,7 @@ import { useShare } from "../share/ShareContext";
 import { genreName } from "../genres";
 import { posterUrl } from "../lib/tmdb";
 import { formatDay, relativeDay, releaseYear } from "../lib/dates";
+import { useToday } from "../lib/useToday";
 import ReviewModal from "./ReviewModal";
 import ReactionBar from "./ReactionBar";
 import UserAvatar from "./UserAvatar";
@@ -54,6 +55,8 @@ const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false 
   const { user } = useAuth();
   const { myReviewFor, isSaved, toggleWatchlist } = useLibrary();
   const openShare = useShare();
+  /* Redraws the card when the day changes, so "today" becomes "yesterday" */
+  const today = useToday();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showOverview, setShowOverview] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -118,7 +121,7 @@ const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false 
               title={formatDay(review.watched_on, { full: true })}
             >
               <EyeIcon />
-              Watched {relativeDay(review.watched_on)}
+              Watched {relativeDay(review.watched_on, today)}
             </span>
           </div>
         </div>

@@ -26,10 +26,13 @@ const friendlyError = (error) => {
   return message;
 };
 
-/* Where Google sends people back to: this app (exp://... in Expo Go, justseen:// in
-the real app). Supabase only allows addresses listed under Authentication ->
-URL Configuration -> Redirect URLs */
-const redirectTo = makeRedirectUri();
+/* This app's own address: exp://192.168.1.20:8081 in Expo Go (it changes with the
+Wi-Fi), justseen:// in the installed app */
+const appUrl = makeRedirectUri();
+/* Supabase only returns people to addresses on its allow list, and the website is
+always on it, so Google sign-in comes back through justseenapp.com/app-auth, which
+sends the login on to appUrl (client/netlify/functions/app-auth.mjs) */
+const redirectTo = `${siteUrl}/app-auth?to=${encodeURIComponent(appUrl)}`;
 
 /* session = the login, user = my profile row (username, name, avatar...) */
 export const AuthProvider = ({ children }) => {
@@ -102,7 +105,8 @@ export const AuthProvider = ({ children }) => {
     });
     if (error) throw new Error(friendlyError(error));
 
-    const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+    /* The window closes by itself when the browser reaches the app's address */
+    const result = await WebBrowser.openAuthSessionAsync(data.url, appUrl);
     if (result.type !== "success") return; // closed the window
 
     const { params, errorCode } = QueryParams.getQueryParams(result.url);

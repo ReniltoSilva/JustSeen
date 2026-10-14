@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useLibrary } from "../library/LibraryContext";
 import { useShare } from "../share/ShareContext";
-import { localToday } from "../lib/dates";
+import { useToday } from "../lib/useToday";
 import { posterUrl } from "../lib/tmdb";
 
 /* Short enough that cards can always show the whole review (the database checks it too) */
@@ -10,8 +10,32 @@ const maxReviewLength = 250;
 
 const starValues = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
 
-/* Write, edit or delete my review of a movie */
+/* Write, edit or delete my review of a movie. Waits for my reviews to load first, so
+it knows whether I already reviewed this one (otherwise an old review would open as a
+new one and be saved with today's date) */
 const ReviewModal = ({ movie, onClose }) => {
+  const { ready } = useLibrary();
+  return ready ? <ReviewDialog movie={movie} onClose={onClose} /> : <LoadingDialog onClose={onClose} />;
+};
+
+const LoadingDialog = ({ onClose }) => {
+  const dialogRef = useRef(null);
+  useEffect(() => {
+    dialogRef.current.showModal();
+  }, []);
+  return (
+    <dialog ref={dialogRef} className="modal" onClose={onClose}>
+      <div className="modal-box max-w-lg rounded-3xl bg-panel border border-line text-fg p-8 text-center text-soft">
+        <span className="loading loading-spinner text-brand" aria-label="Loading your reviews" />
+      </div>
+      <form method="dialog" className="modal-backdrop">
+        <button>close</button>
+      </form>
+    </dialog>
+  );
+};
+
+const ReviewDialog = ({ movie, onClose }) => {
   const dialogRef = useRef(null);
   const ratingName = useId();
   const { user } = useAuth();
@@ -21,7 +45,8 @@ const ReviewModal = ({ movie, onClose }) => {
 
   const [rating, setRating] = useState(Number(existing?.rating) || 0);
   const [review, setReview] = useState(existing?.review ?? "");
-  const [watchedOn, setWatchedOn] = useState(existing?.watched_on ?? localToday());
+  const today = useToday();
+  const [watchedOn, setWatchedOn] = useState(existing?.watched_on ?? today);
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState("");
@@ -125,7 +150,7 @@ const ReviewModal = ({ movie, onClose }) => {
             <input
               type="date"
               required
-              max={localToday()}
+              max={today}
               value={watchedOn}
               onChange={(e) => setWatchedOn(e.target.value)}
               className="input w-full sm:w-56 h-11 rounded-xl bg-ink border-line text-fg focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/25"

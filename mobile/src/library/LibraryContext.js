@@ -26,22 +26,34 @@ const LibraryStore = ({ userId, children }) => {
   const [watchlist, setWatchlist] = useState([]);
   const [followingIds, setFollowingIds] = useState(new Set());
   const [version, setVersion] = useState(0);
+  /* ready: everything above has loaded. The review form waits for it */
+  const [ready, setReady] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
+    setLoadFailed(false);
     Promise.all([getMyReviewSummaries(userId), getWatchlist(userId), getFollowingIds(userId)])
       .then(([reviews, list, following]) => {
         if (cancelled) return;
         setMyReviews(new Map(reviews.map((review) => [review.movie_id, review])));
         setWatchlist(list);
         setFollowingIds(new Set(following));
+        setReady(true);
       })
-      .catch((error) => console.error("Failed to load your library:", error));
+      .catch((error) => {
+        console.error("Failed to load your library:", error);
+        if (!cancelled) setLoadFailed(true);
+      });
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, attempt]);
+
+  /* Try loading again, after it failed (e.g. no connection) */
+  const reload = useCallback(() => setAttempt((n) => n + 1), []);
 
   /* Save (add or edit) my review of a movie */
   const saveMyReview = useCallback(
@@ -133,6 +145,9 @@ const LibraryStore = ({ userId, children }) => {
 
   const value = useMemo(
     () => ({
+      ready,
+      loadFailed,
+      reload,
       version,
       myReviewFor: (movieId) => myReviews.get(movieId),
       saveMyReview,
@@ -144,7 +159,7 @@ const LibraryStore = ({ userId, children }) => {
       isFollowing: (personId) => followingIds.has(personId),
       toggleFollow,
     }),
-    [version, myReviews, saveMyReview, deleteMyReview, watchlist, isSaved, toggleWatchlist, followingIds, toggleFollow],
+    [ready, loadFailed, reload, version, myReviews, saveMyReview, deleteMyReview, watchlist, isSaved, toggleWatchlist, followingIds, toggleFollow],
   );
 
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>;
