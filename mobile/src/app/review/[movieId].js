@@ -12,14 +12,14 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import StarPicker from "../../components/StarPicker";
 import { useLibrary } from "../../library/LibraryContext";
 import { getMovieDetails, posterUrl, toMovie } from "../../lib/tmdb";
-import { pendingMovie } from "../../lib/openReview";
+import { closeReview, pendingMovie } from "../../lib/openReview";
 import { colors } from "../../lib/theme";
 import { formatDay, localToday, releaseYear } from "../../../../shared/dates";
 
@@ -81,7 +81,7 @@ export default function ReviewScreen() {
       {failed ? (
         <>
           <Text style={styles.muted}>Couldn't load this movie. Check your connection.</Text>
-          <Pressable onPress={() => router.back()} hitSlop={12}>
+          <Pressable onPress={() => closeReview()} hitSlop={12}>
             <Text style={styles.closeText}>Close</Text>
           </Pressable>
         </>
@@ -128,7 +128,7 @@ const ReviewForm = ({ movie }) => {
     setError("");
     try {
       await saveMyReview(movie, { rating, review, watchedOn });
-      router.back();
+      closeReview();
     } catch (err) {
       console.error("Failed to save review:", err);
       setError("Couldn't save your review. Check your connection and try again.");
@@ -147,7 +147,7 @@ const ReviewForm = ({ movie }) => {
           setError("");
           try {
             await deleteMyReview(movie.movie_id);
-            router.back();
+            closeReview();
           } catch (err) {
             console.error("Failed to delete review:", err);
             setError("Couldn't delete your review. Try again.");
@@ -162,7 +162,7 @@ const ReviewForm = ({ movie }) => {
     <SafeAreaView style={styles.screen} edges={Platform.OS === "android" ? ["top", "bottom"] : ["bottom"]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <View style={styles.topBar}>
-          <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Close">
+          <Pressable onPress={() => closeReview()} hitSlop={12} accessibilityLabel="Close">
             <Ionicons name="close" size={26} color={colors.soft} />
           </Pressable>
           <Text style={styles.topTitle}>{existing ? "Edit your review" : "Your review"}</Text>

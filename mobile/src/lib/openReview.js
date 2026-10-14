@@ -15,3 +15,10 @@ export const openReview = (movie) => {
   lastOpened = movie;
   router.push(`/review/${movie.movie_id}`);
 };
+
+/* Leaves the review screen: back to where it was opened from, or to the feed when
+there's nothing behind it */
+export const closeReview = () => {
+  if (router.canGoBack()) router.back();
+  else router.replace("/");
+};

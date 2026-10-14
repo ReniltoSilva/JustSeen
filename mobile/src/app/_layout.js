@@ -4,6 +4,12 @@ import { AuthProvider } from "../auth/AuthContext";
 import { LibraryProvider } from "../library/LibraryContext";
 import { colors } from "../lib/theme";
 
+/* If the app reopens straight on another screen (a reload, a link), the tabs still
+load underneath it, so there's always somewhere to go back to */
+export const unstable_settings = {
+  anchor: "(tabs)",
+};
+
 /* Every screen sits inside this: the login state, my reviews, a dark background,
 light status bar text. The review screen slides up over the others */
 export default function RootLayout() {
