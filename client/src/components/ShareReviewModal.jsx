@@ -3,7 +3,7 @@ import ShareReview from "./ShareReview";
 import { CheckIcon } from "./icons";
 
 /* Share a review: straight after writing it (justSaved), or later from its card */
-const ShareReviewModal = ({ movie, rating, review, author, justSaved = false, onClose }) => {
+const ShareReviewModal = ({ movie, rating, review, author, reviewId, justSaved = false, onClose }) => {
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ const ShareReviewModal = ({ movie, rating, review, author, justSaved = false, on
         )}
         <h3 className="pr-8 text-lg font-bold">{justSaved ? "Share it with your friends?" : "Share your review"}</h3>
         <p className="mt-1 mb-5 text-sm text-soft">Post it anywhere and invite friends to JustSeen.</p>
-        <ShareReview movie={movie} rating={rating} review={review} author={author} />
+        <ShareReview movie={movie} rating={rating} review={review} author={author} reviewId={reviewId} />
         {justSaved && (
           <form method="dialog" className="mt-3 text-center">
             <button className="text-sm font-medium text-soft hover:text-fg">Not now</button>

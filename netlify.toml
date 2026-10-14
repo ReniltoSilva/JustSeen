@@ -21,6 +21,12 @@
   to = "/.netlify/functions/tmdb/:splat"
   status = 200
 
+# A shared review's link: a page built on the server so apps can show its preview
+[[redirects]]
+  from = "/r/*"
+  to = "/.netlify/functions/share/:splat"
+  status = 200
+
 # Single-page app: every other address loads index.html and React Router takes over
 [[redirects]]
   from = "/*"

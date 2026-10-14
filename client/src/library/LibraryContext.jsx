@@ -4,6 +4,7 @@ import { getMyReviewSummaries, saveReview, deleteReview } from "../data/reviews"
 import { getWatchlist, addToWatchlist, removeFromWatchlist } from "../data/watchlist";
 import { getFollowingIds, follow, unfollow } from "../data/follows";
 import { getMovieDetails } from "../lib/tmdb";
+import { removeSharePicture } from "../data/sharing";
 
 /* "My library": what I've reviewed, what's on my watchlist and who I follow.
 Every card needs these, so they're loaded once here and shared, instead of each
@@ -106,13 +107,15 @@ const LibraryStore = ({ userId, children }) => {
     const existing = myReviews.get(movieId);
     if (!existing) return;
     await deleteReview(existing.id);
+    /* Its share link already stops working; tidy away the preview picture too */
+    removeSharePicture(userId, existing.id).catch((error) => console.error("Failed to remove share picture:", error));
     setMyReviews((prev) => {
       const next = new Map(prev);
       next.delete(movieId);
       return next;
     });
     setVersion((v) => v + 1);
-  }, [myReviews]);
+  }, [myReviews, userId]);
 
   const toggleFollow = useCallback(
     async (personId) => {

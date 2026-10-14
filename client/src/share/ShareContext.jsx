@@ -6,7 +6,7 @@ const ShareContext = createContext(null);
 /* The share window lives here, above every page, so it stays open even when the page
 behind it reloads (saving a review refreshes lists, and the card that opened it can vanish) */
 export const ShareProvider = ({ children }) => {
-  /* { movie, rating, review, author, justSaved } or null when closed */
+  /* { movie, rating, review, author, reviewId, justSaved } or null when closed */
   const [sharing, setSharing] = useState(null);
 
   return (
@@ -17,6 +17,6 @@ export const ShareProvider = ({ children }) => {
   );
 };
 
-/* Returns openShare({ movie, rating, review, author, justSaved }) */
+/* Returns openShare({ movie, rating, review, author, reviewId, justSaved }) */
 // eslint-disable-next-line react-refresh/only-export-components
 export const useShare = () => useContext(ShareContext);

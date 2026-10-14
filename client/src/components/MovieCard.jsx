@@ -201,7 +201,7 @@ const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false 
               <PosterButton
                 title="Share your review"
                 onClick={posterAction(() =>
-                  openShare({ movie, rating: review.rating, review: review.review, author: review.author }),
+                  openShare({ movie, rating: review.rating, review: review.review, author: review.author, reviewId: review.id }),
                 )}
               >
                 <ShareIcon />

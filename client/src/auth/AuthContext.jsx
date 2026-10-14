@@ -4,6 +4,7 @@ import { isUsernameAvailable, updateProfile as saveProfile } from "../data/profi
 import { cleanUsername, usernameProblem } from "./usernames";
 import { passwordProblem } from "./passwords";
 import { setMonitoredUser } from "../lib/monitoring";
+import { removeAllSharePictures } from "../data/sharing";
 
 const AuthContext = createContext(null);
 
@@ -137,6 +138,8 @@ export const AuthProvider = ({ children }) => {
 
   /* Deletes the login and, through the database's cascades, everything that belonged to it */
   const deleteAccount = async () => {
+    /* Shared-review pictures live in file storage, which the database cascade can't reach */
+    await removeAllSharePictures(user.id).catch((err) => console.error("Failed to remove share pictures:", err));
     const { error } = await supabase.rpc("delete_my_account");
     if (error) throw new Error(friendlyError(error));
     /* The session is gone on the server; clear it here too */

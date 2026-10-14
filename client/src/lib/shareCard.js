@@ -179,10 +179,8 @@ const drawAvatar = async (ctx, user, x, y, size) => {
   ctx.restore();
 };
 
-/* Builds the picture people post: poster, stars, the review as a message from a friend,
-and an invitation. Resolves to a JPEG Blob */
-export const drawShareCard = async ({ movie, rating, review, author }) => {
-  /* Canvas only uses web fonts that have finished loading */
+/* Canvas only uses web fonts that have finished loading */
+const loadFonts = async () => {
   try {
     await Promise.all([
       document.fonts.load(`800 64px ${display}`),
@@ -192,6 +190,12 @@ export const drawShareCard = async ({ movie, rating, review, author }) => {
   } catch {
     /* Falls back to system fonts */
   }
+};
+
+/* Builds the picture people post: poster, stars, the review as a message from a friend,
+and an invitation. Resolves to a JPEG Blob */
+export const drawShareCard = async ({ movie, rating, review, author }) => {
+  await loadFonts();
 
   const poster = movie.poster_path ? await loadImage(posterUrl(movie.poster_path, "w500")) : null;
   const stars = Number(rating);
@@ -382,5 +386,139 @@ export const drawShareCard = async ({ movie, rating, review, author }) => {
 
   return new Promise((resolve, reject) =>
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Couldn't create the image"))), "image/jpeg", 0.92),
+  );
+};
+
+/* The wide version (1200 x 630) that WhatsApp, X and Facebook show when the review's
+link is posted: poster on the left, the review on the right. Resolves to a JPEG Blob */
+export const drawLinkPreview = async ({ movie, rating, review, author }) => {
+  await loadFonts();
+  const w = 1200;
+  const h = 630;
+  const edge = 56;
+  const poster = movie.poster_path ? await loadImage(posterUrl(movie.poster_path, "w500")) : null;
+  const stars = Number(rating);
+  const text = (review ?? "").trim();
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+
+  /* Background: the poster's colours, blurred and darkened, like the portrait card */
+  ctx.fillStyle = "#0b0a14";
+  ctx.fillRect(0, 0, w, h);
+  if (poster) drawBlurredBackdrop(ctx, poster, w, h);
+  const shade = ctx.createLinearGradient(0, 0, w, 0);
+  shade.addColorStop(0, "rgba(11, 10, 20, 0.6)");
+  shade.addColorStop(1, "rgba(11, 10, 20, 0.9)");
+  ctx.fillStyle = shade;
+  ctx.fillRect(0, 0, w, h);
+  const glow = ctx.createRadialGradient(w, h, 0, w, h, 700);
+  glow.addColorStop(0, "rgba(124, 92, 255, 0.35)");
+  glow.addColorStop(1, "rgba(124, 92, 255, 0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
+
+  /* Poster */
+  const posterH = h - edge * 2;
+  const posterW = Math.round((posterH * 2) / 3);
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+  ctx.shadowBlur = 40;
+  ctx.shadowOffsetY = 16;
+  roundedRect(ctx, edge, edge, posterW, posterH, 22);
+  ctx.fillStyle = "#1a1825";
+  ctx.fill();
+  ctx.restore();
+  ctx.save();
+  roundedRect(ctx, edge, edge, posterW, posterH, 22);
+  ctx.clip();
+  if (poster) drawCover(ctx, poster, edge, edge, posterW, posterH);
+  ctx.restore();
+
+  /* Right side: who, the movie, the stars, the review */
+  const x = edge + posterW + 48;
+  const right = w - edge;
+  const columnW = right - x;
+
+  await drawAvatar(ctx, author, x, edge, 60);
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `600 28px ${body}`;
+  ctx.fillText(author?.name ?? "", x + 76, edge + 26, columnW - 76);
+  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+  ctx.font = `400 22px ${body}`;
+  ctx.fillText(verdict(stars), x + 76, edge + 56);
+
+  let titleSize = 54;
+  ctx.font = `800 ${titleSize}px ${display}`;
+  let titleLines = wrapLines(ctx, movie.title, columnW);
+  while (titleLines.length > 2 && titleSize > 38) {
+    titleSize -= 4;
+    ctx.font = `800 ${titleSize}px ${display}`;
+    titleLines = wrapLines(ctx, movie.title, columnW);
+  }
+  titleLines = limitLines(ctx, titleLines, 2, columnW);
+  ctx.fillStyle = "#ffffff";
+  let y = edge + 60 + 34 + titleSize * 0.85;
+  for (const line of titleLines) {
+    ctx.fillText(line, x, y);
+    y += titleSize * 1.05;
+  }
+
+  const year = releaseYear(movie.release_date);
+  const starR = 20;
+  const starY = y + 10;
+  for (let i = 0; i < 5; i++) {
+    drawStar(ctx, x + starR + i * (starR * 2 + 8), starY, starR, Math.min(1, Math.max(0, stars - i)));
+  }
+  ctx.fillStyle = "#fbbf24";
+  ctx.font = `600 24px ${body}`;
+  const ratingX = x + 5 * (starR * 2 + 8) + 8;
+  ctx.fillText(`${stars} / 5`, ratingX, starY + 8);
+  if (year) {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+    ctx.font = `400 22px ${body}`;
+    ctx.fillText(`· ${year}`, ratingX + ctx.measureText(`${stars} / 5`).width + 14, starY + 8);
+  }
+
+  /* The review, in what's left above the footer */
+  const footerTop = h - edge - 44;
+  if (text) {
+    const top = starY + starR + 30;
+    const room = footerTop - 20 - top;
+    let size = 26;
+    let lines;
+    for (;;) {
+      ctx.font = `400 ${size}px ${body}`;
+      lines = wrapLines(ctx, `“${text}”`, columnW);
+      if (lines.length * size * 1.4 <= room || size <= 20) break;
+      size -= 2;
+    }
+    lines = limitLines(ctx, lines, Math.max(1, Math.floor(room / (size * 1.4))), columnW);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+    lines.forEach((line, i) => ctx.fillText(line, x, top + size + i * size * 1.4));
+  }
+
+  /* Footer: logo and the invitation */
+  const logoW = drawLogo(ctx, x, footerTop + 6, 32, "#8b72ff");
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `800 30px ${display}`;
+  ctx.fillText("JustSeen", x + logoW + 12, footerTop + 34);
+  const invite = `Join me on ${siteUrl.replace("https://", "")}`;
+  ctx.font = `600 22px ${body}`;
+  const pillW = ctx.measureText(invite).width + 48;
+  const pillH = 48;
+  roundedRect(ctx, right - pillW, footerTop, pillW, pillH, pillH / 2);
+  ctx.fillStyle = "#7c5cff";
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.textBaseline = "middle";
+  ctx.fillText(invite, right - pillW + 24, footerTop + pillH / 2 + 1);
+  ctx.textBaseline = "alphabetic";
+
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Couldn't create the image"))), "image/jpeg", 0.9),
   );
 };

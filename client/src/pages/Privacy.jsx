@@ -115,8 +115,14 @@ const Privacy = () => {
 
       <Section title="Sharing your reviews">
         <p>
-          When you share a review, the picture is made on your own device. Nothing is sent to us, and nothing reaches X,
-          WhatsApp, Facebook or any other app until you choose to post it there. Once posted, their privacy policies apply.
+          When you share a review, it gets its own link (justseenapp.com/r/…) so the apps you post it to can show a
+          preview. From then on <Strong>anyone with that link can see that one review</Strong>: your name, avatar and
+          username, the movie, your rating and what you wrote. A preview picture of it is stored with Supabase for this.
+          Reviews you never share stay visible to JustSeen users only.
+        </p>
+        <p>
+          Nothing reaches X, WhatsApp, Facebook or any other app until you choose to post it there. Once posted, their
+          privacy policies apply. Deleting the review makes its link stop working.
         </p>
       </Section>
 

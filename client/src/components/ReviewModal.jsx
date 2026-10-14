@@ -39,10 +39,10 @@ const ReviewModal = ({ movie, onClose }) => {
     setSaving(true);
     setError("");
     try {
-      await saveMyReview(movie, { rating, review, watchedOn });
+      const saved = await saveMyReview(movie, { rating, review, watchedOn });
       close();
       /* A brand-new review: offer to share it (edits just close) */
-      if (!existing) openShare({ movie, rating, review, author: user, justSaved: true });
+      if (!existing) openShare({ movie, rating, review, author: user, reviewId: saved.id, justSaved: true });
     } catch (err) {
       console.error("Failed to save review:", err);
       setError("Couldn't save your review. Check your connection and try again.");
