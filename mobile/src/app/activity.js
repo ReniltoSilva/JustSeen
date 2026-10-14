@@ -2,12 +2,12 @@ import { useCallback, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
-import { useNotifications } from "../../notifications/NotificationsContext";
-import { openMovie, openProfile } from "../../lib/navigation";
-import { posterUrl } from "../../lib/tmdb";
-import { colors } from "../../lib/theme";
-import Avatar from "../../components/Avatar";
-import { timeAgo } from "../../../../shared/dates";
+import { useNotifications } from "../notifications/NotificationsContext";
+import { openMovie, openProfile } from "../lib/navigation";
+import { posterUrl } from "../lib/tmdb";
+import { colors } from "../lib/theme";
+import Avatar from "../components/Avatar";
+import { timeAgo } from "../../../shared/dates";
 
 const reactionText = {
   agree: { verb: "agreed with", color: colors.agree },

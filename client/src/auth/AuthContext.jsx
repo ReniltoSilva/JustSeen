@@ -136,14 +136,27 @@ export const AuthProvider = ({ children }) => {
     return saved;
   };
 
-  /* Deletes the login and, through the database's cascades, everything that belonged to it */
+  /* Hides my account straight away and deletes it for good after 30 days (see
+  0006_delete_after_30_days.sql). Until then, logging in offers to restore it. An
+  email confirms the date; if it can't be sent, the deletion still goes ahead */
   const deleteAccount = async () => {
-    /* Shared-review pictures live in file storage, which the database cascade can't reach */
+    /* Shared-review pictures live in file storage, which the database can't reach */
     await removeAllSharePictures(user.id).catch((err) => console.error("Failed to remove share pictures:", err));
-    const { error } = await supabase.rpc("delete_my_account");
+    const { error } = await supabase.rpc("request_account_deletion");
     if (error) throw new Error(friendlyError(error));
-    /* The session is gone on the server; clear it here too */
-    await supabase.auth.signOut({ scope: "local" });
+    fetch("/.netlify/functions/deletion-email", {
+      method: "POST",
+      headers: { authorization: `Bearer ${session.access_token}` },
+    }).catch((err) => console.error("Failed to send the deletion email:", err));
+    /* The restore page takes over, since the profile now has a deletion date */
+    setUser({ ...user, deletion_requested_at: new Date().toISOString() });
+  };
+
+  /* Changed my mind within the 30 days */
+  const restoreAccount = async () => {
+    const { error } = await supabase.rpc("cancel_account_deletion");
+    if (error) throw new Error(friendlyError(error));
+    setUser({ ...user, deletion_requested_at: null });
   };
 
   return (
@@ -160,6 +173,7 @@ export const AuthProvider = ({ children }) => {
         changePassword,
         updateProfile,
         deleteAccount,
+        restoreAccount,
       }}
     >
       {children}

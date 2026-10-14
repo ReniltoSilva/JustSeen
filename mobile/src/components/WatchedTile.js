@@ -1,11 +1,13 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../auth/AuthContext";
-import { movieOf, openMovie, openReview, openShare } from "../lib/navigation";
+import { openMovie } from "../lib/navigation";
 import { posterUrl } from "../lib/tmdb";
 import { colors } from "../lib/theme";
 import { useToday } from "../lib/useToday";
+import Avatar, { AvatarRing } from "./Avatar";
+import PosterActions from "./PosterActions";
 import { relativeDay, releaseYear } from "../../../shared/dates";
 
 const reactionKinds = [
@@ -14,20 +16,13 @@ const reactionKinds = [
   { kind: "disagree", icon: "thumbs-down", color: colors.disagree },
 ];
 
-/* Round frosted button on the poster */
-const PosterButton = ({ icon, label, onPress }) => (
-  <Pressable onPress={onPress} hitSlop={6} accessibilityLabel={label} style={({ pressed }) => [styles.posterButton, pressed && { opacity: 0.7 }]}>
-    <Ionicons name={icon} size={15} color="#fff" />
-  </Pressable>
-);
-
-/* One watched movie in a two-column grid: the poster with the rating (and Share and
-Edit on my own), then the title, year, when, the review and its reactions */
+/* One watched movie in a two-column grid: the poster with the rating, the website's
+quick actions and the faces of who reacted, then the title, year, when, the review
+and its reaction counts */
 const WatchedTile = ({ review }) => {
-  const { user } = useAuth();
   const today = useToday();
-  const isMine = review.user_id === user?.id;
   const reactions = review.reactions ?? [];
+  const reactors = reactions.filter((reaction) => reaction.profile);
   const count = (kind) => reactions.filter((reaction) => reaction.kind === kind).length;
 
   return (
@@ -38,17 +33,21 @@ const WatchedTile = ({ review }) => {
           <Ionicons name="star" size={11} color={colors.star} />
           <Text style={styles.ratingText}>{Number(review.rating)}</Text>
         </View>
-        {isMine && (
-          <View style={styles.posterButtons}>
-            <PosterButton
-              icon="share-social-outline"
-              label="Share your review"
-              onPress={() =>
-                openShare({ reviewId: review.id, movie: movieOf(review), rating: review.rating, review: review.review, author: review.author ?? user })
-              }
-            />
-            <PosterButton icon="create-outline" label="Edit your review" onPress={() => openReview(movieOf(review))} />
-          </View>
+        <PosterActions review={review} />
+        {reactors.length > 0 && (
+          <>
+            <LinearGradient colors={["transparent", "rgba(9,9,13,0.8)"]} style={styles.facesFade} />
+            <View style={styles.faces} accessibilityLabel={`${reactors.length} ${reactors.length === 1 ? "person" : "people"} reacted`}>
+              {reactors.slice(0, 4).map((reaction, i) => (
+                <View key={reaction.user_id} style={{ marginLeft: i === 0 ? 0 : -7 }}>
+                  <AvatarRing color="rgba(9,9,13,0.9)">
+                    <Avatar user={reaction.profile} size={20} />
+                  </AvatarRing>
+                </View>
+              ))}
+              {reactors.length > 4 && <Text style={styles.more}>+{reactors.length - 4}</Text>}
+            </View>
+          </>
         )}
       </Pressable>
 
@@ -91,17 +90,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(9,9,13,0.75)",
   },
   ratingText: { color: colors.fg, fontSize: 12, fontWeight: "700" },
-  posterButtons: { position: "absolute", top: 6, right: 6, gap: 6 },
-  posterButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(9,9,13,0.6)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
-  },
+  facesFade: { position: "absolute", left: 0, right: 0, bottom: 0, height: 48 },
+  faces: { position: "absolute", left: 8, bottom: 8, flexDirection: "row", alignItems: "center" },
+  more: { color: colors.fg, fontSize: 11, fontWeight: "700", marginLeft: 5 },
   title: { color: colors.fg, fontSize: 14, fontWeight: "700", lineHeight: 18 },
   meta: { color: colors.muted, fontSize: 11 },
   review: { color: colors.soft, fontSize: 12, lineHeight: 17, marginTop: 3 },

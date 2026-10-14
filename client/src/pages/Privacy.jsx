@@ -103,7 +103,7 @@ const Privacy = () => {
         <List
           items={[
             "To run your account and show you and your friends each other's reviews.",
-            "To send emails you need: confirming your address and resetting your password. We don't send marketing emails.",
+            "To send emails you need: confirming your address, resetting your password, and confirming an account deletion. We don't send marketing emails.",
             "To keep JustSeen secure and fix problems.",
           ]}
         />
@@ -172,8 +172,10 @@ const Privacy = () => {
 
       <Section title="How long we keep it">
         <p>
-          We keep your information for as long as you have an account. When you delete your account, your profile,
-          reviews, watchlist, follows, reactions and notifications are deleted straight away. Copies in our providers'
+          We keep your information for as long as you have an account. When you delete your account, it's hidden from
+          everyone straight away and kept for <Strong>30 days</Strong>, in case you change your mind: log back in during
+          that time and you can restore it. After 30 days your profile, reviews, watchlist, follows, reactions and
+          notifications are deleted for good. We email you when you ask, with the exact date. Copies in our providers'
           backups disappear as those backups expire.
         </p>
       </Section>
@@ -185,7 +187,8 @@ const Privacy = () => {
               <Strong>See and change your information</Strong> any time from your profile.
             </span>,
             <span key="delete">
-              <Strong>Delete your account</Strong> yourself: open your profile, edit it, and choose "Delete account".
+              <Strong>Delete your account</Strong> yourself: open your profile, edit it, and choose "Delete account". It's
+              hidden straight away and deleted for good after 30 days, unless you log back in and restore it.
             </span>,
             <span key="copy">
               <Strong>Get a copy of your data</Strong>, or ask any question about it, by emailing{" "}

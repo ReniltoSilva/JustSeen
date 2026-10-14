@@ -6,6 +6,7 @@ import PageLoading from "../components/PageLoading";
 /* Only new Google users ever see this, so it downloads on demand like the other pages */
 const WelcomeSetup = lazy(() => import("../pages/WelcomeSetup"));
 const Login = lazy(() => import("../pages/Login"));
+const RestoreAccount = lazy(() => import("../pages/RestoreAccount"));
 
 /* Pages inside this need an account: logged-out visitors go to the login page,
 and come back here afterwards. The home page itself shows the welcome page right there,
@@ -42,6 +43,15 @@ const RequireAuth = () => {
 
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+  }
+
+  /* Deleting the account: until the 30 days are up, offer to restore it */
+  if (user.deletion_requested_at) {
+    return (
+      <Suspense fallback={<PageLoading />}>
+        <RestoreAccount />
+      </Suspense>
+    );
   }
 
   /* First Google sign-in: choose a username and avatar before anything else */

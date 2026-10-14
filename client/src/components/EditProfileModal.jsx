@@ -10,7 +10,8 @@ const maxBioLength = 80;
 const inputClass =
   "w-full h-11 rounded-xl bg-ink border border-line px-4 text-fg placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/25";
 
-/* Delete my account for good. Typing the username first makes it hard to do by accident */
+/* Delete my account: hidden straight away, gone for good after 30 days unless I log
+back in and restore it. Typing the username first makes it hard to do by accident */
 const DeleteAccount = ({ username }) => {
   const { deleteAccount } = useAuth();
   const navigate = useNavigate();
@@ -24,7 +25,8 @@ const DeleteAccount = ({ username }) => {
     setError("");
     try {
       await deleteAccount();
-      navigate("/login", { replace: true });
+      /* The restore page takes over from here, with the deletion date */
+      navigate("/", { replace: true });
     } catch (err) {
       setError(err.message || "Couldn't delete your account. Try again.");
       setDeleting(false);
@@ -46,7 +48,8 @@ const DeleteAccount = ({ username }) => {
   return (
     <div className="mt-6 flex flex-col gap-3 rounded-2xl bg-disagree/10 p-4 ring-1 ring-disagree/25">
       <p className="text-sm text-fg">
-        This permanently deletes your account, reviews, watchlist, follows and reactions. It can't be undone.
+        Your account, reviews, watchlist, follows and reactions will be hidden straight away and deleted for good after 30
+        days. Changed your mind? Log back in before then to restore everything. We&apos;ll email you to confirm.
       </p>
       <label className="flex flex-col gap-1.5 text-xs text-soft">
         Type <span className="font-semibold text-fg">{username}</span> to confirm
@@ -76,7 +79,7 @@ const DeleteAccount = ({ username }) => {
           disabled={typed.trim().toLowerCase() !== username || deleting}
           className="flex-1 rounded-full bg-disagree py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-40"
         >
-          {deleting ? "Deleting..." : "Delete forever"}
+          {deleting ? "Deleting..." : "Delete account"}
         </button>
       </div>
     </div>

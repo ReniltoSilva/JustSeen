@@ -2,7 +2,7 @@ import { ActivityIndicator, View } from "react-native";
 import { Redirect, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../auth/AuthContext";
-import { useNotifications } from "../../notifications/NotificationsContext";
+import ActivityBell from "../../components/ActivityBell";
 import { colors } from "../../lib/theme";
 
 /* A tab's icon: filled when it's the open tab, outlined otherwise */
@@ -10,10 +10,10 @@ const tabIcon =
   (name) =>
   ({ color, focused, size }) => <Ionicons name={focused ? name : `${name}-outline`} size={size} color={color} />;
 
-/* The main app, behind the login: Feed, Search, Watched, Watchlist, Activity and Profile along the bottom */
+/* The main app, behind the login: Feed, Search, Watched, Watchlist and Profile along the
+bottom, and the Activity bell in the top-right corner of each */
 export default function TabsLayout() {
   const { session, user, loading } = useAuth();
-  const { unread } = useNotifications();
 
   if (loading) {
     return (
@@ -24,6 +24,8 @@ export default function TabsLayout() {
   }
   /* No profile means it couldn't load (e.g. no connection); the screens need it */
   if (!session || !user) return <Redirect href="/login" />;
+  /* Deleting the account: until the 30 days are up, offer to restore it */
+  if (user.deletion_requested_at) return <Redirect href="/restore" />;
   /* New Google accounts pick their name and username first */
   if (user.needs_setup) return <Redirect href="/welcome" />;
 
@@ -37,7 +39,8 @@ export default function TabsLayout() {
         tabBarStyle: { backgroundColor: colors.ink, borderTopColor: colors.line },
         tabBarActiveTintColor: colors.brandSoft,
         tabBarInactiveTintColor: colors.muted,
-        tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+        headerRight: () => <ActivityBell />,
         sceneStyle: { backgroundColor: colors.ink },
       }}
     >
@@ -45,15 +48,6 @@ export default function TabsLayout() {
       <Tabs.Screen name="search" options={{ title: "Search", tabBarIcon: tabIcon("search") }} />
       <Tabs.Screen name="watched" options={{ title: "Watched", tabBarIcon: tabIcon("eye") }} />
       <Tabs.Screen name="watchlist" options={{ title: "Watchlist", tabBarIcon: tabIcon("bookmark") }} />
-      <Tabs.Screen
-        name="activity"
-        options={{
-          title: "Activity",
-          tabBarIcon: tabIcon("notifications"),
-          tabBarBadge: unread > 0 ? (unread > 9 ? "9+" : unread) : undefined,
-          tabBarBadgeStyle: { backgroundColor: colors.disagree, color: "#fff", fontSize: 11 },
-        }}
-      />
       <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: tabIcon("person") }} />
     </Tabs>
   );

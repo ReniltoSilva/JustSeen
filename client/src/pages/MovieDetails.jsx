@@ -5,7 +5,7 @@ import { useLibrary } from "../library/LibraryContext";
 import { getMovieDetails, posterUrl, toMovie } from "../lib/tmdb";
 import { getMovieReviews } from "../data/reviews";
 import { releaseYear } from "../lib/dates";
-import MovieCard from "../components/MovieCard";
+import ReviewNote from "../components/ReviewNote";
 import Masonry from "../components/Masonry";
 import ReviewModal from "../components/ReviewModal";
 import EmptyState from "../components/EmptyState";
@@ -227,7 +227,7 @@ const MovieDetails = () => {
               <Masonry
                 items={fromFollowing}
                 getKey={(review) => review.id}
-                renderItem={(review) => <MovieCard movie={review} review={review} variant="review" />}
+                renderItem={(review) => <ReviewNote review={review} movie={movie} />}
               />
             </>
           )}
@@ -238,7 +238,7 @@ const MovieDetails = () => {
               <Masonry
                 items={fromOthers}
                 getKey={(review) => review.id}
-                renderItem={(review) => <MovieCard movie={review} review={review} variant="review" />}
+                renderItem={(review) => <ReviewNote review={review} movie={movie} />}
               />
             </>
           )}

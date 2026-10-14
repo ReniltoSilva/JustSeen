@@ -5,9 +5,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../auth/AuthContext";
 import Avatar, { AvatarRing } from "./Avatar";
 import ReactionBar from "./ReactionBar";
+import PosterActions from "./PosterActions";
 import { colors } from "../lib/theme";
 import { posterUrl } from "../lib/tmdb";
-import { movieOf, openMovie, openProfile, openReview, openShare } from "../lib/navigation";
+import { openMovie, openProfile } from "../lib/navigation";
 import { genreName } from "../../../shared/genres";
 import { relativeDay, releaseYear } from "../../../shared/dates";
 import { useToday } from "../lib/useToday";
@@ -27,7 +28,8 @@ export const Stars = ({ rating, size = 14 }) => (
 );
 
 /* One review, laid out like the website's MovieCard. Tap the person for their
-profile, the poster or title for the movie; my own reviews have Share and Edit.
+profile, the poster or title for the movie; the pill on the poster reviews, shares
+or saves it.
 `compact` leaves the movie out (poster, title, genres), for the movie's own page */
 const ReviewCard = ({ review, compact = false }) => {
   const { user } = useAuth();
@@ -60,24 +62,6 @@ const ReviewCard = ({ review, compact = false }) => {
             </View>
           </View>
         </Pressable>
-        {isMine && (
-          <View style={styles.mineButtons}>
-            <Pressable
-              onPress={() =>
-                openShare({ reviewId: review.id, movie: movieOf(review), rating: review.rating, review: review.review, author: review.author })
-              }
-              hitSlop={10}
-              style={styles.edit}
-              accessibilityLabel="Share your review"
-            >
-              <Ionicons name="share-social-outline" size={16} color={colors.soft} />
-            </Pressable>
-            <Pressable onPress={() => openReview(movieOf(review))} hitSlop={10} style={styles.edit} accessibilityLabel="Edit your review">
-              <Ionicons name="create-outline" size={16} color={colors.soft} />
-              <Text style={styles.editText}>Edit</Text>
-            </Pressable>
-          </View>
-        )}
       </View>
 
       {compact ? (
@@ -97,6 +81,7 @@ const ReviewCard = ({ review, compact = false }) => {
         <View style={styles.posterShade} />
         <Image source={posterUrl(review.poster_path)} style={styles.posterImage} contentFit="cover" transition={200} />
         <LinearGradient colors={["transparent", colors.panel]} style={styles.posterFade} />
+        <PosterActions review={review} />
       </Pressable>
 
       <View style={styles.body}>
@@ -150,9 +135,6 @@ const styles = StyleSheet.create({
   },
   who: { flex: 1, flexDirection: "row", alignItems: "center", gap: 10 },
   headerText: { flex: 1, gap: 2 },
-  edit: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: colors.panel2 },
-  mineButtons: { flexDirection: "row", gap: 6 },
-  editText: { color: colors.soft, fontSize: 13, fontWeight: "600" },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   name: { color: colors.fg, fontSize: 14, fontWeight: "600", flexShrink: 1 },
   youBadge: {
@@ -167,9 +149,9 @@ const styles = StyleSheet.create({
   },
   whenRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   when: { color: colors.muted, fontSize: 12 },
-  poster: { aspectRatio: 1, backgroundColor: colors.panel2, alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  poster: { aspectRatio: 4 / 5, backgroundColor: colors.panel2, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   posterShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(9,9,13,0.45)" },
-  posterImage: { height: "88%", aspectRatio: 2 / 3, borderRadius: 10 },
+  posterImage: { height: "92%", aspectRatio: 2 / 3, borderRadius: 10 },
   stars: { flexDirection: "row", gap: 2 },
   compactRating: { flexDirection: "row", alignItems: "center", gap: 8 },
   posterFade: { position: "absolute", left: 0, right: 0, bottom: 0, height: "18%" },

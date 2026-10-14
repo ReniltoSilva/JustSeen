@@ -54,7 +54,8 @@ export default function EditProfile() {
     setBusy(true);
     try {
       await deleteAccount();
-      router.replace("/login");
+      /* The restore screen takes over from here, with the deletion date */
+      router.replace("/");
     } catch (err) {
       setError(err.message || "Couldn't delete your account. Please try again.");
       setBusy(false);
@@ -113,9 +114,10 @@ export default function EditProfile() {
 
           {confirmingDelete ? (
             <View style={styles.danger}>
-              <Text style={styles.dangerTitle}>Delete your account for good?</Text>
+              <Text style={styles.dangerTitle}>Delete your account?</Text>
               <Text style={styles.dangerText}>
-                Your profile, reviews, watchlist, follows and reactions will be deleted straight away. This can't be undone.
+                Your profile, reviews, watchlist, follows and reactions will be hidden straight away and deleted for good
+                after 30 days. Changed your mind? Log back in before then to restore everything. We'll email you to confirm.
               </Text>
               <Text style={styles.dangerText}>
                 Type your username, <Text style={{ color: colors.fg, fontWeight: "700" }}>{user.username}</Text>, to confirm.
@@ -144,7 +146,7 @@ export default function EditProfile() {
                   disabled={!usernameMatches || busy}
                   style={[styles.dangerButton, styles.deleteButton, (!usernameMatches || busy) && { opacity: 0.4 }]}
                 >
-                  {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.deleteButtonText}>Delete forever</Text>}
+                  {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.deleteButtonText}>Delete account</Text>}
                 </Pressable>
               </View>
             </View>

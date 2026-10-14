@@ -1,5 +1,6 @@
 # Netlify build settings. In the Netlify UI, also add these environment variables:
-#   VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, TMDB_TOKEN
+#   VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, TMDB_TOKEN,
+#   BREVO_API_KEY (the account-deletion email; see netlify/functions/deletion-email.mjs)
 
 [build]
   base = "client"

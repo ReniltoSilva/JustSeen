@@ -9,8 +9,8 @@ function App() {
   const location = useLocation();
   const { user } = useAuth();
   /* The welcome page (at /login, and at / when logged out) and the first-visit
-  setup step have their own logo and layout */
-  const isWelcome = location.pathname === "/login" || (!user && location.pathname === "/") || user?.needs_setup;
+  setup and restore-account steps have their own logo and layout */
+  const isWelcome = location.pathname === "/login" || (!user && location.pathname === "/") || user?.needs_setup || user?.deletion_requested_at;
 
   return (
     <div className="min-h-screen bg-ink text-fg">

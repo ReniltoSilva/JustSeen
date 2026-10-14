@@ -34,6 +34,7 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="login" />
             <Stack.Screen name="welcome" />
+            <Stack.Screen name="restore" />
             {/* The movie page's backdrop runs up under a see-through top bar */}
             <Stack.Screen
               name="movie/[movieId]"
@@ -42,6 +43,7 @@ export default function RootLayout() {
             <Stack.Screen name="u/[username]" options={withBackBar} />
             <Stack.Screen name="follows/[username]" options={withBackBar} />
             <Stack.Screen name="year/[username]" options={withBackBar} />
+            <Stack.Screen name="activity" options={{ ...withBackBar, title: "Activity" }} />
             {/* These slide up over the others */}
             <Stack.Screen name="review/[movieId]" options={{ presentation: "modal" }} />
             <Stack.Screen name="edit-profile" options={{ presentation: "modal" }} />
