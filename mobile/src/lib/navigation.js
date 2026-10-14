@@ -42,3 +42,19 @@ export const closeSheet = () => {
 
 /* Someone's followers or the people they follow; `list` is "followers" or "following" */
 export const openFollows = (username, list) => router.push(`/follows/${username}?list=${list}`);
+
+/* Reviews handed to the share screen, by review id (like the movies above) */
+const shares = new Map();
+
+export const pendingShare = (reviewId) => shares.get(reviewId);
+
+/* Opens the share screen for one of my reviews: { reviewId, movie, rating, review,
+author, justSaved }. `replace` swaps it in for the screen that's open (the review form) */
+export const openShare = ({ reviewId, ...share }, { replace = false } = {}) => {
+  shares.set(reviewId, share);
+  if (replace) router.replace(`/share/${reviewId}`);
+  else router.push(`/share/${reviewId}`);
+};
+
+/* Someone's year in film (this year unless another one is given) */
+export const openYear = (username, year = new Date().getFullYear()) => router.push(`/year/${username}?year=${year}`);

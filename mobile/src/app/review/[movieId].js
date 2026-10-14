@@ -19,7 +19,8 @@ import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/d
 import StarPicker from "../../components/StarPicker";
 import { useLibrary } from "../../library/LibraryContext";
 import { getMovieDetails, posterUrl, toMovie } from "../../lib/tmdb";
-import { closeSheet, pendingMovie } from "../../lib/navigation";
+import { closeSheet, openShare, pendingMovie } from "../../lib/navigation";
+import { useAuth } from "../../auth/AuthContext";
 import { colors } from "../../lib/theme";
 import { formatDay, localToday, releaseYear } from "../../../../shared/dates";
 
@@ -93,6 +94,7 @@ export default function ReviewScreen() {
 }
 
 const ReviewForm = ({ movie }) => {
+  const { user } = useAuth();
   const { myReviewFor, saveMyReview, deleteMyReview } = useLibrary();
   const existing = myReviewFor(movie.movie_id);
 
@@ -127,8 +129,10 @@ const ReviewForm = ({ movie }) => {
     setSaving(true);
     setError("");
     try {
-      await saveMyReview(movie, { rating, review, watchedOn });
-      closeSheet();
+      const saved = await saveMyReview(movie, { rating, review, watchedOn });
+      /* A brand-new review: offer to share it (edits just close) */
+      if (existing) closeSheet();
+      else openShare({ reviewId: saved.id, movie, rating, review, author: user, justSaved: true }, { replace: true });
     } catch (err) {
       console.error("Failed to save review:", err);
       setError("Couldn't save your review. Check your connection and try again.");

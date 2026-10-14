@@ -53,15 +53,21 @@ npm run dev
 3. In Supabase **Authentication → URL Configuration**, add your Netlify address
    (for example `https://justseen.netlify.app/**`) to the Redirect URLs and make it the Site URL.
 
-## The mobile app (in progress)
+## The mobile app
 
-`mobile/` is a React Native app built with Expo, using the same Supabase project.
+`mobile/` is a React Native app built with Expo, using the same Supabase project, so
+the same accounts, reviews and rules. It has everything the website has: the feed,
+search, reviews, reactions, profiles, following, the watchlist, notifications, Year in
+Film, sharing, and signing up or in with email or Google.
 
 1. Install **Expo Go** on your phone (App Store / Google Play).
 2. `npm run setup:mobile`, then copy `mobile/.env.example` to `mobile/.env` and fill in the
    same Supabase URL and publishable key as the website (with the `EXPO_PUBLIC_` prefix).
 3. `npm run mobile` and scan the QR code: with the Camera app on iPhone, or from Expo Go on Android.
    The phone and the computer need to be on the same Wi-Fi.
+4. For **Continue with Google** in the app, add these in Supabase -> Authentication ->
+   URL Configuration -> Redirect URLs: `exp://**` (Expo Go while developing) and
+   `justseen://**` (the installed app).
 
 ## Project structure
 
@@ -75,7 +81,8 @@ client/
   src/lib/            Supabase client, TMDB helper, Year in Film maths, monitoring
   netlify/functions/  the TMDB proxy
 mobile/src/app/       the app's screens (Expo Router: one file per screen)
-shared/               plain JavaScript both apps use (dates, genres, avatars)
+mobile/src/           the app's components, queries and login state, like client/src
+shared/               plain JavaScript both apps use (dates, genres, avatars, rules, stats)
 supabase/migrations/  the database: tables, security rules, triggers
 ```
 

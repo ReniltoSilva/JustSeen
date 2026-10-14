@@ -7,7 +7,7 @@ import Avatar, { AvatarRing } from "./Avatar";
 import ReactionBar from "./ReactionBar";
 import { colors } from "../lib/theme";
 import { posterUrl } from "../lib/tmdb";
-import { movieOf, openMovie, openProfile, openReview } from "../lib/navigation";
+import { movieOf, openMovie, openProfile, openReview, openShare } from "../lib/navigation";
 import { genreName } from "../../../shared/genres";
 import { relativeDay, releaseYear } from "../../../shared/dates";
 
@@ -43,10 +43,22 @@ const ReviewCard = ({ review }) => {
           </View>
         </Pressable>
         {isMine && (
-          <Pressable onPress={() => openReview(movieOf(review))} hitSlop={10} style={styles.edit} accessibilityLabel="Edit your review">
-            <Ionicons name="create-outline" size={16} color={colors.soft} />
-            <Text style={styles.editText}>Edit</Text>
-          </Pressable>
+          <View style={styles.mineButtons}>
+            <Pressable
+              onPress={() =>
+                openShare({ reviewId: review.id, movie: movieOf(review), rating: review.rating, review: review.review, author: review.author })
+              }
+              hitSlop={10}
+              style={styles.edit}
+              accessibilityLabel="Share your review"
+            >
+              <Ionicons name="share-social-outline" size={16} color={colors.soft} />
+            </Pressable>
+            <Pressable onPress={() => openReview(movieOf(review))} hitSlop={10} style={styles.edit} accessibilityLabel="Edit your review">
+              <Ionicons name="create-outline" size={16} color={colors.soft} />
+              <Text style={styles.editText}>Edit</Text>
+            </Pressable>
+          </View>
         )}
       </View>
 
@@ -106,6 +118,7 @@ const styles = StyleSheet.create({
   who: { flex: 1, flexDirection: "row", alignItems: "center", gap: 10 },
   headerText: { flex: 1, gap: 2 },
   edit: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: colors.panel2 },
+  mineButtons: { flexDirection: "row", gap: 6 },
   editText: { color: colors.soft, fontSize: 13, fontWeight: "600" },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   name: { color: colors.fg, fontSize: 14, fontWeight: "600", flexShrink: 1 },

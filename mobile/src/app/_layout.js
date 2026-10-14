@@ -41,9 +41,11 @@ export default function RootLayout() {
             />
             <Stack.Screen name="u/[username]" options={withBackBar} />
             <Stack.Screen name="follows/[username]" options={withBackBar} />
+            <Stack.Screen name="year/[username]" options={withBackBar} />
             {/* These slide up over the others */}
             <Stack.Screen name="review/[movieId]" options={{ presentation: "modal" }} />
             <Stack.Screen name="edit-profile" options={{ presentation: "modal" }} />
+            <Stack.Screen name="share/[reviewId]" options={{ presentation: "modal" }} />
           </Stack>
         </NotificationsProvider>
       </LibraryProvider>

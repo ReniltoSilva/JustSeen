@@ -7,7 +7,8 @@ import { useLibrary } from "../library/LibraryContext";
 import { getUserReviews } from "../data/reviews";
 import { getFollowCounts } from "../data/people";
 import { getWatchlist } from "../data/watchlist";
-import { openFollows, openMovie } from "../lib/navigation";
+import { openFollows, openMovie, openYear } from "../lib/navigation";
+import { LinearGradient } from "expo-linear-gradient";
 import { posterUrl } from "../lib/tmdb";
 import { colors } from "../lib/theme";
 import Avatar from "./Avatar";
@@ -117,6 +118,14 @@ const ProfileView = ({ person, isMe, footer }) => {
           <FollowButton person={person} />
         )}
         {favorite && <Text style={styles.loves}>Loves {favorite}</Text>}
+        <Pressable onPress={() => openYear(person.username)} style={({ pressed }) => pressed && { opacity: 0.85 }}>
+          <LinearGradient colors={[colors.brand, "#d946ef"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.yearChip}>
+            <Ionicons name="sparkles" size={13} color="#fff" />
+            <Text style={styles.yearChipText}>
+              {isMe ? "Your" : `${firstName}'s`} {new Date().getFullYear()} in film
+            </Text>
+          </LinearGradient>
+        </Pressable>
       </View>
 
       <View style={styles.stats}>
@@ -223,6 +232,8 @@ const styles = StyleSheet.create({
     borderColor: colors.lineStrong,
   },
   editText: { color: colors.fg, fontSize: 14, fontWeight: "600" },
+  yearChip: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999 },
+  yearChipText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   loves: {
     color: colors.brandSoft,
     backgroundColor: "rgba(124,92,255,0.15)",

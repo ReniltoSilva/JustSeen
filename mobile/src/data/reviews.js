@@ -65,3 +65,15 @@ export const removeAllSharePictures = async (userId) => {
   if (files.length === 0) return;
   unwrap(await supabase.storage.from("share-cards").remove(files.map((file) => `${userId}/${file.name}`)));
 };
+
+/* Reviews in one calendar year, for Year in Film */
+export const getYearReviews = async (userId, year) =>
+  unwrap(
+    await supabase
+      .from("reviews")
+      .select("*, reactions(kind)")
+      .eq("user_id", userId)
+      .gte("watched_on", `${year}-01-01`)
+      .lte("watched_on", `${year}-12-31`)
+      .order("watched_on"),
+  );
