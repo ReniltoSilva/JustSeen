@@ -25,7 +25,8 @@
       "expo-router",
       "expo-sqlite",
       "expo-image",
-      "expo-font"
+      "expo-font",
+      "@react-native-community/datetimepicker"
     ],
     "scheme": "justseen",
     "backgroundColor": "#09090d"

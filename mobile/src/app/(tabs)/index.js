@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
 import { useAuth } from "../../auth/AuthContext";
+import { useLibrary } from "../../library/LibraryContext";
 import { getFeed, getFollowingIds } from "../../data/feed";
 import ReviewCard from "../../components/ReviewCard";
 import { colors } from "../../lib/theme";
@@ -8,6 +10,8 @@ import { colors } from "../../lib/theme";
 /* Reviews by me and the people I follow, newest first. Pull down to refresh */
 export default function Feed() {
   const { user } = useAuth();
+  /* Goes up when I save or delete a review, so the feed reloads */
+  const { version } = useLibrary();
   const [reviews, setReviews] = useState(null);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -21,11 +25,19 @@ export default function Feed() {
       console.error("Failed to load feed:", err);
       setError("Could not load your feed. Pull down to try again.");
     }
-  }, [user.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id, version]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  /* Tapping one of my own reviews opens it for editing */
+  const editReview = (review) => {
+    const { movie_id, title, poster_path, overview, genre_ids, release_date, runtime } = review;
+    const movie = { movie_id, title, poster_path, overview, genre_ids, release_date, runtime };
+    router.push({ pathname: "/review/[movieId]", params: { movieId: movie_id, movie: JSON.stringify(movie) } });
+  };
 
   const refresh = async () => {
     setRefreshing(true);
@@ -45,7 +57,15 @@ export default function Feed() {
     <FlatList
       data={reviews ?? []}
       keyExtractor={(review) => review.id}
-      renderItem={({ item }) => <ReviewCard review={item} isMine={item.user_id === user.id} />}
+      renderItem={({ item }) =>
+        item.user_id === user.id ? (
+          <Pressable onPress={() => editReview(item)} style={({ pressed }) => pressed && { opacity: 0.85 }}>
+            <ReviewCard review={item} isMine />
+          </Pressable>
+        ) : (
+          <ReviewCard review={item} />
+        )
+      }
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}

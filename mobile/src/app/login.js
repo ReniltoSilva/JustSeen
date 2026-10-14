@@ -15,8 +15,7 @@ import { Redirect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../auth/AuthContext";
 import { colors } from "../lib/theme";
-
-const siteUrl = "https://justseenapp.com";
+import { siteUrl } from "../lib/site";
 
 /* Email and password log in. Creating an account and Google come in the next steps;
 until then "Create a free account" opens the website */
