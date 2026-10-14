@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -29,6 +28,9 @@ export default function EditProfile() {
   const [avatar, setAvatar] = useState(user?.avatar ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  /* Deleting needs two steps: open the warning, then type my username */
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [typedUsername, setTypedUsername] = useState("");
 
   if (!user) return null;
 
@@ -44,37 +46,20 @@ export default function EditProfile() {
     }
   };
 
-  /* Asked twice, since it can't be undone */
-  const confirmDelete = () =>
-    Alert.alert(
-      "Delete your account?",
-      "Your profile, reviews, watchlist, follows and reactions will be deleted for good. This can't be undone.",
-      [
-        { text: "Keep my account", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () =>
-            Alert.alert("Are you sure?", `Deleting @${user.username} now.`, [
-              { text: "Cancel", style: "cancel" },
-              {
-                text: "Delete for good",
-                style: "destructive",
-                onPress: async () => {
-                  setBusy(true);
-                  try {
-                    await deleteAccount();
-                    router.replace("/login");
-                  } catch (err) {
-                    setError(err.message || "Couldn't delete your account. Please try again.");
-                    setBusy(false);
-                  }
-                },
-              },
-            ]),
-        },
-      ],
-    );
+  const usernameMatches = typedUsername.trim().replace(/^@+/, "").toLowerCase() === user.username;
+
+  const remove = async () => {
+    if (!usernameMatches) return;
+    setError("");
+    setBusy(true);
+    try {
+      await deleteAccount();
+      router.replace("/login");
+    } catch (err) {
+      setError(err.message || "Couldn't delete your account. Please try again.");
+      setBusy(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.screen} edges={Platform.OS === "android" ? ["top", "bottom"] : ["bottom"]}>
@@ -126,9 +111,48 @@ export default function EditProfile() {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <Pressable onPress={confirmDelete} disabled={busy} style={styles.delete}>
-            <Text style={styles.deleteText}>Delete account</Text>
-          </Pressable>
+          {confirmingDelete ? (
+            <View style={styles.danger}>
+              <Text style={styles.dangerTitle}>Delete your account for good?</Text>
+              <Text style={styles.dangerText}>
+                Your profile, reviews, watchlist, follows and reactions will be deleted straight away. This can't be undone.
+              </Text>
+              <Text style={styles.dangerText}>
+                Type your username, <Text style={{ color: colors.fg, fontWeight: "700" }}>{user.username}</Text>, to confirm.
+              </Text>
+              <TextInput
+                style={styles.input}
+                value={typedUsername}
+                onChangeText={setTypedUsername}
+                placeholder={user.username}
+                placeholderTextColor={colors.muted}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <View style={styles.dangerButtons}>
+                <Pressable
+                  onPress={() => {
+                    setConfirmingDelete(false);
+                    setTypedUsername("");
+                  }}
+                  style={[styles.dangerButton, styles.keepButton]}
+                >
+                  <Text style={styles.keepText}>Keep my account</Text>
+                </Pressable>
+                <Pressable
+                  onPress={remove}
+                  disabled={!usernameMatches || busy}
+                  style={[styles.dangerButton, styles.deleteButton, (!usernameMatches || busy) && { opacity: 0.4 }]}
+                >
+                  {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.deleteButtonText}>Delete forever</Text>}
+                </Pressable>
+              </View>
+            </View>
+          ) : (
+            <Pressable onPress={() => setConfirmingDelete(true)} disabled={busy} style={styles.delete}>
+              <Text style={styles.deleteText}>Delete account</Text>
+            </Pressable>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -165,4 +189,21 @@ const styles = StyleSheet.create({
   error: { color: colors.disagree, fontSize: 14, marginTop: 8 },
   delete: { marginTop: 32, alignItems: "center", padding: 12 },
   deleteText: { color: colors.disagree, fontSize: 15, fontWeight: "600" },
+  danger: {
+    marginTop: 32,
+    padding: 16,
+    gap: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(251,113,133,0.3)",
+    backgroundColor: "rgba(251,113,133,0.08)",
+  },
+  dangerTitle: { color: colors.fg, fontSize: 16, fontWeight: "700" },
+  dangerText: { color: colors.soft, fontSize: 14, lineHeight: 20 },
+  dangerButtons: { flexDirection: "row", gap: 10, marginTop: 4 },
+  dangerButton: { flex: 1, height: 44, borderRadius: 999, alignItems: "center", justifyContent: "center" },
+  keepButton: { backgroundColor: colors.panel2 },
+  keepText: { color: colors.fg, fontSize: 14, fontWeight: "600" },
+  deleteButton: { backgroundColor: colors.disagree },
+  deleteButtonText: { color: "#fff", fontSize: 14, fontWeight: "700" },
 });

@@ -1,4 +1,5 @@
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useLibrary } from "../../library/LibraryContext";
@@ -19,35 +20,65 @@ export default function Watchlist() {
       columnWrapperStyle={styles.columns}
       contentContainerStyle={styles.content}
       ListHeaderComponent={
-        watchlist.length > 0 ? <Text style={styles.subtitle}>Watched one? Tap "I watched it" to review it.</Text> : null
+        watchlist.length > 0 ? (
+          <Text style={styles.subtitle}>
+            {watchlist.length} {watchlist.length === 1 ? "movie" : "movies"} to watch
+          </Text>
+        ) : null
       }
       renderItem={({ item }) => <WatchlistTile movie={item} />}
       ListEmptyComponent={
         <View style={styles.empty}>
           <Ionicons name="bookmark-outline" size={40} color={colors.lineStrong} />
           <Text style={styles.emptyTitle}>Your watchlist is empty</Text>
-          <Text style={styles.emptyText}>Open any movie and tap "Add to watchlist" to save it for later.</Text>
+          <Text style={styles.emptyText}>Tap the bookmark next to a movie in Search, or "Add to watchlist" on a movie page.</Text>
         </View>
       }
     />
   );
 }
 
-const WatchlistTile = ({ movie }) => (
-  <View style={styles.tile}>
-    <Pressable onPress={() => openMovie(movie.movie_id)} style={({ pressed }) => [styles.poster, pressed && { opacity: 0.8 }]}>
-      <Image source={posterUrl(movie.poster_path, "w342")} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
-    </Pressable>
-    <Text style={styles.title} numberOfLines={1}>
-      {movie.title}
-    </Text>
-    {movie.release_date ? <Text style={styles.year}>{releaseYear(movie.release_date)}</Text> : null}
-    <Pressable onPress={() => openReview(movie)} style={({ pressed }) => [styles.watched, pressed && { opacity: 0.8 }]}>
-      <Ionicons name="checkmark" size={15} color={colors.brandSoft} />
-      <Text style={styles.watchedText}>I watched it</Text>
-    </Pressable>
-  </View>
-);
+/* One saved movie: tap the poster for the movie, the cross to take it off the list,
+or "Watched it? Review" to review it (which also takes it off) */
+const WatchlistTile = ({ movie }) => {
+  const { toggleWatchlist } = useLibrary();
+  const [removing, setRemoving] = useState(false);
+
+  const remove = async () => {
+    setRemoving(true);
+    try {
+      await toggleWatchlist(movie);
+    } catch (error) {
+      console.error("Failed to remove from watchlist:", error);
+      setRemoving(false);
+    }
+  };
+
+  return (
+    <View style={styles.tile}>
+      <Pressable onPress={() => openMovie(movie.movie_id)} style={({ pressed }) => [styles.poster, pressed && { opacity: 0.8 }]}>
+        <Image source={posterUrl(movie.poster_path, "w342")} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
+        <Pressable
+          onPress={remove}
+          disabled={removing}
+          hitSlop={6}
+          accessibilityLabel={`Remove ${movie.title} from your watchlist`}
+          style={({ pressed }) => [styles.remove, pressed && { opacity: 0.7 }]}
+        >
+          {removing ? <ActivityIndicator size="small" color="#fff" /> : <Ionicons name="close" size={16} color="#fff" />}
+        </Pressable>
+      </Pressable>
+      <Text style={styles.title} numberOfLines={1}>
+        {movie.title}
+      </Text>
+      {movie.release_date ? <Text style={styles.year}>{releaseYear(movie.release_date)}</Text> : null}
+      <Pressable onPress={() => openReview(movie)} style={({ pressed }) => [styles.watched, pressed && { opacity: 0.8 }]}>
+        <Ionicons name="star-outline" size={14} color={colors.brandSoft} />
+        <Text style={styles.watchedText}>Watched it? Review</Text>
+      </Pressable>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   content: { padding: 16, paddingBottom: 40 },
@@ -57,6 +88,19 @@ const styles = StyleSheet.create({
   poster: { aspectRatio: 2 / 3, borderRadius: 12, overflow: "hidden", backgroundColor: colors.panel2, marginBottom: 4 },
   title: { color: colors.fg, fontSize: 14, fontWeight: "600" },
   year: { color: colors.muted, fontSize: 12 },
+  remove: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(9,9,13,0.6)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+  },
   watched: {
     flexDirection: "row",
     alignItems: "center",

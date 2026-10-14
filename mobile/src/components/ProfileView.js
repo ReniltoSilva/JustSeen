@@ -13,6 +13,7 @@ import { posterUrl } from "../lib/tmdb";
 import { colors } from "../lib/theme";
 import Avatar from "./Avatar";
 import FollowButton from "./FollowButton";
+import WatchedTile from "./WatchedTile";
 import { genreName } from "../../../shared/genres";
 
 /* Genre that shows up most across the reviews */
@@ -165,7 +166,7 @@ const ProfileView = ({ person, isMe, footer }) => {
       columnWrapperStyle={styles.columns}
       contentContainerStyle={styles.content}
       ListHeaderComponent={header}
-      renderItem={({ item }) => <PosterTile movie={item} rating={tab === "watched" ? item.rating : null} />}
+      renderItem={({ item }) => (tab === "watched" ? <WatchedTile review={item} /> : <PosterTile movie={item} />)}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}
       ListEmptyComponent={
         reviews === null && !error ? (
@@ -187,26 +188,15 @@ const ProfileView = ({ person, isMe, footer }) => {
   );
 };
 
-/* One movie: poster (with the rating on it for watched ones), the title and the review */
-const PosterTile = ({ movie, rating }) => (
+/* A movie on someone's watchlist: the poster and the title */
+const PosterTile = ({ movie }) => (
   <Pressable onPress={() => openMovie(movie.movie_id)} style={({ pressed }) => [styles.tile, pressed && { opacity: 0.8 }]}>
     <View style={styles.tilePoster}>
       <Image source={posterUrl(movie.poster_path, "w342")} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
-      {rating != null && (
-        <View style={styles.tileRating}>
-          <Ionicons name="star" size={11} color={colors.star} />
-          <Text style={styles.tileRatingText}>{Number(rating)}</Text>
-        </View>
-      )}
     </View>
     <Text style={styles.tileTitle} numberOfLines={1}>
       {movie.title}
     </Text>
-    {movie.review ? (
-      <Text style={styles.tileReview} numberOfLines={2}>
-        {movie.review}
-      </Text>
-    ) : null}
   </Pressable>
 );
 
@@ -267,21 +257,7 @@ const styles = StyleSheet.create({
   columns: { gap: 12 },
   tile: { flex: 1, maxWidth: "50%", marginBottom: 18, gap: 4 },
   tilePoster: { aspectRatio: 2 / 3, borderRadius: 12, overflow: "hidden", backgroundColor: colors.panel2 },
-  tileRating: {
-    position: "absolute",
-    top: 8,
-    left: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: 999,
-    backgroundColor: "rgba(9,9,13,0.75)",
-  },
-  tileRatingText: { color: colors.fg, fontSize: 12, fontWeight: "700" },
   tileTitle: { color: colors.fg, fontSize: 14, fontWeight: "600", marginTop: 4 },
-  tileReview: { color: colors.soft, fontSize: 12, lineHeight: 17 },
 });
 
 export default ProfileView;

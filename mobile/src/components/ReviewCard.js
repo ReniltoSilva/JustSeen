@@ -12,9 +12,24 @@ import { genreName } from "../../../shared/genres";
 import { relativeDay, releaseYear } from "../../../shared/dates";
 import { useToday } from "../lib/useToday";
 
+/* Five small stars for a rating, with halves */
+export const Stars = ({ rating, size = 14 }) => (
+  <View style={styles.stars}>
+    {[1, 2, 3, 4, 5].map((i) => (
+      <Ionicons
+        key={i}
+        name={rating >= i ? "star" : rating >= i - 0.5 ? "star-half" : "star-outline"}
+        size={size}
+        color={rating >= i - 0.5 ? colors.star : colors.lineStrong}
+      />
+    ))}
+  </View>
+);
+
 /* One review, laid out like the website's MovieCard. Tap the person for their
-profile, the poster or title for the movie; my own reviews have an Edit button */
-const ReviewCard = ({ review }) => {
+profile, the poster or title for the movie; my own reviews have Share and Edit.
+`compact` leaves the movie out (poster, title, genres), for the movie's own page */
+const ReviewCard = ({ review, compact = false }) => {
   const { user } = useAuth();
   const isMine = review.user_id === user?.id;
   /* Redraws the card when the day changes, so "today" becomes "yesterday" */
@@ -65,9 +80,22 @@ const ReviewCard = ({ review }) => {
         )}
       </View>
 
-      {/* Poster, fading into the card at the bottom */}
+      {compact ? (
+        <View style={styles.body}>
+          <View style={styles.compactRating}>
+            <Stars rating={Number(review.rating)} />
+            <Text style={styles.rating}>{Number(review.rating)} / 5</Text>
+          </View>
+          {review.review ? <Text style={styles.review}>{review.review}</Text> : null}
+          <ReactionBar review={review} />
+        </View>
+      ) : (
+        <>
+      {/* The whole poster, framed by a blurred copy of itself and fading into the card */}
       <Pressable onPress={() => openMovie(review.movie_id)} style={styles.poster} accessibilityLabel={`Open ${review.title}`}>
-        <Image source={posterUrl(review.poster_path)} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} />
+        <Image source={posterUrl(review.poster_path, "w342")} style={StyleSheet.absoluteFill} contentFit="cover" blurRadius={25} />
+        <View style={styles.posterShade} />
+        <Image source={posterUrl(review.poster_path)} style={styles.posterImage} contentFit="cover" transition={200} />
         <LinearGradient colors={["transparent", colors.panel]} style={styles.posterFade} />
       </Pressable>
 
@@ -97,6 +125,8 @@ const ReviewCard = ({ review }) => {
 
         <ReactionBar review={review} />
       </View>
+        </>
+      )}
     </View>
   );
 };
@@ -137,8 +167,12 @@ const styles = StyleSheet.create({
   },
   whenRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   when: { color: colors.muted, fontSize: 12 },
-  poster: { aspectRatio: 2 / 3, backgroundColor: colors.panel2 },
-  posterFade: { position: "absolute", left: 0, right: 0, bottom: 0, height: "33%" },
+  poster: { aspectRatio: 1, backgroundColor: colors.panel2, alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  posterShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(9,9,13,0.45)" },
+  posterImage: { height: "88%", aspectRatio: 2 / 3, borderRadius: 10 },
+  stars: { flexDirection: "row", gap: 2 },
+  compactRating: { flexDirection: "row", alignItems: "center", gap: 8 },
+  posterFade: { position: "absolute", left: 0, right: 0, bottom: 0, height: "18%" },
   body: { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 12 },
   titleRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 8 },
   title: { color: colors.fg, fontSize: 15, fontWeight: "600", flex: 1, lineHeight: 20 },

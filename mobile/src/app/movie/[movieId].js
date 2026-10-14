@@ -211,7 +211,7 @@ export default function MovieScreen() {
             <Text style={styles.subsection}>From you and people you follow</Text>
             <View style={styles.reviews}>
               {fromFollowing.map((review) => (
-                <ReviewCard key={review.id} review={review} />
+                <ReviewCard key={review.id} review={review} compact />
               ))}
             </View>
           </>
@@ -221,7 +221,7 @@ export default function MovieScreen() {
             <Text style={styles.subsection}>From everyone else</Text>
             <View style={styles.reviews}>
               {fromOthers.map((review) => (
-                <ReviewCard key={review.id} review={review} />
+                <ReviewCard key={review.id} review={review} compact />
               ))}
             </View>
           </>

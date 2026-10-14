@@ -128,12 +128,12 @@ export default function Search() {
           ) : mode === "people" ? (
             <PersonRow person={item} />
           ) : (
-          <MovieRow
-            movie={item}
-            myReview={myReviewFor(item.movie_id)}
-            onOpen={() => go(() => openMovie(item.movie_id))}
-            onReview={() => go(() => openReview(item))}
-          />
+            <MovieRow
+              movie={item}
+              myReview={myReviewFor(item.movie_id)}
+              onOpen={() => go(() => openMovie(item.movie_id))}
+              onReview={() => go(() => openReview(item))}
+            />
           )
         }
         ListEmptyComponent={
@@ -159,8 +159,42 @@ export default function Search() {
   );
 }
 
+/* Bookmark button: adds the movie to my watchlist, or takes it off */
+const SaveButton = ({ movie }) => {
+  const { isSaved, toggleWatchlist } = useLibrary();
+  const [busy, setBusy] = useState(false);
+  const saved = isSaved(movie.movie_id);
+
+  const toggle = async () => {
+    setBusy(true);
+    try {
+      await toggleWatchlist(movie);
+    } catch (err) {
+      console.error("Failed to update watchlist:", err);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Pressable
+      onPress={toggle}
+      disabled={busy}
+      hitSlop={8}
+      accessibilityLabel={saved ? `Remove ${movie.title} from your watchlist` : `Add ${movie.title} to your watchlist`}
+      style={[styles.saveButton, saved && styles.saveButtonOn]}
+    >
+      {busy ? (
+        <ActivityIndicator size="small" color={colors.fg} />
+      ) : (
+        <Ionicons name={saved ? "bookmark" : "bookmark-outline"} size={16} color={saved ? colors.fg : colors.soft} />
+      )}
+    </Pressable>
+  );
+};
+
 /* One search result: poster, title and year, and whether I've reviewed it.
-Tap the row for the movie page, the button to review it straight away */
+Tap the row for the movie page, the buttons to save it or review it straight away */
 const MovieRow = ({ movie, myReview, onOpen, onReview }) => (
   <Pressable onPress={onOpen} style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.panel2 }]}>
     <View style={styles.thumb}>
@@ -182,10 +216,13 @@ const MovieRow = ({ movie, myReview, onOpen, onReview }) => (
         <Text style={styles.reviewedText}>{Number(myReview.rating)}</Text>
       </Pressable>
     ) : (
-      <Pressable onPress={onReview} hitSlop={8} style={styles.reviewButton}>
-        <Ionicons name="add" size={16} color={colors.brandSoft} />
-        <Text style={styles.reviewButtonText}>Review</Text>
-      </Pressable>
+      <>
+        <SaveButton movie={movie} />
+        <Pressable onPress={onReview} hitSlop={8} style={styles.reviewButton}>
+          <Ionicons name="add" size={16} color={colors.brandSoft} />
+          <Text style={styles.reviewButtonText}>Review</Text>
+        </Pressable>
+      </>
     )}
   </Pressable>
 );
@@ -236,6 +273,16 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(245,158,11,0.12)",
   },
   reviewedText: { color: colors.star, fontSize: 13, fontWeight: "700" },
+  saveButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.lineStrong,
+  },
+  saveButtonOn: { backgroundColor: colors.panel2, borderColor: colors.panel2 },
   reviewButton: {
     flexDirection: "row",
     alignItems: "center",

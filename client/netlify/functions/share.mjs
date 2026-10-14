@@ -95,9 +95,8 @@ export default async (request) => {
   const rating = Number(review.rating);
   const firstName = (review.author_name ?? "").split(" ")[0] || "A friend";
   const title = `${review.author_name} gave ${review.title} ${rating}/5 on JustSeen`;
-  const description = review.review
-    ? `“${review.review}”`
-    : `See what ${firstName} thought of ${review.title}, and share your own reviews with friends.`;
+  /* The review itself is already in the picture, so the text under it stays short */
+  const description = `Movies are better with friends. Join ${firstName} on JustSeen.`;
   /* ?v= changes each time it's shared again, so apps fetch the new picture */
   const image = `${supabaseUrl}/storage/v1/object/public/share-cards/${review.author_id}/${review.id}.jpg?v=${Date.parse(review.shared_at)}`;
   const url = `${siteUrl}/r/${review.id}`;

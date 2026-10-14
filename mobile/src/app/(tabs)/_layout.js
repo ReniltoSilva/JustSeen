@@ -10,7 +10,7 @@ const tabIcon =
   (name) =>
   ({ color, focused, size }) => <Ionicons name={focused ? name : `${name}-outline`} size={size} color={color} />;
 
-/* The main app, behind the login: Feed, Search, Watchlist, Activity and Profile along the bottom */
+/* The main app, behind the login: Feed, Search, Watched, Watchlist, Activity and Profile along the bottom */
 export default function TabsLayout() {
   const { session, user, loading } = useAuth();
   const { unread } = useNotifications();
@@ -37,11 +37,13 @@ export default function TabsLayout() {
         tabBarStyle: { backgroundColor: colors.ink, borderTopColor: colors.line },
         tabBarActiveTintColor: colors.brandSoft,
         tabBarInactiveTintColor: colors.muted,
+        tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
         sceneStyle: { backgroundColor: colors.ink },
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Feed", tabBarIcon: tabIcon("home") }} />
       <Tabs.Screen name="search" options={{ title: "Search", tabBarIcon: tabIcon("search") }} />
+      <Tabs.Screen name="watched" options={{ title: "Watched", tabBarIcon: tabIcon("eye") }} />
       <Tabs.Screen name="watchlist" options={{ title: "Watchlist", tabBarIcon: tabIcon("bookmark") }} />
       <Tabs.Screen
         name="activity"
