@@ -56,6 +56,10 @@ export default function ReviewScreen() {
   /* Not handed over (e.g. the app reloaded on this screen): load it from TMDB */
   useEffect(() => {
     if (movie) return;
+    if (!/^\d+$/.test(movieId ?? "")) {
+      setFailed(true);
+      return;
+    }
     let cancelled = false;
     getMovieDetails(movieId)
       .then((details) => {
