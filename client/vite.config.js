@@ -11,6 +11,8 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     server: {
+      /* Also serve /shared, the code the website and the mobile app have in common */
+      fs: { allow: [".."] },
       proxy: {
         /* Same path the Netlify function answers in production: /api/tmdb/search/movie?query=... */
         "/api/tmdb": {

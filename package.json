@@ -6,7 +6,9 @@
     "dev": "npm --prefix client run dev",
     "build": "npm --prefix client run build",
     "lint": "npm --prefix client run lint",
-    "setup": "npm --prefix client install"
+    "setup": "npm --prefix client install",
+    "mobile": "npm --prefix mobile start",
+    "setup:mobile": "npm --prefix mobile install"
   },
   "keywords": [],
   "author": "Renilto Junior",

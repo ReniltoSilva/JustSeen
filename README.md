@@ -53,6 +53,16 @@ npm run dev
 3. In Supabase **Authentication → URL Configuration**, add your Netlify address
    (for example `https://justseen.netlify.app/**`) to the Redirect URLs and make it the Site URL.
 
+## The mobile app (in progress)
+
+`mobile/` is a React Native app built with Expo, using the same Supabase project.
+
+1. Install **Expo Go** on your phone (App Store / Google Play).
+2. `npm run setup:mobile`, then copy `mobile/.env.example` to `mobile/.env` and fill in the
+   same Supabase URL and publishable key as the website (with the `EXPO_PUBLIC_` prefix).
+3. `npm run mobile` and scan the QR code: with the Camera app on iPhone, or from Expo Go on Android.
+   The phone and the computer need to be on the same Wi-Fi.
+
 ## Project structure
 
 ```
@@ -62,8 +72,10 @@ client/
   src/data/           every Supabase query, one file per table
   src/auth/           login state, username rules, the "must be logged in" gate
   src/library/        my reviews, watchlist and follows, shared across the app
-  src/lib/            Supabase client, TMDB helper, dates, Year in Film maths
+  src/lib/            Supabase client, TMDB helper, Year in Film maths, monitoring
   netlify/functions/  the TMDB proxy
+mobile/src/app/       the app's screens (Expo Router: one file per screen)
+shared/               plain JavaScript both apps use (dates, genres, avatars)
 supabase/migrations/  the database: tables, security rules, triggers
 ```
 
