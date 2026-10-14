@@ -1,55 +1,64 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../auth/AuthContext";
 import Avatar, { AvatarRing } from "./Avatar";
+import ReactionBar from "./ReactionBar";
 import { colors } from "../lib/theme";
 import { posterUrl } from "../lib/tmdb";
+import { movieOf, openMovie, openProfile, openReview } from "../lib/navigation";
 import { genreName } from "../../../shared/genres";
 import { relativeDay, releaseYear } from "../../../shared/dates";
 
-const reactionKinds = [
-  { kind: "agree", icon: "thumbs-up-outline", color: colors.agree },
-  { kind: "unsure", icon: "remove-circle-outline", color: colors.unsure },
-  { kind: "disagree", icon: "thumbs-down-outline", color: colors.disagree },
-];
-
-/* One review in the feed, laid out like the website's MovieCard */
-const ReviewCard = ({ review, isMine }) => {
+/* One review, laid out like the website's MovieCard. Tap the person for their
+profile, the poster or title for the movie; my own reviews have an Edit button */
+const ReviewCard = ({ review }) => {
+  const { user } = useAuth();
+  const isMine = review.user_id === user?.id;
   const genres = (review.genre_ids ?? []).filter((id) => genreName(id)).slice(0, 3);
-  const reactors = (review.reactions ?? []).filter((reaction) => reaction.profile).slice(0, 3);
-  const count = (kind) => (review.reactions ?? []).filter((reaction) => reaction.kind === kind).length;
 
   return (
     <View style={styles.card}>
       {/* Who watched it and when */}
       <View style={styles.header}>
-        <AvatarRing color="rgba(255,255,255,0.1)">
-          <Avatar user={review.author} size={36} />
-        </AvatarRing>
-        <View style={styles.headerText}>
-          <View style={styles.nameRow}>
-            <Text style={styles.name} numberOfLines={1}>
-              {review.author?.name}
-            </Text>
-            {isMine && <Text style={styles.youBadge}>YOU</Text>}
+        <Pressable
+          onPress={() => review.author && openProfile(review.author.username)}
+          style={({ pressed }) => [styles.who, pressed && { opacity: 0.7 }]}
+        >
+          <AvatarRing color="rgba(255,255,255,0.1)">
+            <Avatar user={review.author} size={36} />
+          </AvatarRing>
+          <View style={styles.headerText}>
+            <View style={styles.nameRow}>
+              <Text style={styles.name} numberOfLines={1}>
+                {review.author?.name}
+              </Text>
+              {isMine && <Text style={styles.youBadge}>YOU</Text>}
+            </View>
+            <View style={styles.whenRow}>
+              <Ionicons name="eye-outline" size={13} color={colors.muted} />
+              <Text style={styles.when}>Watched {relativeDay(review.watched_on)}</Text>
+            </View>
           </View>
-          <View style={styles.whenRow}>
-            <Ionicons name="eye-outline" size={13} color={colors.muted} />
-            <Text style={styles.when}>Watched {relativeDay(review.watched_on)}</Text>
-          </View>
-        </View>
+        </Pressable>
+        {isMine && (
+          <Pressable onPress={() => openReview(movieOf(review))} hitSlop={10} style={styles.edit} accessibilityLabel="Edit your review">
+            <Ionicons name="create-outline" size={16} color={colors.soft} />
+            <Text style={styles.editText}>Edit</Text>
+          </Pressable>
+        )}
       </View>
 
       {/* Poster, fading into the card at the bottom */}
-      <View style={styles.poster}>
+      <Pressable onPress={() => openMovie(review.movie_id)} style={styles.poster} accessibilityLabel={`Open ${review.title}`}>
         <Image source={posterUrl(review.poster_path)} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} />
         <LinearGradient colors={["transparent", colors.panel]} style={styles.posterFade} />
-      </View>
+      </Pressable>
 
       <View style={styles.body}>
         <View style={styles.titleRow}>
-          <Text style={styles.title} numberOfLines={2}>
+          <Text style={styles.title} numberOfLines={2} onPress={() => openMovie(review.movie_id)}>
             {review.title}
           </Text>
           <View style={styles.meta}>
@@ -71,26 +80,7 @@ const ReviewCard = ({ review, isMine }) => {
 
         {review.review ? <Text style={styles.review}>{review.review}</Text> : null}
 
-        {/* Reactions (tapping them comes in the next step) */}
-        <View style={styles.reactions}>
-          <View style={styles.reactionCounts}>
-            {reactionKinds.map(({ kind, icon, color }) => (
-              <View key={kind} style={styles.reaction}>
-                <Ionicons name={icon} size={15} color={color} />
-                <Text style={[styles.reactionCount, { color }]}>{count(kind)}</Text>
-              </View>
-            ))}
-          </View>
-          <View style={styles.reactors}>
-            {reactors.map((reaction, i) => (
-              <View key={reaction.user_id} style={{ marginLeft: i === 0 ? 0 : -8 }}>
-                <AvatarRing color={colors.panel}>
-                  <Avatar user={reaction.profile} size={20} />
-                </AvatarRing>
-              </View>
-            ))}
-          </View>
-        </View>
+        <ReactionBar review={review} />
       </View>
     </View>
   );
@@ -113,7 +103,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255,255,255,0.05)",
   },
+  who: { flex: 1, flexDirection: "row", alignItems: "center", gap: 10 },
   headerText: { flex: 1, gap: 2 },
+  edit: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: colors.panel2 },
+  editText: { color: colors.soft, fontSize: 13, fontWeight: "600" },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   name: { color: colors.fg, fontSize: 14, fontWeight: "600", flexShrink: 1 },
   youBadge: {
@@ -148,11 +141,6 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   review: { color: colors.soft, fontSize: 13, lineHeight: 20, marginTop: 10 },
-  reactions: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12 },
-  reactionCounts: { flexDirection: "row", gap: 14 },
-  reaction: { flexDirection: "row", alignItems: "center", gap: 5 },
-  reactionCount: { fontSize: 12, fontWeight: "600" },
-  reactors: { flexDirection: "row" },
 });
 
 export default ReviewCard;

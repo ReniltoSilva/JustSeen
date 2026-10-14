@@ -1,38 +1,41 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../../auth/AuthContext";
-import Avatar from "../../components/Avatar";
+import ProfileView from "../../components/ProfileView";
+import { siteUrl } from "../../lib/site";
 import { colors } from "../../lib/theme";
 
-/* For now: who's logged in, and a way out. The full profile comes later */
+/* My own profile. Editing it happens on the website for now */
 export default function Profile() {
   const { user, logout } = useAuth();
 
   return (
-    <View style={styles.screen}>
-      <Avatar user={user} size={88} />
-      <Text style={styles.name}>{user?.name}</Text>
-      <Text style={styles.username}>@{user?.username}</Text>
-      {user?.bio ? <Text style={styles.bio}>{user.bio}</Text> : null}
-
-      <Pressable onPress={logout} style={({ pressed }) => [styles.logout, pressed && { opacity: 0.7 }]}>
-        <Text style={styles.logoutText}>Log out</Text>
-      </Pressable>
-    </View>
+    <ProfileView
+      person={user}
+      isMe
+      footer={
+        <View style={styles.footer}>
+          <Pressable onPress={() => Linking.openURL(`${siteUrl}/u/${user.username}`)} style={({ pressed }) => [styles.button, pressed && { opacity: 0.7 }]}>
+            <Text style={styles.buttonText}>Edit profile on the website</Text>
+          </Pressable>
+          <Pressable onPress={logout} style={({ pressed }) => [styles.button, pressed && { opacity: 0.7 }]}>
+            <Text style={[styles.buttonText, { color: colors.disagree }]}>Log out</Text>
+          </Pressable>
+        </View>
+      }
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, alignItems: "center", paddingTop: 48, paddingHorizontal: 24, gap: 6 },
-  name: { color: colors.fg, fontSize: 22, fontWeight: "800", marginTop: 12 },
-  username: { color: colors.muted, fontSize: 15 },
-  bio: { color: colors.soft, fontSize: 15, textAlign: "center", marginTop: 8 },
-  logout: {
-    marginTop: 32,
+  footer: { gap: 10, marginTop: 24, alignItems: "center" },
+  button: {
     borderRadius: 999,
     borderWidth: 1,
     borderColor: colors.lineStrong,
     paddingHorizontal: 24,
     paddingVertical: 10,
+    minWidth: 240,
+    alignItems: "center",
   },
-  logoutText: { color: colors.disagree, fontSize: 15, fontWeight: "600" },
+  buttonText: { color: colors.fg, fontSize: 15, fontWeight: "600" },
 });

@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useLibrary } from "../../library/LibraryContext";
 import { searchMovies, posterUrl } from "../../lib/tmdb";
-import { openReview } from "../../lib/openReview";
+import { openMovie, openReview } from "../../lib/navigation";
 import { colors } from "../../lib/theme";
 import { releaseYear } from "../../../../shared/dates";
 
@@ -48,9 +48,9 @@ export default function Search() {
     };
   }, [query]);
 
-  const reviewMovie = (movie) => {
+  const go = (open) => {
     Keyboard.dismiss();
-    openReview(movie);
+    open();
   };
 
   const searched = query.trim().length >= 2;
@@ -78,7 +78,14 @@ export default function Search() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => <MovieRow movie={item} myReview={myReviewFor(item.movie_id)} onPress={() => reviewMovie(item)} />}
+        renderItem={({ item }) => (
+          <MovieRow
+            movie={item}
+            myReview={myReviewFor(item.movie_id)}
+            onOpen={() => go(() => openMovie(item.movie_id))}
+            onReview={() => go(() => openReview(item))}
+          />
+        )}
         ListEmptyComponent={
           error ? (
             <Text style={styles.message}>{error}</Text>
@@ -96,9 +103,10 @@ export default function Search() {
   );
 }
 
-/* One search result: poster, title and year, and whether I've reviewed it */
-const MovieRow = ({ movie, myReview, onPress }) => (
-  <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.panel2 }]}>
+/* One search result: poster, title and year, and whether I've reviewed it.
+Tap the row for the movie page, the button to review it straight away */
+const MovieRow = ({ movie, myReview, onOpen, onReview }) => (
+  <Pressable onPress={onOpen} style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.panel2 }]}>
     <View style={styles.thumb}>
       {movie.poster_path ? (
         <Image source={posterUrl(movie.poster_path, "w154")} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
@@ -113,15 +121,15 @@ const MovieRow = ({ movie, myReview, onPress }) => (
       {movie.release_date ? <Text style={styles.year}>{releaseYear(movie.release_date)}</Text> : null}
     </View>
     {myReview ? (
-      <View style={styles.reviewed}>
+      <Pressable onPress={onReview} hitSlop={8} style={styles.reviewed} accessibilityLabel="Edit your review">
         <Ionicons name="star" size={12} color={colors.star} />
         <Text style={styles.reviewedText}>{Number(myReview.rating)}</Text>
-      </View>
+      </Pressable>
     ) : (
-      <View style={styles.reviewButton}>
+      <Pressable onPress={onReview} hitSlop={8} style={styles.reviewButton}>
         <Ionicons name="add" size={16} color={colors.brandSoft} />
         <Text style={styles.reviewButtonText}>Review</Text>
-      </View>
+      </Pressable>
     )}
   </Pressable>
 );

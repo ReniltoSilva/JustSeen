@@ -24,8 +24,9 @@ export const searchMovies = async (query) => {
   return data.results.map(toMovie);
 };
 
-/* Details include the runtime, which Year in Film needs */
-export const getMovieDetails = (movieId) => get(`movie/${movieId}`);
+/* Details include the runtime, which Year in Film needs. The movie page also asks
+for the cast and director with { append_to_response: "credits" } */
+export const getMovieDetails = (movieId, params) => get(`movie/${movieId}`, params);
 
 /* Movie posters come straight from TMDB's image servers */
 export const posterUrl = (path, size = "w500") => (path ? `https://image.tmdb.org/t/p/${size}${path}` : null);

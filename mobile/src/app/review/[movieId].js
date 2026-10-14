@@ -19,7 +19,7 @@ import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/d
 import StarPicker from "../../components/StarPicker";
 import { useLibrary } from "../../library/LibraryContext";
 import { getMovieDetails, posterUrl, toMovie } from "../../lib/tmdb";
-import { closeReview, pendingMovie } from "../../lib/openReview";
+import { closeReview, pendingMovie } from "../../lib/navigation";
 import { colors } from "../../lib/theme";
 import { formatDay, localToday, releaseYear } from "../../../../shared/dates";
 

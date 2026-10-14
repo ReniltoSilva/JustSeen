@@ -1,15 +1,16 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { deleteReview, getMyReviewSummaries, removeSharePicture, saveReview } from "../data/reviews";
+import { follow, getFollowingIds, unfollow } from "../data/people";
 import { getMovieDetails } from "../lib/tmdb";
 
-/* "My library", like the website's LibraryContext: the movies I've reviewed, loaded
-once and shared by every screen. `version` goes up whenever my reviews change, so
-the feed knows to reload. (The watchlist and follows join it in a later step) */
+/* "My library", like the website's LibraryContext: the movies I've reviewed and the
+people I follow, loaded once and shared by every screen. `version` goes up whenever
+they change, so screens that list reviews know to reload. (The watchlist joins later) */
 const LibraryContext = createContext(null);
 
-/* A fresh library per logged-in user (the key), so one account's reviews never
-show up for the next person who logs in on the same phone */
+/* A fresh library per logged-in user (the key), so one account's data never
+shows up for the next person who logs in on the same phone */
 export const LibraryProvider = ({ children }) => {
   const { user } = useAuth();
   return (
@@ -21,16 +22,19 @@ export const LibraryProvider = ({ children }) => {
 
 const LibraryStore = ({ userId, children }) => {
   const [myReviews, setMyReviews] = useState(new Map()); // movie_id -> my review
+  const [followingIds, setFollowingIds] = useState(new Set());
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
-    getMyReviewSummaries(userId)
-      .then((reviews) => {
-        if (!cancelled) setMyReviews(new Map(reviews.map((review) => [review.movie_id, review])));
+    Promise.all([getMyReviewSummaries(userId), getFollowingIds(userId)])
+      .then(([reviews, following]) => {
+        if (cancelled) return;
+        setMyReviews(new Map(reviews.map((review) => [review.movie_id, review])));
+        setFollowingIds(new Set(following));
       })
-      .catch((error) => console.error("Failed to load your reviews:", error));
+      .catch((error) => console.error("Failed to load your library:", error));
     return () => {
       cancelled = true;
     };
@@ -87,14 +91,36 @@ const LibraryStore = ({ userId, children }) => {
     [myReviews, userId],
   );
 
+  const toggleFollow = useCallback(
+    async (personId) => {
+      if (!userId || personId === userId) return;
+      if (followingIds.has(personId)) {
+        await unfollow(userId, personId);
+        setFollowingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(personId);
+          return next;
+        });
+      } else {
+        await follow(userId, personId);
+        setFollowingIds((prev) => new Set(prev).add(personId));
+      }
+      setVersion((v) => v + 1);
+    },
+    [userId, followingIds],
+  );
+
   const value = useMemo(
     () => ({
       version,
       myReviewFor: (movieId) => myReviews.get(movieId),
       saveMyReview,
       deleteMyReview,
+      followingIds,
+      isFollowing: (personId) => followingIds.has(personId),
+      toggleFollow,
     }),
-    [version, myReviews, saveMyReview, deleteMyReview],
+    [version, myReviews, saveMyReview, deleteMyReview, followingIds, toggleFollow],
   );
 
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>;

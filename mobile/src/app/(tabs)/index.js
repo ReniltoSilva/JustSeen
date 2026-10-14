@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
-import { openReview } from "../../lib/openReview";
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../../auth/AuthContext";
 import { useLibrary } from "../../library/LibraryContext";
-import { getFeed, getFollowingIds } from "../../data/feed";
+import { getFeed } from "../../data/reviews";
+import { getFollowingIds } from "../../data/people";
 import ReviewCard from "../../components/ReviewCard";
 import { colors } from "../../lib/theme";
 
 /* Reviews by me and the people I follow, newest first. Pull down to refresh */
 export default function Feed() {
   const { user } = useAuth();
-  /* Goes up when I save or delete a review, so the feed reloads */
+  /* Goes up when I save or delete a review or follow someone, so the feed reloads */
   const { version } = useLibrary();
   const [reviews, setReviews] = useState(null);
   const [error, setError] = useState("");
@@ -32,11 +32,6 @@ export default function Feed() {
     load();
   }, [load]);
 
-  /* Tapping one of my own reviews opens it for editing */
-  const editReview = (review) => {
-    const { movie_id, title, poster_path, overview, genre_ids, release_date, runtime } = review;
-    openReview({ movie_id, title, poster_path, overview, genre_ids, release_date, runtime });
-  };
 
   const refresh = async () => {
     setRefreshing(true);
@@ -56,15 +51,7 @@ export default function Feed() {
     <FlatList
       data={reviews ?? []}
       keyExtractor={(review) => review.id}
-      renderItem={({ item }) =>
-        item.user_id === user.id ? (
-          <Pressable onPress={() => editReview(item)} style={({ pressed }) => pressed && { opacity: 0.85 }}>
-            <ReviewCard review={item} isMine />
-          </Pressable>
-        ) : (
-          <ReviewCard review={item} />
-        )
-      }
+      renderItem={({ item }) => <ReviewCard review={item} />}
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}

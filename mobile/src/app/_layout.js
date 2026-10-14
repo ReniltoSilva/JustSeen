@@ -10,8 +10,18 @@ export const unstable_settings = {
   anchor: "(tabs)",
 };
 
-/* Every screen sits inside this: the login state, my reviews, a dark background,
-light status bar text. The review screen slides up over the others */
+/* A top bar with a back arrow, for screens opened on top of the tabs */
+const withBackBar = {
+  headerShown: true,
+  headerStyle: { backgroundColor: colors.ink },
+  headerTintColor: colors.fg,
+  headerTitleStyle: { fontWeight: "700" },
+  headerShadowVisible: false,
+  headerBackButtonDisplayMode: "minimal",
+};
+
+/* Every screen sits inside this: the login state, my library, a dark background,
+light status bar text */
 export default function RootLayout() {
   return (
     <AuthProvider>
@@ -21,6 +31,13 @@ export default function RootLayout() {
           {/* The first screen listed is where the app starts, so the tabs go first */}
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="login" />
+          {/* The movie page's backdrop runs up under a see-through top bar */}
+          <Stack.Screen
+            name="movie/[movieId]"
+            options={{ ...withBackBar, title: "", headerTransparent: true, headerStyle: { backgroundColor: "transparent" } }}
+          />
+          <Stack.Screen name="u/[username]" options={withBackBar} />
+          {/* The review form slides up over the others */}
           <Stack.Screen name="review/[movieId]" options={{ presentation: "modal" }} />
         </Stack>
       </LibraryProvider>
