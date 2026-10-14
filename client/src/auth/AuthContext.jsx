@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import { isUsernameAvailable, updateProfile as saveProfile } from "../data/profiles";
 import { cleanUsername, usernameProblem } from "./usernames";
 import { passwordProblem } from "./passwords";
+import { setMonitoredUser } from "../lib/monitoring";
 
 const AuthContext = createContext(null);
 
@@ -29,6 +30,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const loadProfile = async (newSession) => {
       setSession(newSession);
+      setMonitoredUser(newSession?.user.id);
       if (!newSession) {
         setUser(null);
         setLoading(false);

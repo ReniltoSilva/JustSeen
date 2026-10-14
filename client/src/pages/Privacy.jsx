@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import { usePageMeta } from "../lib/usePageMeta";
+import { contactEmail } from "../lib/site";
 
 /* Who runs JustSeen and where people can reach them about their data */
 const operator = "Junior Silva";
 /* Leave empty to hide; just the handle, without the @ */
 const operatorX = "devnomadJS";
-const contactEmail = "info@justseenapp.com";
-const lastUpdated = "October 13, 2026";
+
+const lastUpdated = "October 14, 2026";
 
 const Section = ({ title, children }) => (
   <section className="mt-10">
@@ -134,6 +135,11 @@ const Privacy = () => {
             <span key="brevo">
               <Strong>Brevo</Strong> delivers our account emails (
               <ExternalLink href="https://www.brevo.com/legal/privacypolicy/">privacy policy</ExternalLink>).
+            </span>,
+            <span key="sentry">
+              <Strong>Sentry</Strong> receives a report when something breaks in the app: the error, the page it
+              happened on, your browser type and your account's ID (never your name or email) (
+              <ExternalLink href="https://sentry.io/privacy/">privacy policy</ExternalLink>).
             </span>,
             <span key="google">
               <Strong>Google</Strong>, only if you choose "Continue with Google" (

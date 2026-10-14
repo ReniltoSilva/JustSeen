@@ -12,6 +12,9 @@ import { AuthProvider } from "./auth/AuthContext.jsx";
 import { LibraryProvider } from "./library/LibraryContext.jsx";
 import { ThemeProvider } from "./theme/ThemeContext.jsx";
 import { ShareProvider } from "./share/ShareContext.jsx";
+import { initMonitoring } from "./lib/monitoring.js";
+
+initMonitoring();
 
 /* Each page is its own file that downloads the first time it's opened,
 so the first visit only loads what it needs */

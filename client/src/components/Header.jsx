@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { feedbackLink } from "../lib/feedback";
 import { useTheme } from "../theme/ThemeContext";
 import UserAvatar from "./UserAvatar";
 import NotificationBell from "./NotificationBell";
@@ -155,6 +156,13 @@ const Header = () => {
                 >
                   Privacy policy
                 </Link>
+                <a
+                  href={feedbackLink({ user })}
+                  onClick={closeMenu}
+                  className="flex rounded-lg px-2.5 py-2 text-sm text-soft hover:bg-fg/5 hover:text-fg"
+                >
+                  Send feedback or report a bug
+                </a>
 
                 <button
                   type="button"

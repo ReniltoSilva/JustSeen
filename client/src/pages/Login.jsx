@@ -9,6 +9,8 @@ import LoginDemo from "../components/LoginDemo";
 import ThemeToggle from "../components/ThemeToggle";
 import { LogoMark } from "../components/Logo";
 import { CheckIcon, GoogleIcon } from "../components/icons";
+import { feedbackLink } from "../lib/feedback";
+import { contactEmail } from "../lib/site";
 import { animalAvatars, animalValue } from "../avatars";
 import { authInputClass as inputClass } from "../components/formStyles";
 import { usePageMeta } from "../lib/usePageMeta";
@@ -414,6 +416,11 @@ const Login = () => {
           <Link to="/privacy" className="underline hover:text-fg">
             Privacy policy
           </Link>
+          {" · "}
+          Found a bug?{" "}
+          <a href={feedbackLink()} className="underline hover:text-fg">
+            {contactEmail}
+          </a>
         </p>
       </section>
     </div>
