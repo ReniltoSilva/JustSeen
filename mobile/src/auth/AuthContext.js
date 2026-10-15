@@ -124,7 +124,8 @@ export const AuthProvider = ({ children }) => {
   /* The reset link opens the website's "choose a new password" page */
   const sendPasswordReset = async (email) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${siteUrl}/reset-password`,
+      /* The website's reset page; ?app= tells it to send me back to the app afterwards */
+      redirectTo: `${siteUrl}/reset-password?app=${encodeURIComponent(appUrl)}`,
     });
     if (error) throw new Error(friendlyError(error));
   };
