@@ -42,6 +42,7 @@ export default function Login() {
   const [mode, setMode] = useState("login"); // "login" | "signup" | "forgot"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [avatar, setAvatar] = useState(() => animalValue(animalAvatars[Math.floor(Math.random() * animalAvatars.length)]));
@@ -204,15 +205,29 @@ export default function Login() {
                     </Pressable>
                   )}
                 </View>
-                <TextInput
-                  style={styles.input}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                  textContentType={mode === "signup" ? "newPassword" : "password"}
-                  onSubmitEditing={mode === "login" ? submit : undefined}
-                />
+                {/* The eye shows or hides what I typed, like the website's PasswordInput */}
+                <View>
+                  <TextInput
+                    style={[styles.input, { paddingRight: 52 }]}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                    textContentType={mode === "signup" ? "newPassword" : "password"}
+                    onSubmitEditing={mode === "login" ? submit : undefined}
+                  />
+                  <Pressable
+                    onPress={() => setShowPassword((shown) => !shown)}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+                    style={styles.eye}
+                  >
+                    <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={21} color={colors.muted} />
+                  </Pressable>
+                </View>
                 {mode === "signup" && <PasswordChecklist password={password} />}
               </>
             )}
@@ -314,6 +329,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 15,
   },
+  eye: { position: "absolute", right: 0, top: 0, bottom: 0, width: 48, alignItems: "center", justifyContent: "center" },
   notice: {
     color: colors.agree,
     fontSize: 14,
