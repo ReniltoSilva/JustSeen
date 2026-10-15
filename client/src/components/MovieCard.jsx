@@ -15,7 +15,7 @@ import {
   BookmarkIcon,
   CheckIcon,
   CloseIcon,
-  EyeIcon,
+  TicketIcon,
   PencilIcon,
   ShareIcon,
   StarIcon,
@@ -121,7 +121,7 @@ const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false 
               className="flex items-center gap-1 text-xs text-muted truncate"
               title={formatDay(review.watched_on, { full: true })}
             >
-              <EyeIcon />
+              <TicketIcon />
               Watched {relativeDay(review.watched_on, today)}
             </span>
           </div>

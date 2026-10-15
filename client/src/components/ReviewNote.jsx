@@ -7,7 +7,7 @@ import { useToday } from "../lib/useToday";
 import ReviewModal from "./ReviewModal";
 import ReactionBar from "./ReactionBar";
 import UserAvatar from "./UserAvatar";
-import { EyeIcon, PencilIcon, ShareIcon, StarIcon } from "./icons";
+import { TicketIcon, PencilIcon, ShareIcon, StarIcon } from "./icons";
 
 /* Five stars with halves: a half star is a full one cut down the middle */
 const Stars = ({ rating }) => (
@@ -53,7 +53,7 @@ const ReviewNote = ({ review, movie }) => {
             )}
           </span>
           <span className="flex items-center gap-1 text-xs text-muted" title={formatDay(review.watched_on, { full: true })}>
-            <EyeIcon />
+            <TicketIcon />
             Watched {relativeDay(review.watched_on, today)}
           </span>
         </div>

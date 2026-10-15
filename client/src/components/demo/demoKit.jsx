@@ -5,7 +5,7 @@ import {
   BellIcon,
   BookmarkIcon,
   CheckIcon,
-  EyeIcon,
+  TicketIcon,
   NeutralIcon,
   PencilIcon,
   SearchIcon,
@@ -168,7 +168,7 @@ export const DemoCard = ({ movie, review, tap = 0, target = false, counts = [0, 
               )}
             </span>
             <span className="flex items-center gap-1 text-xs text-[#8c8c9a]">
-              <EyeIcon />
+              <TicketIcon />
               {review.when}
             </span>
           </div>
