@@ -3,6 +3,7 @@ import { Redirect, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../auth/AuthContext";
 import ActivityBell from "../../components/ActivityBell";
+import Logo from "../../components/Logo";
 import { colors } from "../../lib/theme";
 
 /* A tab's icon: filled when it's the open tab, outlined otherwise */
@@ -44,7 +45,11 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: colors.ink },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Feed", tabBarIcon: tabIcon("home") }} />
+      {/* The feed shows the logo, top left, instead of its name */}
+      <Tabs.Screen
+        name="index"
+        options={{ title: "Feed", headerTitle: () => <Logo />, headerTitleAlign: "left", tabBarIcon: tabIcon("home") }}
+      />
       <Tabs.Screen name="search" options={{ title: "Search", tabBarIcon: tabIcon("search") }} />
       <Tabs.Screen name="watched" options={{ title: "Watched", tabBarIcon: tabIcon("ticket") }} />
       <Tabs.Screen name="watchlist" options={{ title: "Watchlist", tabBarIcon: tabIcon("bookmark") }} />
