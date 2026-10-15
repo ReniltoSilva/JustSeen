@@ -18,16 +18,16 @@ export const getFeed = async (userIds, limit = 100) => {
 export const getUserReviews = async (userId) =>
   unwrap(await newestFirst(supabase.from("reviews").select(reviewSelect).eq("user_id", userId)));
 
-/* Everyone's reviews of one movie */
-export const getMovieReviews = async (movieId) =>
-  unwrap(await newestFirst(supabase.from("reviews").select(reviewSelect).eq("movie_id", movieId)));
+/* Everyone's reviews of one movie or show ({ media_type, movie_id }) */
+export const getTitleReviews = async ({ media_type = "movie", movie_id }) =>
+  unwrap(await newestFirst(supabase.from("reviews").select(reviewSelect).eq("media_type", media_type).eq("movie_id", movie_id)));
 
 /* Only what's needed to know "did I watch this?" across the app */
 export const getMyReviewSummaries = async (userId) =>
   unwrap(
     await supabase
       .from("reviews")
-      .select("id, movie_id, rating, review, watched_on, runtime, genre_ids")
+      .select("id, media_type, movie_id, rating, review, watched_on, runtime, genre_ids")
       .eq("user_id", userId),
   );
 
@@ -43,12 +43,12 @@ export const getYearReviews = async (userId, year) =>
       .order("watched_on"),
   );
 
-/* Add or update: (user_id, movie_id) is unique, so saving twice edits the same review */
+/* Add or update: (user_id, media_type, movie_id) is unique, so saving twice edits the same review */
 export const saveReview = async (review) =>
   unwrap(
     await supabase
       .from("reviews")
-      .upsert(review, { onConflict: "user_id,movie_id" })
+      .upsert(review, { onConflict: "user_id,media_type,movie_id" })
       .select(reviewSelect)
       .single(),
   );

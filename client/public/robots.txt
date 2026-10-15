@@ -8,6 +8,7 @@ Disallow: /watchlist
 Disallow: /people
 Disallow: /search
 Disallow: /movie/
+Disallow: /tv/
 Disallow: /u/
 Disallow: /api/
 

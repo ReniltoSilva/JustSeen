@@ -4,6 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 import { getNotifications, markAllRead, subscribeToNotifications } from "../data/notifications";
 import { posterUrl } from "../lib/tmdb";
 import { timeAgo } from "../lib/dates";
+import { titlePath } from "../lib/titles";
 import UserAvatar from "./UserAvatar";
 import { BellIcon } from "./icons";
 
@@ -20,7 +21,7 @@ const describe = (item) => {
   }
   const reaction = reactionText[item.reaction] ?? reactionText.agree;
   return {
-    to: item.review ? `/movie/${item.review.movie_id}` : "/watched",
+    to: item.review ? titlePath(item.review) : "/watched",
     text: (
       <>
         <span className={reaction.className}>{reaction.verb}</span> your review of{" "}

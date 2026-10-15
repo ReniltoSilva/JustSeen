@@ -43,7 +43,7 @@ const Feed = () => {
     };
   }, [ready, user.id, peopleKey, version]);
 
-  /* The movie fields live on the review row itself */
+  /* The movie or show fields live on the review row itself */
   const shown = filterByGenre(reviews ?? [], selectedGenre);
   const followsNobody = followingIds.size === 0;
 
@@ -72,18 +72,18 @@ const Feed = () => {
             title={followsNobody ? "Welcome to JustSeen!" : "Nothing here yet"}
             message={
               followsNobody
-                ? "Start by logging a movie you've seen, and follow a few people to fill your feed with their reviews."
-                : "When you or the people you follow review a movie, it'll show up here."
+                ? "Start by logging a movie or show you've seen, and follow a few people to fill your feed with their reviews."
+                : "When you or the people you follow review a movie or show, it'll show up here."
             }
             actions={[
-              { to: "/search", label: "Find a movie to review" },
+              { to: "/search", label: "Find something to review" },
               { to: "/people", label: "Find people to follow" },
             ]}
           />
         )}
 
         {reviews?.length > 0 && shown.length === 0 && (
-          <p className="text-center text-muted py-16">No {genreName(selectedGenre)} movies in your feed yet.</p>
+          <p className="text-center text-muted py-16">Nothing in {genreName(selectedGenre)} in your feed yet.</p>
         )}
 
         <Masonry

@@ -73,8 +73,8 @@ const Header = () => {
             </span>
             <input
               type="search"
-              placeholder="Search movies..."
-              aria-label="Search movies"
+              placeholder="Search movies & TV..."
+              aria-label="Search movies and TV shows"
               className="w-full h-10 rounded-full bg-panel border border-line pl-10 pr-4 text-sm text-fg placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/25 transition"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

@@ -3,7 +3,7 @@ import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Tex
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
 import { useNotifications } from "../notifications/NotificationsContext";
-import { openMovie, openProfile } from "../lib/navigation";
+import { openProfile, openTitle } from "../lib/navigation";
 import { posterUrl } from "../lib/tmdb";
 import { colors } from "../lib/theme";
 import Avatar from "../components/Avatar";
@@ -55,7 +55,7 @@ export default function Activity() {
   );
 }
 
-/* One notification. Tapping a follow opens their profile, a reaction opens the movie */
+/* One notification. Tapping a follow opens their profile, a reaction opens the movie or show */
 const NotificationRow = ({ item }) => {
   const isFollow = item.type === "follow";
   const reaction = reactionText[item.reaction] ?? reactionText.agree;
@@ -64,7 +64,7 @@ const NotificationRow = ({ item }) => {
   const open = () => {
     if (isFollow) {
       if (item.actor) openProfile(item.actor.username);
-    } else if (item.review) openMovie(item.review.movie_id);
+    } else if (item.review) openTitle(item.review);
   };
 
   return (
@@ -79,7 +79,7 @@ const NotificationRow = ({ item }) => {
           ) : (
             <>
               <Text style={{ color: reaction.color }}>{reaction.verb}</Text> your review of{" "}
-              <Text style={styles.name}>{item.review?.title ?? "a movie"}</Text>
+              <Text style={styles.name}>{item.review?.title ?? "your review"}</Text>
             </>
           )}
         </Text>

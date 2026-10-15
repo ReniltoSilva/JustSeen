@@ -27,7 +27,7 @@ const Field = ({ label, hint, children }) => (
 const promises = [
   { emoji: "✍️", title: "Share what you watched", text: "A star rating and a few honest words. That's a review." },
   { emoji: "👀", title: "See what friends are watching", text: "Your feed is the people you follow, not a database." },
-  { emoji: "🍿", title: "Pick your next movie", text: "Trust friends' taste over critic scores." },
+  { emoji: "🍿", title: "Pick what to watch next", text: "Trust friends' taste over critic scores." },
 ];
 
 const copy = {
@@ -407,7 +407,7 @@ const Login = () => {
         </ul>
 
         <p className="mt-6 text-center text-xs text-muted">
-          Movie data and posters from{" "}
+          Movie and TV data and posters from{" "}
           <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer" className="underline hover:text-fg">
             TMDB
           </a>

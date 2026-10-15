@@ -1,9 +1,10 @@
-/* Netlify Function: forwards movie requests to TMDB and adds the secret token,
+/* Netlify Function: forwards movie and TV show requests to TMDB and adds the secret token,
 so the token never ships to the browser. The site calls /api/tmdb/<path>
 (see netlify.toml), the same path Vite's dev proxy answers locally. */
 
-/* Only the TMDB endpoints the app uses, so this can't be used as an open proxy */
-const allowed = [/^search\/movie$/, /^movie\/\d+$/, /^movie\/\d+\/credits$/];
+/* Only the TMDB endpoints the app uses (movies, TV shows and searching both), so this
+can't be used as an open proxy */
+const allowed = [/^search\/(movie|tv|multi)$/, /^(movie|tv)\/\d+$/, /^(movie|tv)\/\d+\/credits$/];
 
 export default async (request) => {
   if (request.method !== "GET") {
@@ -29,7 +30,7 @@ export default async (request) => {
     status: upstream.status,
     headers: {
       "content-type": "application/json",
-      /* Movie data barely changes: let browsers and Netlify's CDN reuse it for an hour */
+      /* TMDB data barely changes: let browsers and Netlify's CDN reuse it for an hour */
       "cache-control": "public, max-age=3600",
     },
   });

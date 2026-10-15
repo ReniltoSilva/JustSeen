@@ -10,7 +10,7 @@ const maxReviewLength = 250;
 
 const starValues = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
 
-/* Write, edit or delete my review of a movie. Waits for my reviews to load first, so
+/* Write, edit or delete my review of a movie or show. Waits for my reviews to load first, so
 it knows whether I already reviewed this one (otherwise an old review would open as a
 new one and be saved with today's date) */
 const ReviewModal = ({ movie, onClose }) => {
@@ -41,7 +41,7 @@ const ReviewDialog = ({ movie, onClose }) => {
   const { user } = useAuth();
   const openShare = useShare();
   const { myReviewFor, saveMyReview, deleteMyReview } = useLibrary();
-  const existing = myReviewFor(movie.movie_id);
+  const existing = myReviewFor(movie);
 
   const [rating, setRating] = useState(Number(existing?.rating) || 0);
   const [review, setReview] = useState(existing?.review ?? "");
@@ -79,7 +79,7 @@ const ReviewDialog = ({ movie, onClose }) => {
     setSaving(true);
     setError("");
     try {
-      await deleteMyReview(movie.movie_id);
+      await deleteMyReview(movie);
       close();
     } catch (err) {
       console.error("Failed to delete review:", err);

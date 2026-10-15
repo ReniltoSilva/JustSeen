@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
-import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useLibrary } from "../library/LibraryContext";
 import { getUserReviews } from "../data/reviews";
 import { getFollowCounts } from "../data/people";
 import { getWatchlist } from "../data/watchlist";
-import { openFollows, openMovie, openYear } from "../lib/navigation";
+import { openFollows, openYear } from "../lib/navigation";
 import { LinearGradient } from "expo-linear-gradient";
-import { posterUrl } from "../lib/tmdb";
 import { colors } from "../lib/theme";
 import Avatar from "./Avatar";
 import FollowButton from "./FollowButton";
 import WatchedTile from "./WatchedTile";
+import WatchlistTile from "./WatchlistTile";
+import { titleKey } from "../../../shared/titles";
 import { genreName } from "../../../shared/genres";
 
 /* Genre that shows up most across the reviews */
@@ -161,12 +161,12 @@ const ProfileView = ({ person, isMe, footer }) => {
   return (
     <FlatList
       data={tab === "watched" ? list : watchlist}
-      keyExtractor={(item) => `${tab}-${item.id ?? item.movie_id}`}
+      keyExtractor={(item) => `${tab}-${item.id ?? titleKey(item)}`}
       numColumns={2}
       columnWrapperStyle={styles.columns}
       contentContainerStyle={styles.content}
       ListHeaderComponent={header}
-      renderItem={({ item }) => (tab === "watched" ? <WatchedTile review={item} /> : <PosterTile movie={item} />)}
+      renderItem={({ item }) => (tab === "watched" ? <WatchedTile review={item} /> : <WatchlistTile entry={item} mine={isMe} />)}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}
       ListEmptyComponent={
         reviews === null && !error ? (
@@ -175,7 +175,7 @@ const ProfileView = ({ person, isMe, footer }) => {
           <Text style={styles.empty}>
             {tab === "watched"
               ? isMe
-                ? "You haven't reviewed anything yet. Find a movie in Search."
+                ? "You haven't reviewed anything yet. Find a movie or show in Search."
                 : `${firstName} hasn't reviewed anything yet.`
               : isMe
                 ? "Your watchlist is empty."
@@ -188,17 +188,6 @@ const ProfileView = ({ person, isMe, footer }) => {
   );
 };
 
-/* A movie on someone's watchlist: the poster and the title */
-const PosterTile = ({ movie }) => (
-  <Pressable onPress={() => openMovie(movie.movie_id)} style={({ pressed }) => [styles.tile, pressed && { opacity: 0.8 }]}>
-    <View style={styles.tilePoster}>
-      <Image source={posterUrl(movie.poster_path, "w342")} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
-    </View>
-    <Text style={styles.tileTitle} numberOfLines={1}>
-      {movie.title}
-    </Text>
-  </Pressable>
-);
 
 const styles = StyleSheet.create({
   content: { padding: 16, paddingBottom: 40 },
@@ -255,9 +244,6 @@ const styles = StyleSheet.create({
   error: { color: colors.disagree, fontSize: 14 },
   empty: { color: colors.muted, fontSize: 15, textAlign: "center", paddingVertical: 32, lineHeight: 22 },
   columns: { gap: 12 },
-  tile: { flex: 1, maxWidth: "50%", marginBottom: 18, gap: 4 },
-  tilePoster: { aspectRatio: 2 / 3, borderRadius: 12, overflow: "hidden", backgroundColor: colors.panel2 },
-  tileTitle: { color: colors.fg, fontSize: 14, fontWeight: "600", marginTop: 4 },
 });
 
 export default ProfileView;

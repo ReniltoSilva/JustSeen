@@ -1,7 +1,7 @@
 {
   "name": "JustSeen",
   "short_name": "JustSeen",
-  "description": "Share movie reviews with your friends.",
+  "description": "Share movie and TV show reviews with your friends.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#09090d",

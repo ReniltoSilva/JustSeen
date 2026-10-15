@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { searchMovies } from "../lib/tmdb";
+import { searchTitles } from "../lib/tmdb";
+import { mixLabel, titleKey } from "../lib/titles";
 import MovieCard from "../components/MovieCard";
 import Masonry from "../components/Masonry";
 import PageHeading from "../components/PageHeading";
@@ -8,21 +9,21 @@ import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton } from "../components/Skeletons";
 import { usePageMeta } from "../lib/usePageMeta";
 
-/* Movie search through TMDB */
+/* Movie and TV show search through TMDB */
 const Search = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q")?.trim() ?? "";
   usePageMeta({ title: query ? `"${query}"` : "Search" });
 
   /* Results are stored with the query they belong to, so a new search never shows old results */
-  const [search, setSearch] = useState({ query: "", movies: [], totalResults: 0, page: 0, totalPages: 0 });
+  const [search, setSearch] = useState({ query: "", titles: [], page: 0, totalPages: 0 });
   const [error, setError] = useState("");
   const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     if (!query) return;
     let cancelled = false;
-    searchMovies(query, 1)
+    searchTitles(query, 1)
       .then((data) => {
         if (cancelled) return;
         setSearch({ query, ...data, page: 1 });
@@ -43,14 +44,14 @@ const Search = () => {
   const loadMore = async () => {
     setLoadingMore(true);
     try {
-      const data = await searchMovies(query, search.page + 1);
-      /* TMDB can repeat a movie across pages */
+      const data = await searchTitles(query, search.page + 1);
+      /* TMDB can repeat a title across pages */
       setSearch((prev) => {
-        const seen = new Set(prev.movies.map((movie) => movie.movie_id));
+        const seen = new Set(prev.titles.map(titleKey));
         return {
           ...prev,
           page: prev.page + 1,
-          movies: [...prev.movies, ...data.movies.filter((movie) => !seen.has(movie.movie_id))],
+          titles: [...prev.titles, ...data.titles.filter((title) => !seen.has(titleKey(title)))],
         };
       });
     } catch (err) {
@@ -64,8 +65,8 @@ const Search = () => {
     return (
       <EmptyState
         emoji="🔎"
-        title="Search for a movie"
-        message="Type a title in the search bar at the top to find a movie, then review it or save it for later."
+        title="Search for a movie or show"
+        message="Type a title in the search bar at the top to find a movie or TV show, then review it or save it for later."
       />
     );
   }
@@ -77,9 +78,7 @@ const Search = () => {
           <PageHeading
             title={`Results for “${query}”`}
             subtitle={
-              current
-                ? `${search.totalResults.toLocaleString()} ${search.totalResults === 1 ? "movie" : "movies"} found`
-                : "Searching..."
+              current ? (search.page < search.totalPages ? "Movies and TV shows" : `${mixLabel(search.titles)} found`) : "Searching..."
             }
           />
         </section>
@@ -87,19 +86,19 @@ const Search = () => {
         {error && <p className="text-sm text-disagree">{error}</p>}
         {loading && <MovieGridSkeleton withHeader={false} />}
 
-        {current && search.movies.length === 0 && (
-          <EmptyState emoji="🤔" title={`No movies match “${query}”`} message="Check the spelling or try another title." />
+        {current && search.titles.length === 0 && (
+          <EmptyState emoji="🤔" title={`Nothing matches “${query}”`} message="Check the spelling or try another title." />
         )}
 
         {current && (
           <Masonry
-            items={search.movies}
-            getKey={(movie) => movie.movie_id}
+            items={search.titles}
+            getKey={titleKey}
             renderItem={(movie) => <MovieCard movie={movie} showOverviewText />}
           />
         )}
 
-        {current && search.page < search.totalPages && search.movies.length > 0 && (
+        {current && search.page < search.totalPages && search.titles.length > 0 && (
           <div className="flex justify-center pt-10 pb-16">
             <button
               type="button"
@@ -113,7 +112,7 @@ const Search = () => {
         )}
 
         <p className="pt-8 pb-4 text-center text-xs text-muted">
-          Movie data from{" "}
+          Movie and TV data from{" "}
           <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer" className="underline">
             TMDB
           </a>

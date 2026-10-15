@@ -1,4 +1,5 @@
 import { supabase, unwrap } from "../lib/supabase";
+import { rankSuggestions } from "../lib/suggestions";
 
 /* Ids of everyone this person follows */
 export const getFollowingIds = async (userId) => {
@@ -50,22 +51,44 @@ export const unfollow = async (myId, theirId) =>
     await supabase.from("follows").delete().eq("follower_id", myId).eq("following_id", theirId),
   );
 
-/* People followed by the people I follow, that I don't follow yet, most shared first */
-export const getSuggestions = async (myId, followingIds, limit = 10) => {
-  if (followingIds.length === 0) return [];
-  const rows = unwrap(
-    await supabase
-      .from("follows")
-      .select("following_id, profile:profiles!follows_following_id_fkey(*)")
-      .in("follower_id", followingIds),
-  );
+/* People I might want to follow, ranked by shared/suggestions.js: followed by people I
+follow, or who reviewed the same movies and shows as me (my 100 latest). With little to
+go on, the newest accounts fill the list. myReviews: my reviews from the library */
+export const getSuggestions = async (myId, followingIds, myReviews, limit = 12) => {
+  const latest = [...myReviews].sort((a, b) => b.watched_on.localeCompare(a.watched_on)).slice(0, 100);
+  const titleIds = [...new Set(latest.map((review) => review.movie_id))];
 
-  const counts = new Map();
-  for (const row of rows) {
-    if (row.following_id === myId || followingIds.includes(row.following_id)) continue;
-    const entry = counts.get(row.following_id) ?? { profile: row.profile, mutual: 0 };
-    entry.mutual += 1;
-    counts.set(row.following_id, entry);
-  }
-  return [...counts.values()].sort((a, b) => b.mutual - a.mutual).slice(0, limit);
+  const [friendFollows, sameTitleReviews] = await Promise.all([
+    followingIds.length === 0
+      ? []
+      : supabase
+          .from("follows")
+          .select("following_id, profile:profiles!follows_following_id_fkey(*)")
+          .in("follower_id", followingIds)
+          .then(unwrap),
+    titleIds.length === 0
+      ? []
+      : supabase
+          .from("reviews")
+          .select("user_id, media_type, movie_id, title, rating, author:profiles!reviews_user_id_fkey(*)")
+          .in("movie_id", titleIds)
+          .neq("user_id", myId)
+          .limit(1000)
+          .then(unwrap),
+  ]);
+
+  const ranked = rankSuggestions({ myId, followingIds, friendFollows, sameTitleReviews, myReviews: latest, limit });
+  if (ranked.length >= 4) return ranked;
+
+  const skip = new Set([myId, ...followingIds, ...ranked.map((entry) => entry.profile.id)]);
+  const newest = unwrap(
+    await supabase
+      .from("profiles")
+      .select("*")
+      .eq("needs_setup", false) // half-made Google accounts have no real name yet
+      .order("created_at", { ascending: false })
+      .limit(limit + skip.size),
+  );
+  const extra = newest.filter((profile) => !skip.has(profile.id)).map((profile) => ({ profile, mutual: 0, inCommon: 0 }));
+  return [...ranked, ...extra].slice(0, limit);
 };

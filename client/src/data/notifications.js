@@ -5,7 +5,7 @@ export const getNotifications = async (limit = 30) =>
     await supabase
       .from("notifications")
       .select(
-        "*, actor:profiles!notifications_actor_id_fkey(id, username, name, avatar), review:reviews(id, movie_id, title, poster_path)",
+        "*, actor:profiles!notifications_actor_id_fkey(id, username, name, avatar), review:reviews(id, media_type, movie_id, title, poster_path)",
       )
       .order("created_at", { ascending: false })
       .limit(limit),

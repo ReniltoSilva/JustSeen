@@ -55,6 +55,7 @@ createRoot(document.getElementById("root")).render(
                     <Route path="people" element={page(<People />)} />
                     <Route path="search" element={page(<Search />)} />
                     <Route path="movie/:movieId" element={page(<MovieDetails />)} />
+                    <Route path="tv/:showId" element={page(<MovieDetails mediaType="tv" />)} />
                     <Route path="u/:username" element={page(<Profile />)} />
                     <Route path="u/:username/year/:year" element={page(<YearInFilm />)} />
                   </Route>

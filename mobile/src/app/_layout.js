@@ -21,6 +21,9 @@ const withBackBar = {
   headerBackButtonDisplayMode: "minimal",
 };
 
+/* The same bar, see-through, over a movie's or show's backdrop */
+const titlePageOptions = { ...withBackBar, title: "", headerTransparent: true, headerStyle: { backgroundColor: "transparent" } };
+
 /* Every screen sits inside this: the login state, my library, my notifications, a dark
 background, light status bar text */
 export default function RootLayout() {
@@ -35,17 +38,15 @@ export default function RootLayout() {
             <Stack.Screen name="login" />
             <Stack.Screen name="welcome" />
             <Stack.Screen name="restore" />
-            {/* The movie page's backdrop runs up under a see-through top bar */}
-            <Stack.Screen
-              name="movie/[movieId]"
-              options={{ ...withBackBar, title: "", headerTransparent: true, headerStyle: { backgroundColor: "transparent" } }}
-            />
+            {/* A movie's or show's backdrop runs up under a see-through top bar */}
+            <Stack.Screen name="movie/[movieId]" options={titlePageOptions} />
+            <Stack.Screen name="tv/[showId]" options={titlePageOptions} />
             <Stack.Screen name="u/[username]" options={withBackBar} />
             <Stack.Screen name="follows/[username]" options={withBackBar} />
             <Stack.Screen name="year/[username]" options={withBackBar} />
             <Stack.Screen name="activity" options={{ ...withBackBar, title: "Activity" }} />
             {/* These slide up over the others */}
-            <Stack.Screen name="review/[movieId]" options={{ presentation: "modal" }} />
+            <Stack.Screen name="review/[titleId]" options={{ presentation: "modal" }} />
             <Stack.Screen name="edit-profile" options={{ presentation: "modal" }} />
             <Stack.Screen name="share/[reviewId]" options={{ presentation: "modal" }} />
           </Stack>

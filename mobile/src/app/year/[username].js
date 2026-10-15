@@ -7,15 +7,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../auth/AuthContext";
 import { getProfileByUsername } from "../../data/people";
 import { getYearReviews } from "../../data/reviews";
-import { openMovie, openProfile } from "../../lib/navigation";
+import { openProfile, openTitle } from "../../lib/navigation";
 import { posterUrl } from "../../lib/tmdb";
 import { colors } from "../../lib/theme";
 import Avatar from "../../components/Avatar";
 import BarChart from "../../components/BarChart";
 import { yearStats } from "../../../../shared/yearStats";
 import { formatDay, releaseYear } from "../../../../shared/dates";
+import { countLabel, isShow } from "../../../../shared/titles";
 
-/* Someone's year in film: how many movies, hours, favourites and moments, worked out
+/* Someone's year in film: how many movies and shows, hours, favourites and moments, worked out
 by the same shared/yearStats.js as the website (/year/<username>?year=2026) */
 export default function YearScreen() {
   const params = useLocalSearchParams();
@@ -88,9 +89,11 @@ export default function YearScreen() {
         {yearNav}
         <View style={styles.emptyBox}>
           <Text style={styles.emptyEmoji}>📽️</Text>
-          <Text style={styles.emptyTitle}>No movies logged in {year}</Text>
+          <Text style={styles.emptyTitle}>Nothing logged in {year}</Text>
           <Text style={styles.muted}>
-            {isMe ? "Review the movies you watch and your year in film builds itself." : `${firstName} didn't log any movies in ${year}.`}
+            {isMe
+              ? "Review the movies and shows you watch and your year in film builds itself."
+              : `${firstName} didn't log anything in ${year}.`}
           </Text>
         </View>
       </ScrollView>
@@ -98,18 +101,24 @@ export default function YearScreen() {
   }
 
   const bigNumbers = [
-    { value: stats.count, label: stats.count === 1 ? "movie" : "movies" },
-    { value: stats.hours, label: stats.hours === 1 ? "hour" : "hours", note: stats.missingRuntime ? `${stats.missingRuntime} without runtime` : null },
+    { value: stats.movies, label: stats.movies === 1 ? "movie" : "movies" },
+    /* Shows only once there are some */
+    ...(stats.shows ? [{ value: stats.shows, label: stats.shows === 1 ? "TV show" : "TV shows" }] : []),
+    {
+      value: stats.hours,
+      label: `${stats.hours === 1 ? "hour" : "hours"}${stats.shows ? " of movies" : ""}`,
+      note: stats.missingRuntime ? `${stats.missingRuntime} without runtime` : null,
+    },
     { value: stats.average ? `★ ${stats.average}` : "—", label: "average rating" },
     { value: stats.streak, label: stats.streak === 1 ? "day streak" : "days in a row" },
   ];
 
   const critic =
     Number(stats.average) >= 4
-      ? "A generous critic: most movies won you over."
+      ? "A generous critic: most of what you watched won you over."
       : Number(stats.average) >= 3
         ? "A fair critic: the good ones earned it."
-        : "A tough critic: movies had to work for it.";
+        : "A tough critic: everything had to work for it.";
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -126,7 +135,7 @@ export default function YearScreen() {
         <Text style={styles.kickerLight}>{isMe ? "YOUR" : `${firstName.toUpperCase()}'S`} YEAR IN FILM</Text>
         <Text style={styles.heroYear}>{year}</Text>
         <Text style={styles.heroText}>
-          {stats.count} {stats.count === 1 ? "movie" : "movies"}
+          {[stats.movies && countLabel(stats.movies), stats.shows && countLabel(stats.shows, "tv")].filter(Boolean).join(" and ")}
           {stats.hours > 0 && `, about ${stats.hours} ${stats.hours === 1 ? "hour" : "hours"} in front of the screen`}
           {stats.topGenres[0] && `, and a soft spot for ${stats.topGenres[0].name.toLowerCase()}`}.
         </Text>
@@ -148,8 +157,7 @@ export default function YearScreen() {
         <Text style={styles.kicker}>MONTH BY MONTH</Text>
         {stats.busiestMonth && (
           <Text style={styles.sentence}>
-            <Text style={{ fontWeight: "700" }}>{stats.busiestMonth}</Text> was the busiest month, with {stats.busiestCount}{" "}
-            {stats.busiestCount === 1 ? "movie" : "movies"}.
+            <Text style={{ fontWeight: "700" }}>{stats.busiestMonth}</Text> was the busiest month, with {stats.busiestCount} watched.
           </Text>
         )}
         <BarChart data={stats.perMonth} />
@@ -207,7 +215,7 @@ export default function YearScreen() {
           <Text style={styles.kicker}>TIME CAPSULE</Text>
           <MovieChip
             review={stats.oldest}
-            caption={`The oldest movie ${isMe ? "you" : firstName} watched, from ${releaseYear(stats.oldest.release_date)}`}
+            caption={`The oldest ${isShow(stats.oldest) ? "show" : "movie"} ${isMe ? "you" : firstName} watched, from ${releaseYear(stats.oldest.release_date)}`}
           />
         </View>
       )}
@@ -233,7 +241,7 @@ export default function YearScreen() {
 
 /* A small poster with the title and a line under it; tap for the movie */
 const MovieChip = ({ review, caption, captionColor }) => (
-  <Pressable onPress={() => openMovie(review.movie_id)} style={styles.chip}>
+  <Pressable onPress={() => openTitle(review)} style={styles.chip}>
     <Image source={posterUrl(review.poster_path, "w154")} style={styles.chipPoster} contentFit="cover" />
     <View style={{ flex: 1, gap: 3 }}>
       <Text style={styles.chipTitle} numberOfLines={2}>

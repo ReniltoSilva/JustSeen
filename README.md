@@ -6,12 +6,13 @@
 
 - **Feed** of your reviews and those of the people you follow, newest first, filterable by genre
 - **Reviews** with half-star ratings, a short review (up to 250 characters) and the date you watched
-- **Watchlist** for movies you want to see; reviewing a movie takes it off the list
-- **Movie pages** with cast, runtime and what people on JustSeen thought (friends first, no critic scores)
-- **Search** any movie through [TMDB](https://www.themoviedb.org/)
-- **Follow** people, browse their profiles, watched movies and watchlists
+- **Movies and TV shows**: review either, told apart by `media_type`
+- **Watchlist** for what you want to see; reviewing something takes it off the list
+- **Movie and show pages** with cast, runtime or seasons, and what people on JustSeen thought (friends first, no critic scores)
+- **Search** any movie or TV show through [TMDB](https://www.themoviedb.org/)
+- **Follow** people, browse their profiles, what they watched and their watchlists, with suggestions based on friends in common and shared taste
 - **Reactions** (agree / not sure / disagree) on reviews, with real-time notifications
-- **Year in Film**: movies and hours watched, top genres, month-by-month chart, favourites
+- **Year in Film**: movies, shows and hours watched, top genres, month-by-month chart, favourites
 - Light and dark mode, animal avatars, editable profile, email + password accounts with password rules
 
 ## Tech
@@ -19,7 +20,7 @@
 - **Website:** React 19, Vite, React Router, Tailwind CSS 4 + daisyUI
 - **Database, login and real-time:** [Supabase](https://supabase.com) (Postgres with Row Level Security)
 - **Hosting:** [Netlify](https://www.netlify.com), plus one Netlify Function that keeps the TMDB key off the browser
-- **Movie data:** [TMDB API](https://developer.themoviedb.org/)
+- **Movie and TV data:** [TMDB API](https://developer.themoviedb.org/)
 
 ## Running it locally
 

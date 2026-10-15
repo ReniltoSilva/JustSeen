@@ -93,7 +93,7 @@ export default function EditProfile() {
             maxLength={80}
             multiline
             textAlignVertical="top"
-            placeholder="A line about your taste in movies"
+            placeholder="A line about your taste in movies and shows"
             placeholderTextColor={colors.muted}
           />
 

@@ -13,6 +13,7 @@ import GenreChips from "../components/GenreChips";
 import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton, ProfileHeaderSkeleton } from "../components/Skeletons";
 import { usePageMeta } from "../lib/usePageMeta";
+import { titleKey } from "../lib/titles";
 
 /* Someone's profile: their stats, what they watched and what they want to watch */
 const Profile = () => {
@@ -120,17 +121,17 @@ const Profile = () => {
                 ? `${isMe ? "You haven't" : `${firstName} hasn't`} reviewed anything yet`
                 : `${isMe ? "Your" : `${firstName}'s`} watchlist is empty`
             }
-            actions={isMe ? [{ to: "/search", label: "Find a movie" }] : []}
+            actions={isMe ? [{ to: "/search", label: "Find a movie or show" }] : []}
           />
         )}
 
         {movies.length > 0 && shown.length === 0 && (
-          <p className="text-center text-muted py-16">No movies in this genre.</p>
+          <p className="text-center text-muted py-16">Nothing in this genre.</p>
         )}
 
         <Masonry
           items={shown}
-          getKey={(movie) => `${tab}-${movie.id ?? movie.movie_id}`}
+          getKey={(movie) => `${tab}-${movie.id ?? titleKey(movie)}`}
           renderItem={(movie) =>
             tab === "watched" ? (
               <MovieCard movie={movie} review={movie} variant="review" />

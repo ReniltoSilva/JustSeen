@@ -8,7 +8,8 @@ import ReactionBar from "./ReactionBar";
 import PosterActions from "./PosterActions";
 import { colors } from "../lib/theme";
 import { posterUrl } from "../lib/tmdb";
-import { openMovie, openProfile } from "../lib/navigation";
+import { openProfile, openTitle } from "../lib/navigation";
+import { isShow } from "../../../shared/titles";
 import { genreName } from "../../../shared/genres";
 import { relativeDay, releaseYear } from "../../../shared/dates";
 import { useToday } from "../lib/useToday";
@@ -28,9 +29,9 @@ export const Stars = ({ rating, size = 14 }) => (
 );
 
 /* One review, laid out like the website's MovieCard. Tap the person for their
-profile, the poster or title for the movie; the pill on the poster reviews, shares
-or saves it.
-`compact` leaves the movie out (poster, title, genres), for the movie's own page */
+profile, the poster or title for the movie or show; the buttons next to their name review,
+share or save it.
+`compact` leaves the title out (poster, title, genres), for its own page */
 const ReviewCard = ({ review, compact = false }) => {
   const { user } = useAuth();
   const isMine = review.user_id === user?.id;
@@ -57,11 +58,13 @@ const ReviewCard = ({ review, compact = false }) => {
               {isMine && <Text style={styles.youBadge}>YOU</Text>}
             </View>
             <View style={styles.whenRow}>
-              <Ionicons name="eye-outline" size={13} color={colors.muted} />
+              <Ionicons name="ticket-outline" size={13} color={colors.muted} />
               <Text style={styles.when}>Watched {relativeDay(review.watched_on, today)}</Text>
             </View>
           </View>
         </Pressable>
+        {/* The title's own page has these as big buttons already */}
+        {!compact && <PosterActions review={review} inline />}
       </View>
 
       {compact ? (
@@ -76,22 +79,22 @@ const ReviewCard = ({ review, compact = false }) => {
       ) : (
         <>
       {/* The whole poster, framed by a blurred copy of itself and fading into the card */}
-      <Pressable onPress={() => openMovie(review.movie_id)} style={styles.poster} accessibilityLabel={`Open ${review.title}`}>
+      <Pressable onPress={() => openTitle(review)} style={styles.poster} accessibilityLabel={`Open ${review.title}`}>
         <Image source={posterUrl(review.poster_path, "w342")} style={StyleSheet.absoluteFill} contentFit="cover" blurRadius={25} />
         <View style={styles.posterShade} />
         <Image source={posterUrl(review.poster_path)} style={styles.posterImage} contentFit="cover" transition={200} />
         <LinearGradient colors={["transparent", colors.panel]} style={styles.posterFade} />
-        <PosterActions review={review} />
       </Pressable>
 
       <View style={styles.body}>
         <View style={styles.titleRow}>
-          <Text style={styles.title} numberOfLines={2} onPress={() => openMovie(review.movie_id)}>
+          <Text style={styles.title} numberOfLines={2} onPress={() => openTitle(review)}>
             {review.title}
           </Text>
           <View style={styles.meta}>
-            <Ionicons name="star" size={12} color={colors.star} />
-            <Text style={styles.rating}>{Number(review.rating)}</Text>
+            <Ionicons name="star" size={16} color={colors.star} />
+            <Text style={styles.metaRating}>{Number(review.rating)}</Text>
+            {isShow(review) && <Text style={styles.tvBadge}>TV</Text>}
             <Text style={styles.year}>{releaseYear(review.release_date)}</Text>
           </View>
         </View>
@@ -128,8 +131,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingLeft: 12,
+    paddingRight: 6,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255,255,255,0.05)",
   },
@@ -149,18 +153,30 @@ const styles = StyleSheet.create({
   },
   whenRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   when: { color: colors.muted, fontSize: 12 },
-  poster: { aspectRatio: 4 / 5, backgroundColor: colors.panel2, alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  poster: { aspectRatio: 3 / 4, backgroundColor: colors.panel2, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   posterShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(9,9,13,0.45)" },
-  posterImage: { height: "92%", aspectRatio: 2 / 3, borderRadius: 10 },
+  posterImage: { height: "97%", aspectRatio: 2 / 3, borderRadius: 10 },
   stars: { flexDirection: "row", gap: 2 },
   compactRating: { flexDirection: "row", alignItems: "center", gap: 8 },
-  posterFade: { position: "absolute", left: 0, right: 0, bottom: 0, height: "18%" },
+  posterFade: { position: "absolute", left: 0, right: 0, bottom: 0, height: "8%" },
   body: { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 12 },
   titleRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 8 },
-  title: { color: colors.fg, fontSize: 15, fontWeight: "600", flex: 1, lineHeight: 20 },
-  meta: { flexDirection: "row", alignItems: "center", gap: 3, paddingTop: 2 },
+  title: { color: colors.fg, fontSize: 16, fontWeight: "700", flex: 1, lineHeight: 21 },
+  meta: { flexDirection: "row", alignItems: "center", gap: 4, paddingTop: 1 },
+  metaRating: { color: colors.star, fontSize: 16, fontWeight: "800", marginRight: 6 },
+  tvBadge: {
+    color: colors.brandSoft,
+    backgroundColor: "rgba(124,92,255,0.18)",
+    fontSize: 11,
+    fontWeight: "800",
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 6,
+    overflow: "hidden",
+    marginRight: 2,
+  },
   rating: { color: colors.star, fontSize: 12, fontWeight: "700", marginRight: 6 },
-  year: { color: colors.muted, fontSize: 12 },
+  year: { color: colors.soft, fontSize: 15, fontWeight: "500" },
   genres: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 8 },
   genre: {
     color: colors.soft,

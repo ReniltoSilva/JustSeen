@@ -45,7 +45,7 @@ const Privacy = () => {
       <p className="text-sm font-medium text-muted">Last updated {lastUpdated}</p>
       <h1 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight text-fg">Privacy policy</h1>
       <p className="mt-4 text-lg leading-relaxed text-soft">
-        JustSeen is a small app for sharing movie reviews with friends. We collect only what the app needs to work, we
+        JustSeen is a small app for sharing movie and TV show reviews with friends. We collect only what the app needs to work, we
         don't sell your data, and we don't show ads or track you around the web.
       </p>
 
@@ -75,7 +75,7 @@ const Privacy = () => {
               <Strong>Your profile:</Strong> your name, username, avatar, and the bio and location if you add them.
             </span>,
             <span key="activity">
-              <Strong>What you do in the app:</Strong> the movies you review (star rating, review text and the date you
+              <Strong>What you do in the app:</Strong> the movies and shows you review (star rating, review text and the date you
               watched), your watchlist, the people you follow, your reactions to other people's reviews, and the
               notifications those create.
             </span>,
@@ -117,7 +117,7 @@ const Privacy = () => {
         <p>
           When you share a review, it gets its own link (justseenapp.com/r/…) so the apps you post it to can show a
           preview. From then on <Strong>anyone with that link can see that one review</Strong>: your name, avatar and
-          username, the movie, your rating and what you wrote. A preview picture of it is stored with Supabase for this.
+          username, the movie or show, your rating and what you wrote. A preview picture of it is stored with Supabase for this.
           Reviews you never share stay visible to JustSeen users only.
         </p>
         <p>
@@ -152,7 +152,7 @@ const Privacy = () => {
               <ExternalLink href="https://policies.google.com/privacy">privacy policy</ExternalLink>).
             </span>,
             <span key="tmdb">
-              <Strong>TMDB</Strong> provides movie information and posters. Movie searches go through our server, so TMDB
+              <Strong>TMDB</Strong> provides movie and TV show information and posters. Searches go through our server, so TMDB
               doesn't see who searched, but posters load straight from TMDB's servers, which see your IP address (
               <ExternalLink href="https://www.themoviedb.org/privacy-policy">privacy policy</ExternalLink>).
             </span>,

@@ -10,16 +10,16 @@ export const getWatchlist = async (userId) =>
   );
 
 export const addToWatchlist = async (userId, movie) => {
-  const { movie_id, title, poster_path, overview, genre_ids, release_date } = movie;
+  const { media_type = "movie", movie_id, title, poster_path, overview, genre_ids, release_date } = movie;
   return unwrap(
     await supabase
       .from("watchlist")
       .upsert(
-        { user_id: userId, movie_id, title, poster_path, overview, genre_ids, release_date },
-        { onConflict: "user_id,movie_id", ignoreDuplicates: true },
+        { user_id: userId, media_type, movie_id, title, poster_path, overview, genre_ids, release_date },
+        { onConflict: "user_id,media_type,movie_id", ignoreDuplicates: true },
       ),
   );
 };
 
-export const removeFromWatchlist = async (userId, movieId) =>
-  unwrap(await supabase.from("watchlist").delete().eq("user_id", userId).eq("movie_id", movieId));
+export const removeFromWatchlist = async (userId, { media_type = "movie", movie_id }) =>
+  unwrap(await supabase.from("watchlist").delete().eq("user_id", userId).eq("media_type", media_type).eq("movie_id", movie_id));

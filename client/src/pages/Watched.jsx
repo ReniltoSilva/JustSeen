@@ -11,8 +11,9 @@ import Masonry from "../components/Masonry";
 import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton } from "../components/Skeletons";
 import { usePageMeta } from "../lib/usePageMeta";
+import { mixLabel } from "../lib/titles";
 
-/* Every movie I've reviewed, newest first */
+/* Every movie and show I've reviewed, newest first */
 const Watched = () => {
   usePageMeta({ title: "Watched" });
   const { user } = useAuth();
@@ -26,8 +27,8 @@ const Watched = () => {
     getUserReviews(user.id)
       .then((data) => !cancelled && setReviews(data))
       .catch((err) => {
-        console.error("Failed to load watched movies:", err);
-        if (!cancelled) setError("Couldn't load your movies. Check your connection and try again.");
+        console.error("Failed to load what I watched:", err);
+        if (!cancelled) setError("Couldn't load what you watched. Check your connection and try again.");
       });
     return () => {
       cancelled = true;
@@ -44,7 +45,7 @@ const Watched = () => {
       <section className="max-w-7xl mx-auto flex flex-col gap-4 pt-8 pb-6">
         <PageHeading
           title="Watched"
-          subtitle={reviews ? `${count} ${count === 1 ? "movie" : "movies"} you've watched and reviewed.` : " "}
+          subtitle={reviews ? `${mixLabel(reviews)} you've watched and reviewed.` : " "}
         />
         {count > 0 && (
           <GenreChips genres={genresIn(reviews)} selected={selectedGenre} onSelect={setSelectedGenre} />
@@ -59,13 +60,13 @@ const Watched = () => {
           <EmptyState
             emoji="🎬"
             title="Your film diary starts here"
-            message="Search for a movie you've seen, give it a rating and a few words, and it'll show up here."
-            actions={[{ to: "/search", label: "Find a movie" }]}
+            message="Search for a movie or show you've seen, give it a rating and a few words, and it'll show up here."
+            actions={[{ to: "/search", label: "Find a movie or show" }]}
           />
         )}
 
         {count > 0 && shown.length === 0 && (
-          <p className="text-center text-muted py-16">No movies in this genre yet.</p>
+          <p className="text-center text-muted py-16">Nothing in this genre yet.</p>
         )}
 
         <Masonry

@@ -1,4 +1,5 @@
 import { genreName } from "./genres.js";
+import { isShow } from "./titles.js";
 
 /* Everything Year in Film shows, worked out from one year of reviews.
 Plain functions with no React in them, so they're easy to read and test */
@@ -11,7 +12,7 @@ const fullMonthNames = [
 
 const dayNumber = (day) => Math.round(new Date(`${day}T12:00:00`).getTime() / 86_400_000);
 
-/* Most days in a row with at least one movie */
+/* Most days in a row with at least one movie or show */
 const longestStreak = (reviews) => {
   const days = [...new Set(reviews.map((review) => dayNumber(review.watched_on)))].sort((a, b) => a - b);
   let best = 0;
@@ -27,12 +28,15 @@ export const yearStats = (reviews) => {
   const byDate = [...reviews].sort((a, b) => a.watched_on.localeCompare(b.watched_on));
   const rated = [...reviews].sort((a, b) => Number(b.rating) - Number(a.rating) || b.watched_on.localeCompare(a.watched_on));
 
-  const minutes = reviews.reduce((sum, review) => sum + (review.runtime ?? 0), 0);
-  const missingRuntime = reviews.filter((review) => !review.runtime).length;
+  /* Hours count movies only: a show has no single runtime, and a review doesn't say how
+  many episodes someone watched */
+  const movies = reviews.filter((review) => !isShow(review));
+  const minutes = movies.reduce((sum, review) => sum + (review.runtime ?? 0), 0);
+  const missingRuntime = movies.filter((review) => !review.runtime).length;
 
   const perMonth = monthNames.map((label, month) => {
     const count = reviews.filter((review) => Number(review.watched_on.slice(5, 7)) === month + 1).length;
-    return { label, value: count, tooltip: `${count} ${count === 1 ? "movie" : "movies"} in ${fullMonthNames[month]}` };
+    return { label, value: count, tooltip: `${count} watched in ${fullMonthNames[month]}` };
   });
   const busiest = perMonth.reduce((best, month, index) => (month.value > perMonth[best].value ? index : best), 0);
 
@@ -54,7 +58,7 @@ export const yearStats = (reviews) => {
     return {
       label: value % 1 ? `${Math.floor(value) || ""}½` : String(value), // ½, 1, 1½, 2 ...
       value: count,
-      tooltip: `${count} ${count === 1 ? "movie" : "movies"} rated ${value} ★`,
+      tooltip: `${count} rated ${value} ★`,
     };
   });
 
@@ -70,6 +74,8 @@ export const yearStats = (reviews) => {
 
   return {
     count: reviews.length,
+    movies: movies.length,
+    shows: reviews.length - movies.length,
     hours: Math.round(minutes / 60),
     minutes,
     missingRuntime,

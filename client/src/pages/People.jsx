@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useLibrary } from "../library/LibraryContext";
 import { getFollowers, getFollowing, getSuggestions } from "../data/follows";
+import { suggestionNote } from "../lib/suggestions";
 import { searchProfiles } from "../data/profiles";
 import { getReviewCounts } from "../data/reviews";
 import ProfileHeader from "../components/ProfileHeader";
@@ -29,14 +30,14 @@ const useDebounced = (value, delay = 300) => {
   return debounced;
 };
 
-const PeopleGrid = ({ people, counts, mutual = {} }) => (
+const PeopleGrid = ({ people, counts, notes = {} }) => (
   <Masonry
     items={people}
     getKey={(person) => person.id}
     maxColumns={4}
     narrowOnPhone={false}
     renderItem={(person) => (
-      <PersonCard person={person} reviewCount={counts[person.id]} mutualCount={mutual[person.id]} />
+      <PersonCard person={person} reviewCount={counts[person.id]} note={notes[person.id]} />
     )}
   />
 );
@@ -45,7 +46,7 @@ const PeopleGrid = ({ people, counts, mutual = {} }) => (
 const People = () => {
   usePageMeta({ title: "People" });
   const { user } = useAuth();
-  const { followingIds, version } = useLibrary();
+  const { followingIds, myReviews, ready, version } = useLibrary();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get("tab") ?? "following";
 
@@ -72,17 +73,20 @@ const People = () => {
     };
   }, [user.id, version]);
 
-  /* Suggestions are based on who I follow, so only the ids matter */
+  /* Suggestions are based on who I follow and what I reviewed (shared/suggestions.js).
+  They're worked out again when I follow someone, not when I review something */
   const followingKey = [...followingIds].sort().join(",");
   useEffect(() => {
+    if (!ready) return;
     let cancelled = false;
-    getSuggestions(user.id, followingKey.split(",").filter(Boolean))
+    getSuggestions(user.id, followingKey.split(",").filter(Boolean), [...myReviews.values()])
       .then((list) => !cancelled && setSuggestions(list))
       .catch((error) => console.error("Failed to load suggestions:", error));
     return () => {
       cancelled = true;
     };
-  }, [user.id, followingKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id, followingKey, ready]);
 
   /* Search by name or username; results are kept per query */
   const searchTerm = debouncedQuery.trim();
@@ -120,7 +124,7 @@ const People = () => {
   }, [peopleKey]);
 
   const chooseTab = (key) => setSearchParams(key === "following" ? {} : { tab: key }, { replace: true });
-  const mutual = Object.fromEntries(suggestions.map((item) => [item.profile.id, item.mutual]));
+  const notes = Object.fromEntries(suggestions.map((item) => [item.profile.id, suggestionNote(item)]));
 
   const tabCounts = { following: following?.length, followers: followers?.length };
 
@@ -199,7 +203,7 @@ const People = () => {
               (results.length === 0 ? (
                 <p className="text-muted">Nobody matches “{debouncedQuery}”.</p>
               ) : (
-                <PeopleGrid people={results} counts={counts} mutual={mutual} />
+                <PeopleGrid people={results} counts={counts} notes={notes} />
               ))}
 
             {results === null && suggestions.length > 0 && (
@@ -208,7 +212,7 @@ const People = () => {
                 <PeopleGrid
                   people={suggestions.map((item) => item.profile)}
                   counts={counts}
-                  mutual={mutual}
+                  notes={notes}
                 />
               </div>
             )}

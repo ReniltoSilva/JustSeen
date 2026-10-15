@@ -18,8 +18,9 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import StarPicker from "../../components/StarPicker";
 import { useLibrary } from "../../library/LibraryContext";
-import { getMovieDetails, posterUrl, toMovie } from "../../lib/tmdb";
-import { closeSheet, openShare, pendingMovie } from "../../lib/navigation";
+import { getTitleDetails, posterUrl } from "../../lib/tmdb";
+import { isShow, toTitle } from "../../../../shared/titles";
+import { closeSheet, openShare, parseTitleParam, pendingTitle } from "../../lib/navigation";
 import { useAuth } from "../../auth/AuthContext";
 import { colors } from "../../lib/theme";
 import { addDays, formatDay, releaseYear, toDay } from "../../../../shared/dates";
@@ -39,37 +40,39 @@ const DayChip = ({ label, active, onPress, icon }) => (
   </Pressable>
 );
 
-/* Write, edit or delete my review of a movie. Opened with openReview() from Search
-or my own card in the feed. Finds the movie first, then shows the form */
+/* Write, edit or delete my review of a movie or show. Opened with openReview() from Search
+or a poster (/review/movie-438631, /review/tv-1399). Finds the title first, then shows the form */
 export default function ReviewScreen() {
-  const { movieId } = useLocalSearchParams();
-  const [movie, setMovie] = useState(() => pendingMovie(movieId));
+  const { titleId } = useLocalSearchParams();
+  const [movie, setMovie] = useState(() => pendingTitle(titleId));
   const [failed, setFailed] = useState(false);
 
   /* Not handed over (e.g. the app reloaded on this screen): load it from TMDB */
   useEffect(() => {
     if (movie) return;
-    if (!/^\d+$/.test(movieId ?? "")) {
+    const wanted = parseTitleParam(titleId);
+    if (!wanted) {
       setFailed(true);
       return;
     }
     let cancelled = false;
-    getMovieDetails(movieId)
+    getTitleDetails(wanted.media_type, wanted.movie_id)
       .then((details) => {
-        if (!cancelled) setMovie({ ...toMovie(details), runtime: details.runtime || null });
+        if (cancelled) return;
+        setMovie({ ...toTitle(details, wanted.media_type), runtime: wanted.media_type === "tv" ? null : details.runtime || null });
       })
       .catch((error) => {
-        console.error("Failed to load the movie:", error);
+        console.error("Failed to load the title:", error);
         if (!cancelled) setFailed(true);
       });
     return () => {
       cancelled = true;
     };
-  }, [movie, movieId]);
+  }, [movie, titleId]);
 
   const { ready, loadFailed, reload } = useLibrary();
 
-  /* The form waits for my reviews, so it knows whether I already reviewed this movie.
+  /* The form waits for my reviews, so it knows whether I already reviewed this title.
   Otherwise an old review would open as a new one and be saved with today's date */
   if (movie && ready) return <ReviewForm movie={movie} />;
 
@@ -91,7 +94,7 @@ export default function ReviewScreen() {
     <SafeAreaView style={[styles.screen, styles.center]}>
       {failed ? (
         <>
-          <Text style={styles.muted}>Couldn't load this movie. Check your connection.</Text>
+          <Text style={styles.muted}>Couldn't load this title. Check your connection.</Text>
           <Pressable onPress={() => closeSheet()} hitSlop={12}>
             <Text style={styles.closeText}>Close</Text>
           </Pressable>
@@ -106,7 +109,7 @@ export default function ReviewScreen() {
 const ReviewForm = ({ movie }) => {
   const { user } = useAuth();
   const { myReviewFor, saveMyReview, deleteMyReview } = useLibrary();
-  const existing = myReviewFor(movie.movie_id);
+  const existing = myReviewFor(movie);
 
   const [rating, setRating] = useState(Number(existing?.rating) || 0);
   const [review, setReview] = useState(existing?.review ?? "");
@@ -161,7 +164,7 @@ const ReviewForm = ({ movie }) => {
           setSaving(true);
           setError("");
           try {
-            await deleteMyReview(movie.movie_id);
+            await deleteMyReview(movie);
             closeSheet();
           } catch (err) {
             console.error("Failed to delete review:", err);
@@ -193,7 +196,7 @@ const ReviewForm = ({ movie }) => {
             </View>
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={styles.movieTitle}>{movie.title}</Text>
-              {movie.release_date ? <Text style={styles.muted}>{releaseYear(movie.release_date)}</Text> : null}
+              <Text style={styles.muted}>{[isShow(movie) && "TV show", releaseYear(movie.release_date)].filter(Boolean).join(" · ")}</Text>
             </View>
           </View>
 

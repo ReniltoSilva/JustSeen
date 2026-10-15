@@ -1,7 +1,8 @@
 import { siteUrl } from "./site";
+import { toTitle } from "../../../shared/titles";
 
-/* Movie data from TMDB, through the website's /api/tmdb, which adds the secret
-token (client/netlify/functions/tmdb.mjs). The token never ships inside the app */
+/* Movie and TV show data from TMDB, through the website's /api/tmdb, which adds the
+secret token (client/netlify/functions/tmdb.mjs). The token never ships inside the app */
 const get = async (path, params = {}) => {
   const query = new URLSearchParams(params).toString();
   const response = await fetch(`${siteUrl}/api/tmdb/${path}${query ? `?${query}` : ""}`);
@@ -9,24 +10,15 @@ const get = async (path, params = {}) => {
   return response.json();
 };
 
-/* The movie fields JustSeen stores with reviews (same as the website's toMovie) */
-export const toMovie = (movie) => ({
-  movie_id: movie.id,
-  title: movie.title,
-  poster_path: movie.poster_path || null,
-  overview: movie.overview || "",
-  genre_ids: movie.genre_ids ?? movie.genres?.map((genre) => genre.id) ?? [],
-  release_date: movie.release_date || null, // TMDB sends "" when unknown
-});
-
-export const searchMovies = async (query) => {
-  const data = await get("search/movie", { query, include_adult: false });
-  return data.results.map(toMovie);
+/* Movies and TV shows in one search (the same as the website; actors are left out) */
+export const searchTitles = async (query) => {
+  const data = await get("search/multi", { query, include_adult: false });
+  return data.results.filter((item) => item.media_type === "movie" || item.media_type === "tv").map((item) => toTitle(item));
 };
 
-/* Details include the runtime, which Year in Film needs. The movie page also asks
-for the cast and director with { append_to_response: "credits" } */
-export const getMovieDetails = (movieId, params) => get(`movie/${movieId}`, params);
+/* A movie's or show's details. Movies include the runtime, which Year in Film needs.
+The title's page also asks for the cast and crew with { append_to_response: "credits" } */
+export const getTitleDetails = (mediaType, id, params) => get(`${mediaType === "tv" ? "tv" : "movie"}/${id}`, params);
 
-/* Movie posters come straight from TMDB's image servers */
+/* Posters come straight from TMDB's image servers */
 export const posterUrl = (path, size = "w500") => (path ? `https://image.tmdb.org/t/p/${size}${path}` : null);

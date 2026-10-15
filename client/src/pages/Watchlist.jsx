@@ -9,9 +9,10 @@ import Masonry from "../components/Masonry";
 import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton } from "../components/Skeletons";
 import { usePageMeta } from "../lib/usePageMeta";
+import { mixLabel, titleKey } from "../lib/titles";
 
-/* Movies I want to watch. The list lives in the shared library, so saving a
-movie anywhere in the app shows up here straight away */
+/* Movies and shows I want to watch. The list lives in the shared library, so saving
+one anywhere in the app shows up here straight away */
 const Watchlist = () => {
   usePageMeta({ title: "Watchlist" });
   const { ready, watchlist } = useLibrary();
@@ -27,7 +28,7 @@ const Watchlist = () => {
       <section className="max-w-7xl mx-auto flex flex-col gap-4 pt-8 pb-6">
         <PageHeading
           title="Watchlist"
-          subtitle={`${count} ${count === 1 ? "movie" : "movies"} you want to watch.`}
+          subtitle={`${mixLabel(watchlist)} you want to watch.`}
         />
         {count > 0 && (
           <GenreChips genres={genresIn(watchlist)} selected={selectedGenre} onSelect={setSelectedGenre} />
@@ -41,21 +42,21 @@ const Watchlist = () => {
           <EmptyState
             emoji="🔖"
             title="Nothing saved yet"
-            message="Tap the bookmark on any movie to save it for later. Reviewing it takes it off this list."
+            message="Tap the bookmark on any movie or show to save it for later. Reviewing it takes it off this list."
             actions={[
-              { to: "/search", label: "Search movies" },
+              { to: "/search", label: "Search movies and shows" },
               { to: "/", label: "Browse your feed" },
             ]}
           />
         )}
 
         {count > 0 && shown.length === 0 && (
-          <p className="text-center text-muted py-16">No movies in this genre.</p>
+          <p className="text-center text-muted py-16">Nothing in this genre.</p>
         )}
 
         <Masonry
           items={shown}
-          getKey={(movie) => movie.movie_id}
+          getKey={titleKey}
           renderItem={(movie) => <MovieCard movie={movie} variant="watchlist" />}
         />
       </main>

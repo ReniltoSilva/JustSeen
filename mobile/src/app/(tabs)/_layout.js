@@ -46,7 +46,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="index" options={{ title: "Feed", tabBarIcon: tabIcon("home") }} />
       <Tabs.Screen name="search" options={{ title: "Search", tabBarIcon: tabIcon("search") }} />
-      <Tabs.Screen name="watched" options={{ title: "Watched", tabBarIcon: tabIcon("eye") }} />
+      <Tabs.Screen name="watched" options={{ title: "Watched", tabBarIcon: tabIcon("ticket") }} />
       <Tabs.Screen name="watchlist" options={{ title: "Watchlist", tabBarIcon: tabIcon("bookmark") }} />
       <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: tabIcon("person") }} />
     </Tabs>

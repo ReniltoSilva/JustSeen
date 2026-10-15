@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { siteUrl } from "./site";
 
-export const defaultTitle = "JustSeen: the free app to share movie reviews with friends";
+export const defaultTitle = "JustSeen: the free app to share movie and TV show reviews with friends";
 export const defaultDescription =
-  "Share quick movie reviews with your friends and see what they're watching. Rate films, keep a watchlist and pick your next movie from people whose taste you trust. Free.";
+  "Share quick movie and TV show reviews with your friends and see what they're watching. Rate films and series, keep a watchlist and pick what to watch next from people whose taste you trust. Free.";
 
 const setMeta = (name, content) => {
   document.querySelector(`meta[name="${name}"]`)?.setAttribute("content", content);

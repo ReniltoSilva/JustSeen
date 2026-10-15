@@ -98,7 +98,7 @@ export const DemoHeader = ({ wide = false, search = "", typing = false, active =
       <div data-tap="search" className={`relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-[#131318] pl-10 pr-4 text-sm ${wide ? "max-w-md" : ""} ${typing ? "border-[#7c5cff] ring-2 ring-[#7c5cff]/25" : "border-[#25252f]"}`}>
         <SearchIcon className="absolute left-3.5 h-4 w-4 text-[#8c8c9a]" />
         <span className="truncate text-[#f5f5f7]">
-          <Typed text={search} placeholder="Search movies..." caret={typing} />
+          <Typed text={search} placeholder="Search movies & TV..." caret={typing} />
         </span>
       </div>
       {wide && <DemoNav active={active} className="ml-auto h-16 gap-6" />}

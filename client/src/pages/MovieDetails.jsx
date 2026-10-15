@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useLibrary } from "../library/LibraryContext";
-import { getMovieDetails, posterUrl, toMovie } from "../lib/tmdb";
-import { getMovieReviews } from "../data/reviews";
+import { getTitleDetails, posterUrl } from "../lib/tmdb";
+import { getTitleReviews } from "../data/reviews";
 import { releaseYear } from "../lib/dates";
+import { toTitle } from "../lib/titles";
 import ReviewNote from "../components/ReviewNote";
 import Masonry from "../components/Masonry";
 import ReviewModal from "../components/ReviewModal";
@@ -18,15 +19,25 @@ const formatRuntime = (minutes) =>
 const average = (reviews) =>
   reviews.length ? (reviews.reduce((sum, review) => sum + Number(review.rating), 0) / reviews.length).toFixed(1) : null;
 
-/* One movie: details from TMDB, plus everything JustSeen people said about it */
-const MovieDetails = () => {
-  const { movieId } = useParams();
-  const id = Number(movieId);
+/* "2008–2013" for a show that ended, "2019–" for one still running */
+const airedYears = (show) => {
+  const first = releaseYear(show.first_air_date);
+  if (!first) return null;
+  const last = releaseYear(show.last_air_date);
+  if (show.in_production || !last) return `${first}–`;
+  return last === first ? first : `${first}–${last}`;
+};
+
+/* One movie or TV show (/movie/438631, /tv/1399): details from TMDB, plus everything
+JustSeen people said about it */
+const MovieDetails = ({ mediaType, id }) => {
+  const isShow = mediaType === "tv";
+  const ref = { media_type: mediaType, movie_id: id };
   const { user } = useAuth();
   const { myReviewFor, isSaved, toggleWatchlist, followingIds, version } = useLibrary();
 
   const [details, setDetails] = useState(null);
-  usePageMeta({ title: details?.title });
+  usePageMeta({ title: details?.title ?? details?.name });
   const [reviews, setReviews] = useState(null);
   const [status, setStatus] = useState("loading");
   const [reviewing, setReviewing] = useState(false);
@@ -34,33 +45,39 @@ const MovieDetails = () => {
 
   useEffect(() => {
     let cancelled = false;
-    getMovieDetails(id)
+    getTitleDetails(mediaType, id)
       .then((data) => {
         if (cancelled) return;
         setDetails(data);
         setStatus("ready");
       })
       .catch((error) => {
-        console.error("Failed to load movie:", error);
+        console.error("Failed to load title:", error);
         if (!cancelled) setStatus("error");
       });
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [mediaType, id]);
 
   useEffect(() => {
     let cancelled = false;
-    getMovieReviews(id)
+    getTitleReviews({ media_type: mediaType, movie_id: id })
       .then((data) => !cancelled && setReviews(data))
       .catch((error) => console.error("Failed to load reviews:", error));
     return () => {
       cancelled = true;
     };
-  }, [id, version]);
+  }, [mediaType, id, version]);
 
   if (status === "error" || Number.isNaN(id)) {
-    return <EmptyState emoji="🎞️" title="We couldn't find that movie" actions={[{ to: "/search", label: "Search movies" }]} />;
+    return (
+      <EmptyState
+        emoji="🎞️"
+        title={`We couldn't find that ${isShow ? "show" : "movie"}`}
+        actions={[{ to: "/search", label: "Search movies and shows" }]}
+      />
+    );
   }
 
   if (!details) {
@@ -71,10 +88,12 @@ const MovieDetails = () => {
     );
   }
 
-  const movie = toMovie(details);
-  const myReview = myReviewFor(id);
-  const saved = isSaved(id);
-  const director = details.credits?.crew?.find((person) => person.job === "Director");
+  const movie = toTitle(details, mediaType);
+  const myReview = myReviewFor(ref);
+  const saved = isSaved(ref);
+  const director = isShow ? null : details.credits?.crew?.find((person) => person.job === "Director");
+  const creators = isShow ? (details.created_by ?? []).map((person) => person.name).slice(0, 2) : [];
+  const seasons = details.number_of_seasons;
   const cast = details.credits?.cast?.slice(0, 8) ?? [];
   const backdrop = details.backdrop_path ? `https://image.tmdb.org/t/p/w1280${details.backdrop_path}` : null;
 
@@ -108,19 +127,29 @@ const MovieDetails = () => {
         <div className="flex flex-col sm:flex-row gap-6 md:gap-10">
           <img
             src={posterUrl(details.poster_path, "w500") ?? undefined}
-            alt={details.title}
+            alt={movie.title}
             className="w-36 sm:w-48 md:w-64 aspect-[2/3] rounded-2xl object-cover shadow-2xl ring-1 ring-white/10 bg-panel-2 shrink-0"
           />
 
           <div className="flex-1 min-w-0 sm:pt-16 md:pt-24">
+            {isShow && <p className="mb-1 text-xs font-bold uppercase tracking-widest text-brand-soft">TV show</p>}
             <h1 className="text-3xl md:text-5xl font-bold leading-tight text-fg">
-              {details.title}{" "}
-              <span className="text-xl md:text-3xl font-medium text-muted">{releaseYear(details.release_date)}</span>
+              {movie.title}{" "}
+              <span className="text-xl md:text-3xl font-medium text-muted">
+                {isShow ? airedYears(details) : releaseYear(details.release_date)}
+              </span>
             </h1>
 
             <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-soft">
-              {formatRuntime(details.runtime) && <span>{formatRuntime(details.runtime)}</span>}
+              {!isShow && formatRuntime(details.runtime) && <span>{formatRuntime(details.runtime)}</span>}
+              {seasons > 0 && (
+                <span>
+                  {seasons} {seasons === 1 ? "season" : "seasons"}
+                  {details.number_of_episodes ? ` · ${details.number_of_episodes} episodes` : ""}
+                </span>
+              )}
               {director && <span>Directed by <span className="font-medium text-fg">{director.name}</span></span>}
+              {creators.length > 0 && <span>Created by <span className="font-medium text-fg">{creators.join(" & ")}</span></span>}
             </p>
 
             {details.genres?.length > 0 && (
@@ -245,8 +274,8 @@ const MovieDetails = () => {
         </section>
 
         <p className="mt-16 text-center text-xs text-muted">
-          Movie data and images from{" "}
-          <a href={`https://www.themoviedb.org/movie/${id}`} target="_blank" rel="noreferrer" className="underline">
+          {isShow ? "Show" : "Movie"} data and images from{" "}
+          <a href={`https://www.themoviedb.org/${mediaType}/${id}`} target="_blank" rel="noreferrer" className="underline">
             TMDB
           </a>
           .
@@ -258,10 +287,12 @@ const MovieDetails = () => {
   );
 };
 
-/* Start fresh (no old movie shown) when going from one movie page to another */
-const MovieDetailsRoute = () => {
-  const { movieId } = useParams();
-  return <MovieDetails key={movieId} />;
+/* /movie/:movieId and /tv/:showId. Starts fresh (nothing old shown) when going from
+one title's page to another */
+const MovieDetailsRoute = ({ mediaType = "movie" }) => {
+  const { movieId, showId } = useParams();
+  const id = mediaType === "tv" ? showId : movieId;
+  return <MovieDetails key={`${mediaType}-${id}`} mediaType={mediaType} id={Number(id)} />;
 };
 
 export default MovieDetailsRoute;

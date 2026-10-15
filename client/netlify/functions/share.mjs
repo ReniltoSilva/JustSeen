@@ -66,7 +66,7 @@ const notFound = () =>
   page({
     status: 404,
     title: "JustSeen: movies are better with friends",
-    description: "Share quick movie reviews with your friends and see what they're watching.",
+    description: "Share quick movie and TV show reviews with your friends and see what they're watching.",
     image: `${siteUrl}/og-image.png`,
     url: siteUrl,
     body: `<h1>This review isn't available</h1>
@@ -108,10 +108,10 @@ export default async (request) => {
     url,
     body: `<img class="card" src="${escape(image)}" alt="${escape(`${review.author_name}'s review of ${review.title}`)}" />
 <h1>${escape(firstName)} wants to know what you think of ${escape(review.title)}</h1>
-<p>JustSeen is a free app for sharing quick movie reviews with your friends. No critic scores, just people whose taste you trust.</p>
+<p>JustSeen is a free app for sharing quick movie and TV show reviews with your friends. No critic scores, just people whose taste you trust.</p>
 <div class="actions">
   <a class="button primary" href="${siteUrl}/?mode=signup">Create your free account</a>
-  <a class="button secondary" href="${siteUrl}/movie/${review.movie_id}">Open in JustSeen</a>
+  <a class="button secondary" href="${siteUrl}/${review.media_type === "tv" ? "tv" : "movie"}/${review.movie_id}">Open in JustSeen</a>
 </div>
 <small>Shared by @${escape(review.author_username)}</small>`,
   });

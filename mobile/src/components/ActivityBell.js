@@ -5,8 +5,8 @@ import { useNotifications } from "../notifications/NotificationsContext";
 import { colors } from "../lib/theme";
 
 /* The bell in the top-right corner, like the website's header: opens Activity, with a
-red badge for notifications I haven't seen yet */
-const ActivityBell = () => {
+red badge for notifications I haven't seen yet. `style` moves it (the feed's own header) */
+const ActivityBell = ({ style }) => {
   const { unread } = useNotifications();
   return (
     <Pressable
@@ -14,7 +14,7 @@ const ActivityBell = () => {
       hitSlop={10}
       accessibilityRole="button"
       accessibilityLabel={unread ? `Activity, ${unread} new` : "Activity"}
-      style={({ pressed }) => [styles.bell, pressed && { opacity: 0.6 }]}
+      style={({ pressed }) => [styles.bell, style, pressed && { opacity: 0.6 }]}
     >
       <Ionicons name="notifications-outline" size={23} color={colors.fg} />
       {unread > 0 && (

@@ -11,6 +11,7 @@ import BarChart from "../components/BarChart";
 import EmptyState from "../components/EmptyState";
 import { StarIcon } from "../components/icons";
 import { usePageMeta } from "../lib/usePageMeta";
+import { countLabel, isShow, titlePath } from "../lib/titles";
 
 /* A block on the page; `accent` gives it the purple gradient */
 const Panel = ({ children, className = "", accent = false }) => (
@@ -31,9 +32,9 @@ const Kicker = ({ children, light = false }) => (
   </p>
 );
 
-/* A movie as a small poster + title, linking to its page */
+/* A movie or show as a small poster + title, linking to its page */
 const MovieChip = ({ review, caption }) => (
-  <Link to={`/movie/${review.movie_id}`} className="group flex items-center gap-4">
+  <Link to={titlePath(review)} className="group flex items-center gap-4">
     {posterUrl(review.poster_path, "w154") && (
       <img
         src={posterUrl(review.poster_path, "w154")}
@@ -120,17 +121,27 @@ const YearInFilm = () => {
         <div className="flex justify-end">{yearNav}</div>
         <EmptyState
           emoji="📽️"
-          title={`No movies logged in ${year}`}
-          message={isMe ? "Review the movies you watch and your year in film builds itself." : `${firstName} didn't log any movies in ${year}.`}
-          actions={isMe ? [{ to: "/search", label: "Log a movie" }] : []}
+          title={`Nothing logged in ${year}`}
+          message={
+            isMe
+              ? "Review the movies and shows you watch and your year in film builds itself."
+              : `${firstName} didn't log anything in ${year}.`
+          }
+          actions={isMe ? [{ to: "/search", label: "Log a movie or show" }] : []}
         />
       </div>
     );
   }
 
   const bigNumbers = [
-    { value: stats.count, label: stats.count === 1 ? "movie" : "movies" },
-    { value: stats.hours, label: stats.hours === 1 ? "hour" : "hours", note: stats.missingRuntime ? `${stats.missingRuntime} without runtime` : null },
+    { value: stats.movies, label: stats.movies === 1 ? "movie" : "movies" },
+    /* Shows only once there are some */
+    ...(stats.shows ? [{ value: stats.shows, label: stats.shows === 1 ? "TV show" : "TV shows" }] : []),
+    {
+      value: stats.hours,
+      label: `${stats.hours === 1 ? "hour" : "hours"}${stats.shows ? " of movies" : ""}`,
+      note: stats.missingRuntime ? `${stats.missingRuntime} without runtime` : null,
+    },
     { value: stats.average ? `★ ${stats.average}` : "—", label: "average rating" },
     { value: stats.streak, label: stats.streak === 1 ? "day streak" : "days in a row" },
   ];
@@ -152,7 +163,7 @@ const YearInFilm = () => {
             <Kicker light>{isMe ? "Your" : `${firstName}'s`} year in film</Kicker>
             <h1 className="mt-2 font-display text-6xl md:text-8xl font-extrabold tracking-tight">{year}</h1>
             <p className="mt-3 max-w-lg text-lg text-white/85">
-              {stats.count} {stats.count === 1 ? "movie" : "movies"}
+              {[stats.movies && countLabel(stats.movies), stats.shows && countLabel(stats.shows, "tv")].filter(Boolean).join(" and ")}
               {stats.hours > 0 && `, about ${stats.hours} ${stats.hours === 1 ? "hour" : "hours"} in front of the screen`}
               {stats.topGenres[0] && `, and a soft spot for ${stats.topGenres[0].name.toLowerCase()}`}.
             </p>
@@ -161,7 +172,7 @@ const YearInFilm = () => {
       </Panel>
 
       {/* Headline numbers */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+      <div className={`grid grid-cols-2 gap-4 md:gap-5 ${bigNumbers.length > 4 ? "md:grid-cols-5" : "md:grid-cols-4"}`}>
         {bigNumbers.map((item) => (
           <Panel key={item.label} className="!p-5">
             <p className="font-display text-4xl font-bold tabular-nums">{item.value}</p>
@@ -178,11 +189,11 @@ const YearInFilm = () => {
           {stats.busiestMonth && (
             <p className="mt-2 text-lg">
               <span className="font-semibold">{stats.busiestMonth}</span> was the busiest month, with{" "}
-              {stats.busiestCount} {stats.busiestCount === 1 ? "movie" : "movies"}.
+              {stats.busiestCount} watched.
             </p>
           )}
           <div className="mt-6">
-            <BarChart data={stats.perMonth} title={`Movies watched per month in ${year}`} valueLabel="Movies" />
+            <BarChart data={stats.perMonth} title={`Movies and shows watched per month in ${year}`} valueLabel="Watched" />
           </div>
         </Panel>
 
@@ -191,13 +202,13 @@ const YearInFilm = () => {
           <Kicker>How {isMe ? "you" : firstName} rated</Kicker>
           <p className="mt-2 text-lg">
             {Number(stats.average) >= 4
-              ? "A generous critic: most movies won you over."
+              ? "A generous critic: most of what you watched won you over."
               : Number(stats.average) >= 3
                 ? "A fair critic: the good ones earned it."
-                : "A tough critic: movies had to work for it."}
+                : "A tough critic: everything had to work for it."}
           </p>
           <div className="mt-6">
-            <BarChart data={stats.ratingSpread} title={`Ratings given in ${year}, from half a star to five`} valueLabel="Movies" />
+            <BarChart data={stats.ratingSpread} title={`Ratings given in ${year}, from half a star to five`} valueLabel="Rated" />
           </div>
           <p className="mt-1 text-center text-[10px] text-muted">stars</p>
         </Panel>
@@ -271,7 +282,7 @@ const YearInFilm = () => {
           <Panel>
             <Kicker>Time capsule</Kicker>
             <div className="mt-4">
-              <MovieChip review={stats.oldest} caption={`The oldest movie ${isMe ? "you" : firstName} watched, from ${releaseYear(stats.oldest.release_date)}`} />
+              <MovieChip review={stats.oldest} caption={`The oldest ${isShow(stats.oldest) ? "show" : "movie"} ${isMe ? "you" : firstName} watched, from ${releaseYear(stats.oldest.release_date)}`} />
             </div>
           </Panel>
         )}

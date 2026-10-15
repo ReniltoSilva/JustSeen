@@ -24,8 +24,9 @@ const Banner = ({ person }) => (
   </div>
 );
 
-/* A person as a card; clicking anywhere opens their profile */
-const PersonCard = ({ person, reviewCount, mutualCount = 0 }) => (
+/* A person as a card; clicking anywhere opens their profile. `note` says why they're
+suggested ("Followed by 2 people you follow", "You both watched Dune") */
+const PersonCard = ({ person, reviewCount, note }) => (
   <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-panel transition duration-300 hover:border-line-strong hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-16px_rgba(0,0,0,0.45)] has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-brand">
     {/* Banner with the avatar overlapping its bottom edge */}
     <Banner person={person} />
@@ -64,10 +65,10 @@ const PersonCard = ({ person, reviewCount, mutualCount = 0 }) => (
             {person.location}
           </span>
         )}
-        {mutualCount > 0 && (
+        {note && (
           <span className="flex items-center gap-1">
             <UsersIcon />
-            Followed by {mutualCount} you follow
+            {note}
           </span>
         )}
       </div>

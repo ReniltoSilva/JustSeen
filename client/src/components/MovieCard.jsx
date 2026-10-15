@@ -7,6 +7,7 @@ import { genreName } from "../genres";
 import { posterUrl } from "../lib/tmdb";
 import { formatDay, relativeDay, releaseYear } from "../lib/dates";
 import { useToday } from "../lib/useToday";
+import { isShow, titlePath } from "../lib/titles";
 import ReviewModal from "./ReviewModal";
 import ReactionBar from "./ReactionBar";
 import UserAvatar from "./UserAvatar";
@@ -46,10 +47,10 @@ const PosterButton = ({ title, onClick, pressed, children }) => (
 );
 
 /*
-  One movie as a card. Three kinds:
+  One movie or TV show as a card. Three kinds:
   - variant "review":    someone's review (`review` has the author, rating, text and reactions)
-  - variant "watchlist": a movie on MY watchlist, with remove and "watched it?" buttons
-  - variant "movie":     just a movie (search results, someone else's watchlist)
+  - variant "watchlist": a title on MY watchlist, with remove and "watched it?" buttons
+  - variant "movie":     just the title (search results, someone else's watchlist)
 */
 const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false }) => {
   const { user } = useAuth();
@@ -63,8 +64,8 @@ const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false 
 
   const isReview = variant === "review" && review;
   const isMine = isReview && review.user_id === user?.id;
-  const myReview = myReviewFor(movie.movie_id);
-  const saved = isSaved(movie.movie_id);
+  const myReview = myReviewFor(movie);
+  const saved = isSaved(movie);
 
   /* Saving for later only makes sense before I've watched it (or to un-save it) */
   const canSave = Boolean(user) && (!myReview || saved);
@@ -236,7 +237,7 @@ const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false 
         {/* Title, their rating and the year share one line */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-fg text-[15px] leading-snug line-clamp-2" title={movie.title}>
-            <Link to={`/movie/${movie.movie_id}`} className="hover:text-brand-soft transition-colors">
+            <Link to={titlePath(movie)} className="hover:text-brand-soft transition-colors">
               {movie.title}
             </Link>
           </h3>
@@ -248,6 +249,11 @@ const MovieCard = ({ movie, review, variant = "movie", showOverviewText = false 
               >
                 <StarIcon className="w-3 h-3" />
                 {Number(review.rating)}
+              </span>
+            )}
+            {isShow(movie) && (
+              <span className="rounded-md bg-brand/15 px-1.5 py-px text-[10px] font-bold text-brand-soft" title="TV show">
+                TV
               </span>
             )}
             {year && <span className="text-muted">{year}</span>}
