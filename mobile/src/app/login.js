@@ -17,15 +17,24 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../auth/AuthContext";
 import AvatarPicker from "../components/AvatarPicker";
 import PasswordChecklist from "../components/PasswordChecklist";
+import Logo from "../components/Logo";
 import { colors } from "../lib/theme";
 import { siteUrl } from "../lib/site";
 import { animalAvatars, animalValue } from "../../../shared/avatars";
 
-const intro = {
-  login: "Log in to see what your friends have been watching.",
-  signup: "Create your free account. No ads, no credit card.",
-  forgot: "Enter your email and we'll send you a link to choose a new password.",
+/* The same words as the website's login page (client/src/pages/Login.jsx) */
+const copy = {
+  login: { title: "Welcome back", subtitle: "Log in to see what your friends have been watching." },
+  signup: { title: "Join your friends on JustSeen", subtitle: "Free, simple, and takes less than a minute." },
+  forgot: { title: "Reset your password", subtitle: "Enter your email and we'll send you a link." },
 };
+
+/* What makes JustSeen different, in three lines */
+const promises = [
+  { emoji: "✍️", title: "Share what you watched", text: "A star rating and a few honest words. That's a review." },
+  { emoji: "👀", title: "See what friends are watching", text: "Your feed is the people you follow, not a database." },
+  { emoji: "🍿", title: "Pick what to watch next", text: "Trust friends' taste over critic scores." },
+];
 
 /* Log in, create an account, or reset a forgotten password, plus Google */
 export default function Login() {
@@ -89,12 +98,39 @@ export default function Login() {
     <SafeAreaView style={styles.screen}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Text style={styles.brand}>JustSeen</Text>
-          <Text style={styles.headline}>
-            Movies are better{"\n"}
-            <Text style={{ color: colors.brandSoft }}>with friends.</Text>
-          </Text>
-          <Text style={styles.lead}>{intro[mode]}</Text>
+          <View style={styles.brand}>
+            <Logo />
+          </View>
+          {mode !== "forgot" && (
+            <>
+              <View style={styles.free}>
+                <Ionicons name="checkmark" size={13} color="#6ee7b7" />
+                <Text style={styles.freeText}>100% free, for everyone</Text>
+              </View>
+              <Text style={styles.headline}>
+                Movies are better{"\n"}
+                <Text style={{ color: colors.brandSoft }}>with friends.</Text>
+              </Text>
+              <Text style={styles.lead}>
+                Share quick reviews of what you watch, and decide what to see next from the people whose taste you trust.
+                No critic scores. Just your friends.
+              </Text>
+              <View style={styles.promises}>
+                {promises.map((item) => (
+                  <View key={item.title} style={styles.promise}>
+                    <Text style={styles.promiseEmoji}>{item.emoji}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.promiseTitle}>{item.title}</Text>
+                      <Text style={styles.promiseText}>{item.text}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+
+          <Text style={styles.formTitle}>{copy[mode].title}</Text>
+          <Text style={styles.formSubtitle}>{copy[mode].subtitle}</Text>
 
           {mode !== "forgot" && (
             <>
@@ -225,9 +261,30 @@ export default function Login() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.ink },
   content: { padding: 24, paddingTop: 40, paddingBottom: 48, gap: 6 },
-  brand: { color: colors.fg, fontSize: 22, fontWeight: "800", marginBottom: 32 },
-  headline: { color: colors.fg, fontSize: 36, fontWeight: "800", lineHeight: 40 },
-  lead: { color: colors.soft, fontSize: 16, lineHeight: 23, marginTop: 10 },
+  brand: { marginBottom: 28 },
+  free: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    marginBottom: 14,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(52,211,153,0.25)",
+    backgroundColor: "rgba(52,211,153,0.1)",
+  },
+  freeText: { color: "#6ee7b7", fontSize: 12, fontWeight: "700" },
+  headline: { color: colors.fg, fontSize: 38, fontWeight: "800", lineHeight: 42, letterSpacing: -0.5 },
+  lead: { color: colors.soft, fontSize: 16, lineHeight: 24, marginTop: 12 },
+  promises: { gap: 14, marginTop: 24, paddingTop: 20, borderTopWidth: 1, borderTopColor: colors.line },
+  promise: { flexDirection: "row", gap: 12 },
+  promiseEmoji: { fontSize: 20 },
+  promiseTitle: { color: colors.fg, fontSize: 14, fontWeight: "700" },
+  promiseText: { color: colors.muted, fontSize: 13, lineHeight: 18 },
+  formTitle: { color: colors.fg, fontSize: 24, fontWeight: "800", marginTop: 32 },
+  formSubtitle: { color: colors.muted, fontSize: 15, marginBottom: 4 },
   google: {
     flexDirection: "row",
     alignItems: "center",

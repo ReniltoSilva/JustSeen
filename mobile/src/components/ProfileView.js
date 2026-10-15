@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import { useLibrary } from "../library/LibraryContext";
 import { getUserReviews } from "../data/reviews";
 import { getFollowCounts } from "../data/people";
@@ -110,14 +109,8 @@ const ProfileView = ({ person, isMe }) => {
       {person.bio ? <Text style={styles.bio}>{person.bio}</Text> : null}
 
       <View style={styles.badges}>
-        {isMe ? (
-          <Pressable onPress={() => router.push("/edit-profile")} style={({ pressed }) => [styles.editButton, pressed && { opacity: 0.7 }]}>
-            <Ionicons name="create-outline" size={16} color={colors.fg} />
-            <Text style={styles.editText}>Edit profile</Text>
-          </Pressable>
-        ) : (
-          <FollowButton person={person} />
-        )}
+        {/* My own "Edit profile" is in the avatar menu, top right */}
+        {!isMe && <FollowButton person={person} />}
         {favorite && <Text style={styles.loves}>Loves {favorite}</Text>}
         <Pressable onPress={() => openYear(person.username)} style={({ pressed }) => pressed && { opacity: 0.85 }}>
           <LinearGradient colors={[colors.brand, "#d946ef"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.yearChip}>
@@ -199,17 +192,6 @@ const styles = StyleSheet.create({
   location: { flexDirection: "row", alignItems: "center", gap: 3 },
   bio: { color: colors.soft, fontSize: 15, lineHeight: 21 },
   badges: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 10 },
-  editButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    height: 38,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: colors.lineStrong,
-  },
-  editText: { color: colors.fg, fontSize: 14, fontWeight: "600" },
   yearChip: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999 },
   yearChipText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   loves: {

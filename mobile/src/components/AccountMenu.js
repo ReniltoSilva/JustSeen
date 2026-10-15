@@ -22,7 +22,7 @@ const feedbackLink = (user) => {
 };
 
 /* My avatar in the top-right corner, next to the bell, like the website's header.
-Tapping it opens a small menu: my profile, edit profile, feedback, privacy and log out */
+Tapping it opens a small menu: edit profile, feedback, privacy and log out */
 const AccountMenu = () => {
   const { user, logout } = useAuth();
   const insets = useSafeAreaInsets();
@@ -36,7 +36,6 @@ const AccountMenu = () => {
   };
 
   const items = [
-    { icon: "person-outline", label: "Your profile", onPress: () => router.navigate("/profile") },
     { icon: "create-outline", label: "Edit profile", onPress: () => router.push("/edit-profile") },
     { icon: "chatbubble-ellipses-outline", label: "Send feedback or report a bug", onPress: () => Linking.openURL(feedbackLink(user)) },
     { icon: "shield-checkmark-outline", label: "Privacy policy", onPress: () => Linking.openURL(`${siteUrl}/privacy`) },
