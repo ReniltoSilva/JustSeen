@@ -3,6 +3,7 @@ import { Redirect, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../auth/AuthContext";
 import ActivityBell from "../../components/ActivityBell";
+import AccountMenu from "../../components/AccountMenu";
 import Logo from "../../components/Logo";
 import { colors } from "../../lib/theme";
 
@@ -12,7 +13,7 @@ const tabIcon =
   ({ color, focused, size }) => <Ionicons name={focused ? name : `${name}-outline`} size={size} color={color} />;
 
 /* The main app, behind the login: Feed, Search, Watched, Watchlist and Profile along the
-bottom, and the Activity bell in the top-right corner of each */
+bottom, and the Activity bell and my avatar menu in the top-right corner of each */
 export default function TabsLayout() {
   const { session, user, loading } = useAuth();
 
@@ -41,7 +42,12 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.brandSoft,
         tabBarInactiveTintColor: colors.muted,
         tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
-        headerRight: () => <ActivityBell />,
+        headerRight: () => (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <ActivityBell style={{ marginRight: 0 }} />
+            <AccountMenu />
+          </View>
+        ),
         sceneStyle: { backgroundColor: colors.ink },
       }}
     >

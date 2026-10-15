@@ -33,8 +33,8 @@ const averageRating = (reviews) => {
 };
 
 /* Someone's profile: who they are, their stats, and what they've watched or want to
-watch as a grid of posters. `footer` goes under the grid (my Profile tab puts Log out there) */
-const ProfileView = ({ person, isMe, footer }) => {
+watch as a grid of posters */
+const ProfileView = ({ person, isMe }) => {
   const { version, watchlist: myWatchlist } = useLibrary();
   const [reviews, setReviews] = useState(null);
   const [theirWatchlist, setTheirWatchlist] = useState(null);
@@ -183,7 +183,6 @@ const ProfileView = ({ person, isMe, footer }) => {
           </Text>
         ) : null
       }
-      ListFooterComponent={footer}
     />
   );
 };
