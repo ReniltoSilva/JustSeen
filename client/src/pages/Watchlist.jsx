@@ -10,6 +10,7 @@ import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton } from "../components/Skeletons";
 import { usePageMeta } from "../lib/usePageMeta";
 import { mixLabel, titleKey } from "../lib/titles";
+import ReactGA from "react-ga4";
 
 /* Movies and shows I want to watch. The list lives in the shared library, so saving
 one anywhere in the app shows up here straight away */
@@ -21,6 +22,12 @@ const Watchlist = () => {
   const shown = filterByGenre(watchlist, selectedGenre);
   const count = watchlist.length;
 
+  /* Google analytics tag */
+  useEffect(() => {
+    ReactGA.initialize("GTM-TQ8MDX27");
+    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
+  }, []);
+
   return (
     <div className="min-h-screen px-4 md:px-8 py-6 md:py-8">
       <ProfileHeader />
@@ -31,7 +38,11 @@ const Watchlist = () => {
           subtitle={`${mixLabel(watchlist)} you want to watch.`}
         />
         {count > 0 && (
-          <GenreChips genres={genresIn(watchlist)} selected={selectedGenre} onSelect={setSelectedGenre} />
+          <GenreChips
+            genres={genresIn(watchlist)}
+            selected={selectedGenre}
+            onSelect={setSelectedGenre}
+          />
         )}
       </section>
 
@@ -57,7 +68,9 @@ const Watchlist = () => {
         <Masonry
           items={shown}
           getKey={titleKey}
-          renderItem={(movie) => <MovieCard movie={movie} variant="watchlist" />}
+          renderItem={(movie) => (
+            <MovieCard movie={movie} variant="watchlist" />
+          )}
         />
       </main>
     </div>

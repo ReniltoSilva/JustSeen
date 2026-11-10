@@ -11,9 +11,13 @@ import Masonry from "../components/Masonry";
 import ProfileHeader from "../components/ProfileHeader";
 import GenreChips from "../components/GenreChips";
 import EmptyState from "../components/EmptyState";
-import { MovieGridSkeleton, ProfileHeaderSkeleton } from "../components/Skeletons";
+import {
+  MovieGridSkeleton,
+  ProfileHeaderSkeleton,
+} from "../components/Skeletons";
 import { usePageMeta } from "../lib/usePageMeta";
 import { titleKey } from "../lib/titles";
+import ReactGA from "react-ga4";
 
 /* Someone's profile: their stats, what they watched and what they want to watch */
 const Profile = () => {
@@ -22,12 +26,20 @@ const Profile = () => {
   const { version, watchlist: myWatchlist } = useLibrary();
 
   const [person, setPerson] = useState(null);
-  usePageMeta({ title: person ? `${person.name} (@${person.username})` : undefined });
+  usePageMeta({
+    title: person ? `${person.name} (@${person.username})` : undefined,
+  });
   const [reviews, setReviews] = useState(null);
   const [theirWatchlist, setTheirWatchlist] = useState(null);
   const [status, setStatus] = useState("loading"); // "loading" | "ready" | "missing" | "error"
   const [tab, setTab] = useState("watched");
   const [selectedGenre, setSelectedGenre] = useState("All");
+
+  /* Google analytics tag */
+  useEffect(() => {
+    ReactGA.initialize("GTM-TQ8MDX27");
+    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -37,7 +49,10 @@ const Profile = () => {
         if (cancelled) return;
         if (!found) return setStatus("missing");
 
-        const [reviewList, list] = await Promise.all([getUserReviews(found.id), getWatchlist(found.id)]);
+        const [reviewList, list] = await Promise.all([
+          getUserReviews(found.id),
+          getWatchlist(found.id),
+        ]);
         if (cancelled) return;
         setPerson(found);
         setReviews(reviewList);
@@ -58,8 +73,16 @@ const Profile = () => {
     return (
       <EmptyState
         emoji={status === "missing" ? "🔍" : "⚠️"}
-        title={status === "missing" ? `There's nobody called @${username}` : "Couldn't load this profile"}
-        message={status === "missing" ? "Check the spelling, or search for them instead." : "Check your connection and try again."}
+        title={
+          status === "missing"
+            ? `There's nobody called @${username}`
+            : "Couldn't load this profile"
+        }
+        message={
+          status === "missing"
+            ? "Check the spelling, or search for them instead."
+            : "Check your connection and try again."
+        }
         actions={[{ to: "/people?tab=find", label: "Find people" }]}
       />
     );
@@ -83,7 +106,11 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen px-4 md:px-8 py-6 md:py-8">
-      {status === "loading" ? <ProfileHeaderSkeleton /> : <ProfileHeader profile={person} reviews={reviews} />}
+      {status === "loading" ? (
+        <ProfileHeaderSkeleton />
+      ) : (
+        <ProfileHeader profile={person} reviews={reviews} />
+      )}
 
       <section className="max-w-7xl mx-auto flex flex-col gap-4 pt-8 pb-6">
         {/* Watched / Watchlist tabs */}
@@ -96,22 +123,34 @@ const Profile = () => {
               aria-selected={tab === key}
               onClick={() => chooseTab(key)}
               className={`relative pb-3 text-lg font-semibold transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:rounded-full ${
-                tab === key ? "text-fg after:bg-brand" : "text-muted hover:text-fg after:bg-transparent"
+                tab === key
+                  ? "text-fg after:bg-brand"
+                  : "text-muted hover:text-fg after:bg-transparent"
               }`}
             >
               {label}
-              {count !== undefined && <span className="ml-1.5 text-sm font-medium text-muted">{count}</span>}
+              {count !== undefined && (
+                <span className="ml-1.5 text-sm font-medium text-muted">
+                  {count}
+                </span>
+              )}
             </button>
           ))}
         </div>
 
         {movies.length > 0 && (
-          <GenreChips genres={genresIn(movies)} selected={selectedGenre} onSelect={setSelectedGenre} />
+          <GenreChips
+            genres={genresIn(movies)}
+            selected={selectedGenre}
+            onSelect={setSelectedGenre}
+          />
         )}
       </section>
 
       <main className="max-w-7xl mx-auto pb-16">
-        {status === "loading" && <MovieGridSkeleton count={5} withHeader={tab === "watched"} />}
+        {status === "loading" && (
+          <MovieGridSkeleton count={5} withHeader={tab === "watched"} />
+        )}
 
         {status === "ready" && movies.length === 0 && (
           <EmptyState
@@ -121,7 +160,9 @@ const Profile = () => {
                 ? `${isMe ? "You haven't" : `${firstName} hasn't`} reviewed anything yet`
                 : `${isMe ? "Your" : `${firstName}'s`} watchlist is empty`
             }
-            actions={isMe ? [{ to: "/search", label: "Find a movie or show" }] : []}
+            actions={
+              isMe ? [{ to: "/search", label: "Find a movie or show" }] : []
+            }
           />
         )}
 
@@ -141,14 +182,20 @@ const Profile = () => {
           }
         />
 
-        {status === "ready" && !isMe && tab === "watched" && reviews.length > 0 && (
-          <p className="mt-10 text-center text-sm text-muted">
-            See {firstName}'s highlights in{" "}
-            <Link to={`/u/${person.username}/year/${new Date().getFullYear()}`} className="font-semibold text-brand-soft hover:underline">
-              {new Date().getFullYear()} in film
-            </Link>
-          </p>
-        )}
+        {status === "ready" &&
+          !isMe &&
+          tab === "watched" &&
+          reviews.length > 0 && (
+            <p className="mt-10 text-center text-sm text-muted">
+              See {firstName}'s highlights in{" "}
+              <Link
+                to={`/u/${person.username}/year/${new Date().getFullYear()}`}
+                className="font-semibold text-brand-soft hover:underline"
+              >
+                {new Date().getFullYear()} in film
+              </Link>
+            </p>
+          )}
       </main>
     </div>
   );

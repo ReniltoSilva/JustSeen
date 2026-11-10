@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Link, Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { cleanUsername, usernameProblem } from "../auth/usernames";
 import { passwordProblem } from "../auth/passwords";
@@ -14,6 +20,7 @@ import { contactEmail } from "../lib/site";
 import { animalAvatars, animalValue } from "../avatars";
 import { authInputClass as inputClass } from "../components/formStyles";
 import { usePageMeta } from "../lib/usePageMeta";
+import ReactGA from "react-ga4";
 
 const Field = ({ label, hint, children }) => (
   <label className="flex flex-col gap-1.5">
@@ -25,26 +32,56 @@ const Field = ({ label, hint, children }) => (
 
 /* What makes JustSeen different, in three lines */
 const promises = [
-  { emoji: "✍️", title: "Share what you watched", text: "A star rating and a few honest words. That's a review." },
-  { emoji: "👀", title: "See what friends are watching", text: "Your feed is the people you follow, not a database." },
-  { emoji: "🍿", title: "Pick what to watch next", text: "Trust friends' taste over critic scores." },
+  {
+    emoji: "✍️",
+    title: "Share what you watched",
+    text: "A star rating and a few honest words. That's a review.",
+  },
+  {
+    emoji: "👀",
+    title: "See what friends are watching",
+    text: "Your feed is the people you follow, not a database.",
+  },
+  {
+    emoji: "🍿",
+    title: "Pick what to watch next",
+    text: "Trust friends' taste over critic scores.",
+  },
 ];
 
 const copy = {
-  login: { title: "Welcome back", subtitle: "Log in to see what your friends have been watching." },
-  signup: { title: "Join your friends on JustSeen", subtitle: "Free, simple, and takes less than a minute." },
-  forgot: { title: "Reset your password", subtitle: "Enter your email and we'll send you a link." },
+  login: {
+    title: "Welcome back",
+    subtitle: "Log in to see what your friends have been watching.",
+  },
+  signup: {
+    title: "Join your friends on JustSeen",
+    subtitle: "Free, simple, and takes less than a minute.",
+  },
+  forgot: {
+    title: "Reset your password",
+    subtitle: "Enter your email and we'll send you a link.",
+  },
 };
 
 /* Log in, sign up and "forgot password" on one page (?mode=signup / ?mode=forgot) */
 const Login = () => {
+  /* Google analytics tag */
+  useEffect(() => {
+    ReactGA.initialize("GTM-TQ8MDX27");
+    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
+  }, []);
+
   /* Shown at "/" and "/login"; Google should treat "/" as the one real address */
   usePageMeta({ canonicalPath: "/" });
-  const { user, login, signup, signInWithGoogle, sendPasswordReset } = useAuth();
+  const { user, login, signup, signInWithGoogle, sendPasswordReset } =
+    useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const mode = copy[searchParams.get("mode")] ? searchParams.get("mode") : "login";
+  const mode = copy[searchParams.get("mode")]
+    ? searchParams.get("mode")
+    : "login";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,16 +98,27 @@ const Login = () => {
   const switchMode = (next) => {
     setError("");
     setNotice("");
-    setSearchParams(next === "login" ? {} : { mode: next }, { replace: true, state: location.state });
+    setSearchParams(next === "login" ? {} : { mode: next }, {
+      replace: true,
+      state: location.state,
+    });
   };
 
   /* Buttons in the welcome section: pick the tab and glide down to the form.
   On computers also put the cursor in its first box (phones would pop the keyboard up) */
   const jumpToForm = (next) => {
     switchMode(next);
-    document.getElementById("login-form")?.scrollIntoView({ behavior: "smooth" });
+    document
+      .getElementById("login-form")
+      ?.scrollIntoView({ behavior: "smooth" });
     if (window.matchMedia("(min-width: 1024px)").matches) {
-      setTimeout(() => document.querySelector("#login-form input")?.focus({ preventScroll: true }), 50);
+      setTimeout(
+        () =>
+          document
+            .querySelector("#login-form input")
+            ?.focus({ preventScroll: true }),
+        50,
+      );
     }
   };
 
@@ -105,15 +153,25 @@ const Login = () => {
         await login(email, password);
         navigate(location.state?.from || "/", { replace: true });
       } else if (mode === "signup") {
-        const needsConfirmation = await signup({ email, password, name, username, avatar });
+        const needsConfirmation = await signup({
+          email,
+          password,
+          name,
+          username,
+          avatar,
+        });
         if (needsConfirmation) {
-          setNotice(`Almost there! We sent a confirmation link to ${email.trim()}. Open it to activate your account, then log in.`);
+          setNotice(
+            `Almost there! We sent a confirmation link to ${email.trim()}. Open it to activate your account, then log in.`,
+          );
           setPassword("");
           setSearchParams({}, { replace: true, state: location.state });
         }
       } else {
         await sendPasswordReset(email);
-        setNotice(`If ${email.trim()} has an account, a link to reset the password is on its way.`);
+        setNotice(
+          `If ${email.trim()} has an account, a link to reset the password is on its way.`,
+        );
       }
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
@@ -136,7 +194,9 @@ const Login = () => {
           {/* Top bar: logo, and on wide screens shortcuts down to the form */}
           <div className="flex items-center gap-3">
             <LogoMark className="h-8 w-auto" />
-            <span className="mr-auto font-display text-2xl font-bold tracking-tight">JustSeen</span>
+            <span className="mr-auto font-display text-2xl font-bold tracking-tight">
+              JustSeen
+            </span>
             <button
               type="button"
               onClick={() => jumpToForm("login")}
@@ -170,8 +230,9 @@ const Login = () => {
                 </span>
               </h1>
               <p className="mt-4 max-w-md text-base sm:text-lg leading-relaxed text-white/70 lg:mt-5">
-                Share quick reviews of what you watch, and decide what to see next from the people whose taste you
-                trust. No critic scores. Just your friends.
+                Share quick reviews of what you watch, and decide what to see
+                next from the people whose taste you trust. No critic scores.
+                Just your friends.
               </p>
 
               {/* The main call to action; the form is further down the page */}
@@ -191,7 +252,9 @@ const Login = () => {
                   I have an account
                 </button>
               </div>
-              <p className="mt-3 text-xs text-white/50">No ads. No credit card. Ready in a minute.</p>
+              <p className="mt-3 text-xs text-white/50">
+                No ads. No credit card. Ready in a minute.
+              </p>
             </div>
 
             <div className="mt-8 lg:mt-0">
@@ -204,7 +267,9 @@ const Login = () => {
               <li key={item.title}>
                 <span className="text-xl">{item.emoji}</span>
                 <p className="mt-2 text-sm font-semibold">{item.title}</p>
-                <p className="mt-1 text-xs leading-relaxed text-white/55">{item.text}</p>
+                <p className="mt-1 text-xs leading-relaxed text-white/55">
+                  {item.text}
+                </p>
               </li>
             ))}
           </ul>
@@ -212,14 +277,20 @@ const Login = () => {
       </section>
 
       {/* The form */}
-      <section id="login-form" className="flex scroll-mt-4 flex-col px-5 py-8 sm:px-10 lg:py-16">
+      <section
+        id="login-form"
+        className="flex scroll-mt-4 flex-col px-5 py-8 sm:px-10 lg:py-16"
+      >
         <div className="flex flex-1 items-center justify-center py-4 lg:py-8">
           <div className="w-full max-w-[26rem]">
             <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
             <p className="mt-2 text-soft">{subtitle}</p>
 
             {mode !== "forgot" && (
-              <div className="mt-7 grid grid-cols-2 rounded-xl bg-fg/[0.09] p-1 text-sm font-semibold ring-1 ring-inset ring-fg/[0.04]" role="tablist">
+              <div
+                className="mt-7 grid grid-cols-2 rounded-xl bg-fg/[0.09] p-1 text-sm font-semibold ring-1 ring-inset ring-fg/[0.04]"
+                role="tablist"
+              >
                 {[
                   { label: "Log in", value: "login" },
                   { label: "Create account", value: "signup" },
@@ -243,7 +314,10 @@ const Login = () => {
             )}
 
             {notice && (
-              <p className="mt-6 rounded-xl bg-agree/10 px-4 py-3 text-sm leading-relaxed text-fg ring-1 ring-agree/30" role="status">
+              <p
+                className="mt-6 rounded-xl bg-agree/10 px-4 py-3 text-sm leading-relaxed text-fg ring-1 ring-agree/30"
+                role="status"
+              >
                 {notice}
               </p>
             )}
@@ -267,7 +341,10 @@ const Login = () => {
               </>
             )}
 
-            <form onSubmit={handleSubmit} className={`${mode === "forgot" ? "mt-7" : "mt-5"} flex flex-col gap-5`}>
+            <form
+              onSubmit={handleSubmit}
+              className={`${mode === "forgot" ? "mt-7" : "mt-5"} flex flex-col gap-5`}
+            >
               {mode === "signup" && (
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Field label="Name">
@@ -313,7 +390,9 @@ const Login = () => {
               {mode !== "forgot" && (
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-fg">Password</span>
+                    <span className="text-sm font-medium text-fg">
+                      Password
+                    </span>
                     {mode === "login" && (
                       <button
                         type="button"
@@ -328,7 +407,9 @@ const Login = () => {
                     value={password}
                     onChange={setPassword}
                     showRules={mode === "signup"}
-                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                    autoComplete={
+                      mode === "signup" ? "new-password" : "current-password"
+                    }
                     className={inputClass}
                   />
                 </div>
@@ -336,13 +417,18 @@ const Login = () => {
 
               {mode === "signup" && (
                 <div className="flex flex-col gap-2">
-                  <span className="text-sm font-medium text-fg">Pick an avatar</span>
+                  <span className="text-sm font-medium text-fg">
+                    Pick an avatar
+                  </span>
                   <AvatarPicker value={avatar} onChange={setAvatar} />
                 </div>
               )}
 
               {error && (
-                <p className="rounded-xl bg-disagree/10 px-4 py-3 text-sm text-disagree ring-1 ring-disagree/25" role="alert">
+                <p
+                  className="rounded-xl bg-disagree/10 px-4 py-3 text-sm text-disagree ring-1 ring-disagree/25"
+                  role="alert"
+                >
                   {error}
                 </p>
               )}
@@ -364,7 +450,10 @@ const Login = () => {
               {mode === "signup" && (
                 <p className="-mt-2 text-center text-xs text-muted">
                   By creating an account you agree to our{" "}
-                  <Link to="/privacy" className="font-medium text-soft underline hover:text-fg">
+                  <Link
+                    to="/privacy"
+                    className="font-medium text-soft underline hover:text-fg"
+                  >
                     privacy policy
                   </Link>
                   .
@@ -385,7 +474,11 @@ const Login = () => {
               )}
 
               {mode === "forgot" && (
-                <button type="button" onClick={() => switchMode("login")} className="text-sm font-medium text-soft hover:text-fg">
+                <button
+                  type="button"
+                  onClick={() => switchMode("login")}
+                  className="text-sm font-medium text-soft hover:text-fg"
+                >
                   ← Back to log in
                 </button>
               )}
@@ -408,7 +501,12 @@ const Login = () => {
 
         <p className="mt-6 text-center text-xs text-muted">
           Movie and TV data and posters from{" "}
-          <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer" className="underline hover:text-fg">
+          <a
+            href="https://www.themoviedb.org/"
+            target="_blank"
+            rel="noreferrer"
+            className="underline hover:text-fg"
+          >
             TMDB
           </a>
           . JustSeen uses the TMDB API but is not endorsed or certified by TMDB.

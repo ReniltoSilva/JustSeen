@@ -11,6 +11,7 @@ import Masonry from "../components/Masonry";
 import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton } from "../components/Skeletons";
 import { usePageMeta } from "../lib/usePageMeta";
+import ReactGA from "react-ga4";
 
 /* Reviews by me and the people I follow, newest first */
 const Feed = () => {
@@ -24,6 +25,12 @@ const Feed = () => {
   /* A key that changes when the list of people changes, to reload the feed */
   const peopleKey = [...followingIds].sort().join(",");
 
+  /* Google analytics tag */
+  useEffect(() => {
+    ReactGA.initialize("GTM-TQ8MDX27");
+    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
+  }, []);
+
   useEffect(() => {
     if (!ready) return;
     let cancelled = false;
@@ -36,7 +43,10 @@ const Feed = () => {
       })
       .catch((err) => {
         console.error("Failed to load feed:", err);
-        if (!cancelled) setError("Couldn't load your feed. Check your connection and try again.");
+        if (!cancelled)
+          setError(
+            "Couldn't load your feed. Check your connection and try again.",
+          );
       });
     return () => {
       cancelled = true;
@@ -57,7 +67,11 @@ const Feed = () => {
           subtitle="What you and the people you follow watched lately, newest first."
         />
         {reviews?.length > 0 && (
-          <GenreChips genres={genresIn(reviews)} selected={selectedGenre} onSelect={setSelectedGenre} />
+          <GenreChips
+            genres={genresIn(reviews)}
+            selected={selectedGenre}
+            onSelect={setSelectedGenre}
+          />
         )}
       </section>
 
@@ -83,13 +97,17 @@ const Feed = () => {
         )}
 
         {reviews?.length > 0 && shown.length === 0 && (
-          <p className="text-center text-muted py-16">Nothing in {genreName(selectedGenre)} in your feed yet.</p>
+          <p className="text-center text-muted py-16">
+            Nothing in {genreName(selectedGenre)} in your feed yet.
+          </p>
         )}
 
         <Masonry
           items={shown}
           getKey={(review) => review.id}
-          renderItem={(review) => <MovieCard movie={review} review={review} variant="review" />}
+          renderItem={(review) => (
+            <MovieCard movie={review} review={review} variant="review" />
+          )}
         />
       </main>
     </div>
