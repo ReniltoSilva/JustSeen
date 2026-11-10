@@ -17,7 +17,6 @@ import {
 } from "../components/Skeletons";
 import { usePageMeta } from "../lib/usePageMeta";
 import { titleKey } from "../lib/titles";
-import ReactGA from "react-ga4";
 
 /* Someone's profile: their stats, what they watched and what they want to watch */
 const Profile = () => {
@@ -34,12 +33,6 @@ const Profile = () => {
   const [status, setStatus] = useState("loading"); // "loading" | "ready" | "missing" | "error"
   const [tab, setTab] = useState("watched");
   const [selectedGenre, setSelectedGenre] = useState("All");
-
-  /* Google analytics tag */
-  useEffect(() => {
-    ReactGA.initialize("GTM-TQ8MDX27");
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
-  }, []);
 
   useEffect(() => {
     let cancelled = false;

@@ -12,7 +12,6 @@ import EmptyState from "../components/EmptyState";
 import { MovieGridSkeleton } from "../components/Skeletons";
 import { usePageMeta } from "../lib/usePageMeta";
 import { mixLabel } from "../lib/titles";
-import ReactGA from "react-ga4";
 
 /* Every movie and show I've reviewed, newest first */
 const Watched = () => {
@@ -22,12 +21,6 @@ const Watched = () => {
   const [reviews, setReviews] = useState(null);
   const [error, setError] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("All");
-
-  /* Google analytics tag */
-  useEffect(() => {
-    ReactGA.initialize("GTM-TQ8MDX27");
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
-  }, []);
 
   useEffect(() => {
     let cancelled = false;

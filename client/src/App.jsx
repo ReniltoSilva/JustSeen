@@ -2,18 +2,12 @@ import { Outlet, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useAuth } from "./auth/AuthContext";
-import ReactGA from "react-ga4";
 
 /* Every page shares the header; the page itself renders in <Outlet />.
 If a page crashes, the header still works and the error clears on the next page */
 function App() {
   const location = useLocation();
   const { user } = useAuth();
-
-  useEffect(() => {
-    ReactGA.initialize("GTM-TQ8MDX27");
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
-  }, []);
 
   /* The welcome page (at /login, and at / when logged out) and the first-visit
   setup and restore-account steps have their own logo and layout */

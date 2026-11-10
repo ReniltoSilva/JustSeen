@@ -20,7 +20,6 @@ import { contactEmail } from "../lib/site";
 import { animalAvatars, animalValue } from "../avatars";
 import { authInputClass as inputClass } from "../components/formStyles";
 import { usePageMeta } from "../lib/usePageMeta";
-import ReactGA from "react-ga4";
 
 const Field = ({ label, hint, children }) => (
   <label className="flex flex-col gap-1.5">
@@ -66,12 +65,6 @@ const copy = {
 
 /* Log in, sign up and "forgot password" on one page (?mode=signup / ?mode=forgot) */
 const Login = () => {
-  /* Google analytics tag */
-  useEffect(() => {
-    ReactGA.initialize("GTM-TQ8MDX27");
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
-  }, []);
-
   /* Shown at "/" and "/login"; Google should treat "/" as the one real address */
   usePageMeta({ canonicalPath: "/" });
   const { user, login, signup, signInWithGoogle, sendPasswordReset } =

@@ -17,7 +17,6 @@ import {
   StarPlusIcon,
 } from "../components/icons";
 import { usePageMeta } from "../lib/usePageMeta";
-import ReactGA from "react-ga4";
 
 const formatRuntime = (minutes) =>
   minutes
@@ -56,12 +55,6 @@ const MovieDetails = ({ mediaType, id }) => {
   const [status, setStatus] = useState("loading");
   const [reviewing, setReviewing] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  /* Google analytics tag */
-  useEffect(() => {
-    ReactGA.initialize("GTM-TQ8MDX27");
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
-  }, []);
 
   useEffect(() => {
     let cancelled = false;

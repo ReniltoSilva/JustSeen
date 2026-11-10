@@ -4,7 +4,6 @@ import AvatarPicker from "../components/AvatarPicker";
 import { LogoMark } from "../components/Logo";
 import { authInputClass as inputClass } from "../components/formStyles";
 import { usePageMeta } from "../lib/usePageMeta";
-import ReactGA from "react-ga4";
 
 /* Shown once, after someone's first Google sign-in. The database already gave them a
 username from their name, so everything is filled in; they just confirm or change it */
@@ -16,11 +15,6 @@ const WelcomeSetup = () => {
   const [avatar, setAvatar] = useState(user.avatar);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    ReactGA.initialize("GTM-TQ8MDX27");
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
